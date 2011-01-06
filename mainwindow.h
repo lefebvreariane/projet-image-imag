@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <ZoneDessin.h>
+
 
 QT_BEGIN_NAMESPACE
 class QLabel;
@@ -28,17 +30,22 @@ private slots:
 
 
 private:
+    void createAreas();
     void createActions();
     void createMenus();
+    void createToolBars();
+    void createStatusBar();
 
+    static const int TAILLE_PANNEAU_LATERAL = 70;
     QMenu *fileMenu;
     QAction *exitAct;
     QAction *ouvrirAct;
     QAction *saveAct;
     QAction *saveInAct;
+    ZoneDessin *z;
 
-    QLabel *imageLabel;
     QScrollArea *scrollArea;
+    QToolBar *fileToolBar;
 
 };
 

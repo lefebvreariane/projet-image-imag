@@ -1,36 +1,66 @@
 #include <QtGui>
 #include "mainwindow.h"
+#include <QHBoxLayout>
 
 MainWindow::MainWindow()
 {
-    imageLabel = new QLabel;
-    imageLabel->setBackgroundRole(QPalette::Base);
-    imageLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-    imageLabel->setScaledContents(true);
+    createActions();
+    createToolBars();
+    createAreas();
+    createMenus();
+    createStatusBar();
+    resize(500,400);
 
+}
+
+void MainWindow::createToolBars()
+{
+    fileToolBar = addToolBar(tr("Fichier"));
+    fileToolBar->addAction(ouvrirAct);
+    fileToolBar->addAction(saveAct);
+}
+
+void MainWindow::createAreas()
+{
+
+    QWidget *zoneTravail= new QWidget;
+    z = new ZoneDessin;
 
     scrollArea = new QScrollArea;
     scrollArea->setBackgroundRole(QPalette::Dark);
-    scrollArea->setWidget(imageLabel);
-    setCentralWidget(scrollArea);
+    scrollArea->setWidget(z->resultLabel);
     scrollArea->setAlignment(Qt::AlignCenter);
-    createActions();
-    createMenus();
 
-    resize(500,400);
+    QHBoxLayout *layout = new QHBoxLayout;
+    QFrame *panneauDroite = new QFrame;
+
+    panneauDroite->setMaximumWidth(TAILLE_PANNEAU_LATERAL);
+    panneauDroite->setMinimumWidth(TAILLE_PANNEAU_LATERAL);
+
+    layout->addWidget(scrollArea);
+    layout->addWidget(panneauDroite);
+
+    zoneTravail->setLayout(layout);
+    zoneTravail->show();
+
+    setCentralWidget(zoneTravail);
+
 }
 
-
+void MainWindow::createStatusBar()
+{
+    statusBar()->showMessage(tr("LOL"));
+}
 
 void MainWindow::createActions()
 {
     exitAct = new QAction(tr("&Quitter"), this);
     connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
-    ouvrirAct = new QAction(tr("&Ouvrir"), this);
+    ouvrirAct = new QAction(QIcon(":/icones/open.png"), tr("&Ouvrir..."), this);
     connect(ouvrirAct, SIGNAL(triggered()), this , SLOT(open()));
 
-    saveAct = new QAction(tr("&Enregistrer"), this);
+    saveAct = new QAction(QIcon(":/icones/save.png"),tr("&Enregistrer"), this);
     connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
 
     saveInAct = new QAction(tr("&Enregistrer sous..."), this);
@@ -53,24 +83,23 @@ void MainWindow::createMenus()
 
 void MainWindow::open()
 {
-
     QString fileName = QFileDialog::getOpenFileName(this,
-                                                    tr("Open File"), QDir::currentPath());
+                                                    tr("Ouvrir un fichier"), QDir::currentPath());
     if (!fileName.isEmpty()) {
         QImage image(fileName);
         if (image.isNull()) {
-            QMessageBox::information(this, tr("Image Viewer"),
-                                     tr("Cannot load %1.").arg(fileName));
+            QMessageBox::information(this, tr("ImageViewer"),
+                                     tr("Imppossible d'ouvrir %1.").arg(fileName));
             return;
         }
-
-        imageLabel->setPixmap(QPixmap::fromImage(image));
-        imageLabel->adjustSize();
+        z->image = image;
+        z->afficher_image();
         saveAct->setEnabled(true);
         saveInAct->setEnabled(true);
 
     }
 }
+
 
 void MainWindow::save()
 {
@@ -79,14 +108,14 @@ void MainWindow::save()
 
 void MainWindow::saveIn()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Enregistrer fichier"), QDir::currentPath(),
-                                                    "*.jpeg\n *.jpg\n *.png\n *.bmp\n *.ppm\n *.tiff\n *.xbm\n *.xpm\n");
-    QImageWriter *imgW = new QImageWriter();
+   QString fileName = QFileDialog::getSaveFileName(this, tr("Enregistrer fichier"), QDir::currentPath(),
+                                                   "*.jpeg\n *.jpg\n *.png\n *.bmp\n *.ppm\n *.tiff\n *.xbm\n *.xpm\n");
+   QImageWriter *imgW = new QImageWriter();
 
 
-    if (!fileName.isEmpty()){
-        imgW->setFileName(fileName);
-        imgW->write(imageLabel->pixmap()->toImage());
-    }
-
+   if (!fileName.isEmpty()){
+       imgW->setFileName(fileName);
+       z->ecrire_image();
+       imgW->write(z->image);
+   }
 }
