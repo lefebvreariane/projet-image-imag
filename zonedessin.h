@@ -3,6 +3,8 @@
 
 #include <QPainter>
 #include <QWidget>
+#include <labelimage.h>
+
 
 QT_BEGIN_NAMESPACE
 class QComboBox;
@@ -19,7 +21,7 @@ public:
     QImage image;
     QImage resultImage;
     QPainter *painter;
-    QLabel *resultLabel;
+    LabelImage *resultLabel;
 
     void afficher_image();
     void ecrire_image();

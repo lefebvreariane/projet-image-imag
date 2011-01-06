@@ -26,6 +26,7 @@ private slots:
     void open();
     void save();
     void saveIn();
+    void clic_recu();
 
 
 
@@ -36,7 +37,7 @@ private:
     void createToolBars();
     void createStatusBar();
 
-    static const int TAILLE_PANNEAU_LATERAL = 70;
+    static const int TAILLE_PANNEAU_LATERAL = 100;
     QMenu *fileMenu;
     QAction *exitAct;
     QAction *ouvrirAct;

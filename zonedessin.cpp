@@ -1,9 +1,10 @@
 #include "zonedessin.h"
+
 #include <QtGui>
 ZoneDessin::ZoneDessin(QWidget *parent) :
         QWidget(parent)
 {
-    resultLabel = new QLabel;
+    resultLabel = new LabelImage;
     resultLabel->setBackgroundRole(QPalette::Base);
     resultLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     resultLabel->setScaledContents(true);
@@ -14,6 +15,7 @@ ZoneDessin::ZoneDessin(QWidget *parent) :
 void ZoneDessin::afficher_image()
 {
     resultLabel->setPixmap(QPixmap::fromImage(image));
+
     resultLabel->adjustSize();
 
 

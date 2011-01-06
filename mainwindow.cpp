@@ -25,6 +25,8 @@ void MainWindow::createAreas()
 
     QWidget *zoneTravail= new QWidget;
     z = new ZoneDessin;
+    //connect(z->resultLabel,SIGNAL(clicked()),this,clic_recu());
+
 
     scrollArea = new QScrollArea;
     scrollArea->setBackgroundRole(QPalette::Dark);
@@ -49,7 +51,7 @@ void MainWindow::createAreas()
 
 void MainWindow::createStatusBar()
 {
-    statusBar()->showMessage(tr("LOL"));
+    statusBar()->showMessage(tr("Prêt"));
 }
 
 void MainWindow::createActions()
@@ -118,4 +120,9 @@ void MainWindow::saveIn()
        z->ecrire_image();
        imgW->write(z->image);
    }
+}
+
+void MainWindow::clic_recu()
+{
+    qDebug()<<"click recu";
 }

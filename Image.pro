@@ -12,10 +12,12 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    zonedessin.cpp
+    zonedessin.cpp \
+    labelimage.cpp
 
 HEADERS  += mainwindow.h \
-    zonedessin.h
+    zonedessin.h \
+    labelimage.h
 
 FORMS    += mainwindow.ui
 
