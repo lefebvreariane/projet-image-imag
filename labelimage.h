@@ -9,13 +9,13 @@ class LabelImage : public QLabel
 {
     Q_OBJECT
 public:
+    LabelImage();
     void mousePressEvent(QMouseEvent *event);
-    int get_clic_X();
-    int get_clic_Y();
+    int X0,Y0,X1,Y1;
 
 
 signals:
-
+    void clic();
 public slots:
 
 private:

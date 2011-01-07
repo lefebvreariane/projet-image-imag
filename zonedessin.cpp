@@ -15,7 +15,6 @@ ZoneDessin::ZoneDessin(QWidget *parent) :
 void ZoneDessin::afficher_image()
 {
     resultLabel->setPixmap(QPixmap::fromImage(image));
-
     resultLabel->adjustSize();
 
 

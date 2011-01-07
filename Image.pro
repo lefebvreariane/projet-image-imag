@@ -13,11 +13,15 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     zonedessin.cpp \
-    labelimage.cpp
+    labelimage.cpp \
+    controleur.cpp \
+    fenetrepipette.cpp
 
 HEADERS  += mainwindow.h \
     zonedessin.h \
-    labelimage.h
+    labelimage.h \
+    controleur.h \
+    fenetrepipette.h
 
 FORMS    += mainwindow.ui
 
