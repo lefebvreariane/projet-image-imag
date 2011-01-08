@@ -19,17 +19,14 @@ public:
     Mode mode;
 
 public slots:
-
     void clic_recu();
 
 signals:
     void afficher_pixel(int r, int g, int b);
 
-
-
 private:
-            void pipette(int x, int y);
-
+    void pipette(int x, int y);
+    void RGB_to_grey();
 
     ZoneDessin *z;
 
