@@ -27,7 +27,9 @@ signals:
 private:
     void pipette(int x, int y);
     void RGB_to_grey();
-
+    void appliquer_flou();
+    QImage flouter_coins(QImage imIn, QImage imOut, int distPixel, int tailleFiltre);
+    QImage flouter_bords(QImage imIn, QImage imOut, int distPixel, int tailleFiltre);
     ZoneDessin *z;
 
 };
