@@ -147,7 +147,7 @@ void Controleur::appliquer_flou()
     QImage imFloue = z->image.copy(0,0,z->image.width(),z->image.height());
     int i,j,k,l;
     double r,g,b; // composantes de la nouvelle couleur
-    int tailleFiltre = 15;
+    int tailleFiltre = 3;
     int distPixel = (int) tailleFiltre/2;
 
     // On applique le filtre de moyenne (à 1) de taille 3 par default
