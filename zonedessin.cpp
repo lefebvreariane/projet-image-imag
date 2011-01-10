@@ -5,6 +5,8 @@ ZoneDessin::ZoneDessin(QWidget *parent) :
         QWidget(parent)
 {
     resultLabel = new LabelImage;
+    QPainter painter(&image);
+
     resultLabel->setBackgroundRole(QPalette::Base);
     resultLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     resultLabel->setScaledContents(true);

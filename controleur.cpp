@@ -33,39 +33,24 @@ void Controleur::clic_recu()
     switch (mode) {
     case SELECTION: {
 
-            int cX0 = min(z->resultLabel->X0,z->resultLabel->X1);
-            int cY0 = min(z->resultLabel->Y0,z->resultLabel->Y1);
-            int cX1 = max(z->resultLabel->X0,z->resultLabel->X1) - cX0;
-            int cY1 = max(z->resultLabel->Y0,z->resultLabel->Y1) - cY0;
-
-
-            qDebug()<< "X0 = " << cX0;
-            qDebug()<< "Y0 = " << cY0;
-            qDebug()<< "X1 = " << cX1;
-            qDebug()<< "Y1 = " << cY1;
+            qDebug()<< "X0 = " << sX0;
+            qDebug()<< "Y0 = " << sY0;
+            qDebug()<< "X1 = " << sX1;
+            qDebug()<< "Y1 = " << sY1;
 
             QPainter paint(&(z->image));
-            if (sX0 == -1 || (cX0 < sX0 || cY0 < sY0 || z->resultLabel->X0 > sX0 + sX1 || z->resultLabel->Y0 > sY0 + sY1))
+            if (sX0 == -1 || !(z->resultLabel->X0 > sX0 && z->resultLabel->X0 < sX0 + sX1 &&
+                z->resultLabel->Y0 > sY0 && z->resultLabel->Y0 < sY0 + sY1))
             {
-                sX0 = cX0;
-                sY0 = cY0;
-                sX1 = cX1;
-                sY1 = cY1;
-                qDebug()<< "nouvelle selec";
+                sX0 = min(z->resultLabel->X0,z->resultLabel->X1);
+                sY0 = min(z->resultLabel->Y0,z->resultLabel->Y1);
+                sX1 = max(z->resultLabel->X0,z->resultLabel->X1) - sX0;
+                sY1 = max(z->resultLabel->Y0,z->resultLabel->Y1) - sY0;
             }
             else
             {
                 sX0 += z->resultLabel->X1 - z->resultLabel->X0;
                 sY0 += z->resultLabel->Y1 - z->resultLabel->Y0;
-                if (sX0 < 0)
-                    sX0 = 0;
-                if (sY0 < 0)
-                    sY0 = 0;
-                if (sX1 + sX0 > z->image.width())
-                    sX1 = z->image.width() - sX0;
-                if (sY1 + sY0 > z->image.height())
-                    sY1 = z->image.width() - sY0;
-                qDebug()<< "deplacement";
             }
             paint.drawRect(sX0,sY0,sX1,sY1);
             z->afficher_image();
@@ -180,16 +165,21 @@ void Controleur::appliquer_flou()
 QImage Controleur::decouper()
 {
     int x = 0, y = 0;
-    int largeur = max(z->resultLabel->X0, z->resultLabel->X1) - min(z->resultLabel->X0, z->resultLabel->X1);
-    int hauteur = max(z->resultLabel->Y0, z->resultLabel->Y1) - min(z->resultLabel->Y0, z->resultLabel->Y1);
-    QImage resImage(largeur,hauteur,z->image.format());
+    //int largeur = max(z->resultLabel->X0, z->resultLabel->X1) - min(z->resultLabel->X0, z->resultLabel->X1);
+    //int hauteur = max(z->resultLabel->Y0, z->resultLabel->Y1) - min(z->resultLabel->Y0, z->resultLabel->Y1);
+    //QImage resImage(largeur,hauteur,z->image.format());
+    QImage resImage(sX1,sY1,z->image.format());
 
     if(z->resultLabel->X0 == z->resultLabel->X1 || z->resultLabel->Y0 == z->resultLabel->Y1)
         resImage = z->image;
     else {
-        for(int i=min(z->resultLabel->X0,z->resultLabel->X1); i<max(z->resultLabel->X0,z->resultLabel->X1); i++) {
-            for(int j=min(z->resultLabel->Y0,z->resultLabel->Y1); j<max(z->resultLabel->Y0,z->resultLabel->Y1); j++)
-                resImage.setPixel(QPoint(x,y++),z->image.pixel(i,j));
+        for(int i=sX0; i<sX0 + sX1; i++) {
+            for(int j=sY0; j<sY0 + sY1; j++) {
+                if (i < 0 || i > z->image.width() || j < 0 || j > z->image.height())
+                    resImage.setPixel(QPoint(x,y++),qRgba(255,255,255,0));
+                else
+                    resImage.setPixel(QPoint(x,y++),z->image.pixel(i,j));
+            }
             x++;
             y = 0;
         }
