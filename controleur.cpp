@@ -16,13 +16,6 @@ void Controleur::clic_recu()
         }
     case PIPETTE: {
             pipette(z->resultLabel->X0,z->resultLabel->Y0);
-        }
-    case GREY: {
-            RGB_to_grey();
-            break;
-        }
-    case FLOU: {
-            appliquer_flou();
             break;
         }
     default: {
@@ -82,10 +75,10 @@ QImage Controleur::flouter_coins(QImage imIn, QImage imOut, int distPixel, int t
         for (k=0 ; k<=distPixel+n ; k++)
             for(l=0 ; l<=distPixel+n ; l++)
             {
-                r += qRed(z->image.pixel(k,l));
-                g += qGreen(z->image.pixel(k,l));
-                b += qBlue(z->image.pixel(k,l));
-            }
+            r += qRed(z->image.pixel(k,l));
+            g += qGreen(z->image.pixel(k,l));
+            b += qBlue(z->image.pixel(k,l));
+        }
         r = r/(tailleFiltre*tailleFiltre);
         g = g/(tailleFiltre*tailleFiltre);
         b = b/(tailleFiltre*tailleFiltre);
@@ -96,10 +89,10 @@ QImage Controleur::flouter_coins(QImage imIn, QImage imOut, int distPixel, int t
         for (k=imIn.width() ; k>=imIn.width()-distPixel-n ; k--)
             for(l=imIn.height() ; l>=imIn.height()-distPixel-n ; l--)
             {
-                r += qRed(z->image.pixel(k,l));
-                g += qGreen(z->image.pixel(k,l));
-                b += qBlue(z->image.pixel(k,l));
-            }
+            r += qRed(z->image.pixel(k,l));
+            g += qGreen(z->image.pixel(k,l));
+            b += qBlue(z->image.pixel(k,l));
+        }
         r = r/(tailleFiltre*tailleFiltre);
         g = g/(tailleFiltre*tailleFiltre);
         b = b/(tailleFiltre*tailleFiltre);
@@ -110,10 +103,10 @@ QImage Controleur::flouter_coins(QImage imIn, QImage imOut, int distPixel, int t
         for (k=imIn.width() ; k>=imIn.width()-distPixel-n ; k--)
             for(l=0 ; l<=distPixel+n ; l++)
             {
-                r += qRed(z->image.pixel(k,l));
-                g += qGreen(z->image.pixel(k,l));
-                b += qBlue(z->image.pixel(k,l));
-            }
+            r += qRed(z->image.pixel(k,l));
+            g += qGreen(z->image.pixel(k,l));
+            b += qBlue(z->image.pixel(k,l));
+        }
         r = r/(tailleFiltre*tailleFiltre);
         g = g/(tailleFiltre*tailleFiltre);
         b = b/(tailleFiltre*tailleFiltre);
@@ -124,10 +117,10 @@ QImage Controleur::flouter_coins(QImage imIn, QImage imOut, int distPixel, int t
         for (k=0 ; k<=distPixel+n ; k++)
             for(l=imIn.height() ; l>=imIn.height()-distPixel-n ; l++)
             {
-                r += qRed(z->image.pixel(k,l));
-                g += qGreen(z->image.pixel(k,l));
-                b += qBlue(z->image.pixel(k,l));
-            }
+            r += qRed(z->image.pixel(k,l));
+            g += qGreen(z->image.pixel(k,l));
+            b += qBlue(z->image.pixel(k,l));
+        }
         // Puis on divise la somme par la taille du filtre au carré
         r = r/(tailleFiltre*tailleFiltre);
         g = g/(tailleFiltre*tailleFiltre);
@@ -181,4 +174,43 @@ void Controleur::appliquer_flou()
     //qDebug()<< "image floutee un pixel:" << qRed(z->image.pixel(distPixel,distPixel)) << " ; " << qRed(z->image.pixel(distPixel,distPixel)) << " ; " << qBlue(z->image.pixel(distPixel,distPixel));
 
     z->afficher_image();
+}
+
+
+
+int min(int i, int j)
+{
+    if(i>j)
+        return j;
+    else
+        return i;
+}
+
+int max(int i, int j)
+{
+    if(i<j)
+        return j;
+    else
+        return i;
+}
+
+QImage Controleur::decouper()
+{
+    int x = 0, y = 0;
+    int largeur = max(z->resultLabel->X0, z->resultLabel->X1) - min(z->resultLabel->X0, z->resultLabel->X1);
+    int hauteur = max(z->resultLabel->Y0, z->resultLabel->Y1) - min(z->resultLabel->Y0, z->resultLabel->Y1);
+    QImage resImage(largeur,hauteur,z->image.format());
+
+    if(z->resultLabel->X0 == z->resultLabel->X1 || z->resultLabel->Y0 == z->resultLabel->Y1)
+        resImage = z->image;
+    else {
+        for(int i=min(z->resultLabel->X0,z->resultLabel->X1); i<max(z->resultLabel->X0,z->resultLabel->X1); i++) {
+            for(int j=min(z->resultLabel->Y0,z->resultLabel->Y1); j<max(z->resultLabel->Y0,z->resultLabel->Y1); j++)
+                resImage.setPixel(QPoint(x,y++),z->image.pixel(i,j));
+            x++;
+            y = 0;
+        }
+    }
+
+    return resImage;
 }
