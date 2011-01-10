@@ -17,6 +17,7 @@ class Controleur : public QObject
 public:
     Controleur(ZoneDessin *zone);
     Mode mode;
+    void reInitSelection();
 
 public slots:
     void clic_recu();

@@ -11,6 +11,14 @@ Controleur::Controleur(ZoneDessin *zone)
     sY1 = -1;
 }
 
+void Controleur::reInitSelection()
+{
+    sX0 = -1;
+    sX1 = -1;
+    sY0 = -1;
+    sY1 = -1;
+}
+
 int min(int i, int j)
 {
     if(i>j)
@@ -61,10 +69,6 @@ void Controleur::clic_recu()
             pipette(z->resultLabel->X1,z->resultLabel->Y1);
             break;
         }
-    case FLOU: {
-            appliquer_flou();
-            break;
-        }
 
     default: {
 
@@ -111,50 +115,112 @@ void Controleur::RGB_to_grey()
     z->afficher_image();
 }
 
+QImage Controleur::flouter_coins(QImage imIn, QImage imOut, int distPixel, int tailleFiltre)
+{
+
+    for (int n=0 ; n<distPixel ; n++)
+    {
+        double r,g,b;
+        int k,l;
+        // flou sur coin Haut/Gauche
+        r = g = b = 0;
+        for (k=0 ; k<=distPixel+n ; k++)
+            for(l=0 ; l<=distPixel+n ; l++)
+            {
+            r += qRed(z->image.pixel(k,l));
+            g += qGreen(z->image.pixel(k,l));
+            b += qBlue(z->image.pixel(k,l));
+        }
+        r = r/(tailleFiltre*tailleFiltre);
+        g = g/(tailleFiltre*tailleFiltre);
+        b = b/(tailleFiltre*tailleFiltre);
+        imOut.setPixel(n,n,qRgb((int)r,(int)g,(int)b));
+
+        // flou sur coin Bas/Droite
+        r = g = b = 0;
+        for (k=imIn.width() ; k>=imIn.width()-distPixel-n ; k--)
+            for(l=imIn.height() ; l>=imIn.height()-distPixel-n ; l--)
+            {
+            r += qRed(z->image.pixel(k,l));
+            g += qGreen(z->image.pixel(k,l));
+            b += qBlue(z->image.pixel(k,l));
+        }
+        r = r/(tailleFiltre*tailleFiltre);
+        g = g/(tailleFiltre*tailleFiltre);
+        b = b/(tailleFiltre*tailleFiltre);
+        imOut.setPixel(imIn.width()-n,imIn.height()-n,qRgb((int)r,(int)g,(int)b));
+
+        // flou sur coin Haut/Droite
+        r = g = b = 0;
+        for (k=imIn.width() ; k>=imIn.width()-distPixel-n ; k--)
+            for(l=0 ; l<=distPixel+n ; l++)
+            {
+            r += qRed(z->image.pixel(k,l));
+            g += qGreen(z->image.pixel(k,l));
+            b += qBlue(z->image.pixel(k,l));
+        }
+        r = r/(tailleFiltre*tailleFiltre);
+        g = g/(tailleFiltre*tailleFiltre);
+        b = b/(tailleFiltre*tailleFiltre);
+        imOut.setPixel(imIn.width()-n,n,qRgb((int)r,(int)g,(int)b));
+
+        // flou sur coin Bas/Gauche
+        r = g = b = 0;
+        for (k=0 ; k<=distPixel+n ; k++)
+            for(l=imIn.height() ; l>=imIn.height()-distPixel-n ; l++)
+            {
+            r += qRed(z->image.pixel(k,l));
+            g += qGreen(z->image.pixel(k,l));
+            b += qBlue(z->image.pixel(k,l));
+        }
+        // Puis on divise la somme par la taille du filtre au carré
+        r = r/(tailleFiltre*tailleFiltre);
+        g = g/(tailleFiltre*tailleFiltre);
+        b = b/(tailleFiltre*tailleFiltre);
+        imOut.setPixel(n,imIn.height()-n,qRgb((int)r,(int)g,(int)b));
+    }
+    return imOut;
+}
+
+QImage Controleur::flouter_bords(QImage imIn, QImage imOut, int distPixel, int tailleFiltre)
+{
+    return imOut;
+}
+
 void Controleur::appliquer_flou()
 {
     QImage imFloue = z->image.copy(0,0,z->image.width(),z->image.height());
     int i,j,k,l;
-    int compteur;
     double r,g,b; // composantes de la nouvelle couleur
-    int tailleFiltre = 15;
+    int tailleFiltre = 3;
     int distPixel = (int) tailleFiltre/2;
 
     // On applique le filtre de moyenne (à 1) de taille 3 par default
-    for(i=0 ; i<=imFloue.width()-1 ; i++)
+    for(i=distPixel ; i<imFloue.width()-distPixel-1 ; i++)
     {
-        for(j=0 ; j<=imFloue.height()-1 ; j++)
+        for(j=distPixel ; j<imFloue.height()-distPixel-1 ; j++)
         {
             // On fait la somme des taille^2 pixels (des taille^2 qui
             // entourent le point sur lequel on est entrain d'appliquer
-            // le filtre et lui même, seulement s'ils ne sont pas en
-			// dehors de la zone image)
+            // le filtre et lui même)
             r = g = b = 0;
-            compteur = tailleFiltre*tailleFiltre;
             for (k=-distPixel ; k<=distPixel ; k++)
             {
                 for(l=-distPixel ; l<=distPixel ; l++)
                 {
-                    if ((i+k>=0) && (i+k<=z->image.width()-1) &&
-                        (j+l>=0) && (j+l<=z->image.height()-1))
-                    {
-                        r += qRed(z->image.pixel(i+k,j+l));
-                        g += qGreen(z->image.pixel(i+k,j+l));
-                        b += qBlue(z->image.pixel(i+k,j+l));
-                    }
-                    else compteur--;
+                    r += qRed(z->image.pixel(i+k,j+l));
+                    g += qGreen(z->image.pixel(i+k,j+l));
+                    b += qBlue(z->image.pixel(i+k,j+l));
                 }
             }
-            // Puis on divise la somme par le nombre d'additions effectuees
-            if (compteur != 0)
-            {
-                r = r/(compteur);
-                g = g/(compteur);
-                b = b/(compteur);
-              imFloue.setPixel(i,j,qRgb((int)r,(int)g,(int)b));
-            }
+            // Puis on divise la somme par la taille du filtre au carré
+            r = r/(tailleFiltre*tailleFiltre);
+            g = g/(tailleFiltre*tailleFiltre);
+            b = b/(tailleFiltre*tailleFiltre);
+            imFloue.setPixel(i,j,qRgb((int)r,(int)g,(int)b));
         }
     }
+    //imFloue = this->flouter_coins(z->image, imFloue, distPixel, tailleFiltre);
     //qDebug()<< "image originale un pixel:" << qRed(z->image.pixel(distPixel,distPixel)) << " ; " << qRed(z->image.pixel(distPixel,distPixel)) << " ; " << qBlue(z->image.pixel(distPixel,distPixel));
     z->image = imFloue;
     //qDebug()<< "image floutee un pixel:" << qRed(z->image.pixel(distPixel,distPixel)) << " ; " << qRed(z->image.pixel(distPixel,distPixel)) << " ; " << qBlue(z->image.pixel(distPixel,distPixel));

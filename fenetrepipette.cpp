@@ -38,11 +38,18 @@ FenetrePipette::FenetrePipette(QWidget *parent) :
 
 void FenetrePipette:: afficher_pixel(int r, int g, int b){
 
-    labelR->setText("R:" +QString::number(r));
+    labelR->setText("R:" + QString::number(r));
     labelG->setText("V:" + QString::number(g));
     labelB->setText("B:" + QString::number(b));
-    //labelY->setText("Rouge:" + r);
-    //labelU->setText("Rouge:" + r);
-    //labelV->setText("Rouge:" + r);
+
+    float y, u, v;
+
+    y = r*0.299 + g*0.587 + b*0.114;
+    u = -0.14713*r - 0.28886*g + 0.436*b;
+    v = 0.615*r - 0.51498*g -0.10001*b;
+
+    labelY->setText("Y:" + QString::number((int) y));
+    labelU->setText("U:" + QString::number((int) u));
+    labelV->setText("V:" + QString::number((int) v));
 }
 

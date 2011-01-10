@@ -10,7 +10,7 @@ MainWindow::MainWindow()
     createControleur();
     createMenus();
     createStatusBar();
-    resize(500,400);
+    resize(1024,728);
 
 }
 
@@ -56,7 +56,7 @@ void MainWindow::createControleur()
     connect(z->resultLabel, SIGNAL(clic()), c, SLOT(clic_recu()));
     connect(c, SIGNAL(afficher_pixel(int,int,int)), fenetrePipette, SLOT(afficher_pixel(int,int,int)));
 
-    c->mode = AUCUN;
+    c->mode = SELECTION;
 }
 
 
@@ -97,7 +97,7 @@ void MainWindow::createActions()
     fusionAct = new QAction(tr("&Fusion"), this);
     connect(fusionAct, SIGNAL(triggered()), this, SLOT(fusion()));
 
-    decoupageAct = new QAction(tr("&DecoupageTest"), this);
+    decoupageAct = new QAction(tr("&Decoupage"), this);
     connect(decoupageAct, SIGNAL(triggered()), this, SLOT(decouper()));
 
 }
@@ -147,6 +147,7 @@ void MainWindow::open()
         z->afficher_image();
         saveAct->setEnabled(true);
         saveInAct->setEnabled(true);
+        c->reInitSelection();
 
     }
 }
@@ -211,6 +212,7 @@ void MainWindow::decouper()
 {
     z->image = c->decouper();
     z->afficher_image();
+    c->reInitSelection();
     qDebug() << "decoupage";
 }
 
