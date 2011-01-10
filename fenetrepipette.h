@@ -20,10 +20,14 @@ public:
 
 
 signals:
+    void afficher_panneauDroite(bool);
 
 public slots:
 
     void afficher_pixel(int r, int g, int b);
+
+private:
+QImage apercu;
 
 };
 

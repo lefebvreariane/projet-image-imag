@@ -8,6 +8,7 @@ LabelImage::LabelImage()
     X1=-1;
     Y0=-1;
     Y1=-1;
+
 }
 
 void LabelImage::mousePressEvent(QMouseEvent *event)

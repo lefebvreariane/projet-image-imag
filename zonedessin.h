@@ -20,6 +20,7 @@ public:
     explicit ZoneDessin(QWidget *parent = 0);
     QImage image;
     QImage resultImage;
+    QPainter *painter;
     LabelImage *resultLabel;
 
     void afficher_image();

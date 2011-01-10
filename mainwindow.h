@@ -38,6 +38,7 @@ private slots:
     void appliquer_flou();
     void fusion();
     void decouper();
+    void afficher_panneauDroite(bool);
 
 
 
@@ -50,6 +51,7 @@ private:
     void createMenus();
     void createStatusBar();
     void createToolBars();
+    void MAJ_affichage();
 
 
 
@@ -58,6 +60,8 @@ private:
     QMenu *fileMenu;
     QMenu *editMenu;
     QMenu *toolsMenu;
+
+    QFrame *panneauDroite;
 
     QAction *exitAct;
     QAction *ouvrirAct;

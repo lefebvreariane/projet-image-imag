@@ -15,13 +15,15 @@ SOURCES += main.cpp\
     zonedessin.cpp \
     labelimage.cpp \
     controleur.cpp \
-    fenetrepipette.cpp
+    fenetrepipette.cpp \
+    histogramme.cpp
 
 HEADERS  += mainwindow.h \
     zonedessin.h \
     labelimage.h \
     controleur.h \
-    fenetrepipette.h
+    fenetrepipette.h \
+    histogramme.h
 
 FORMS    += mainwindow.ui
 
@@ -30,4 +32,5 @@ OTHER_FILES += \
     open.png
 
 RESOURCES += \
-    images/icones.qrc
+    images/icones.qrc \
+    images/images.qrc
