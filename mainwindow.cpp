@@ -82,6 +82,9 @@ void MainWindow::createActions()
     pipetteAct = new QAction(tr("&Pipette"), this);
     connect(pipetteAct, SIGNAL(triggered()), this, SLOT(pipette()));
 
+    selectionAct = new QAction(tr("&Selection"), this);
+    connect(selectionAct, SIGNAL(triggered()), this, SLOT(selection()));
+
     histoAct = new QAction(tr("&Histogrammes"), this);
     connect(histoAct, SIGNAL(triggered()), this, SLOT(afficher_histogramme()));
 
@@ -116,6 +119,7 @@ void MainWindow::createMenus()
 
     /*Creation de la barre de menu Outils*/
     toolsMenu = menuBar()->addMenu("&Outils");
+    toolsMenu->addAction(selectionAct);
     toolsMenu->addAction(pipetteAct);
     toolsMenu->addAction(histoAct);
     toolsMenu->addAction(RGB_to_greyAct);
@@ -165,6 +169,12 @@ void MainWindow::saveIn()
         z->ecrire_image();
         imgW->write(z->image);
     }
+}
+
+void MainWindow::selection()
+{
+    c->mode = SELECTION;
+    qDebug()<<"selection";
 }
 
 void MainWindow::pipette()

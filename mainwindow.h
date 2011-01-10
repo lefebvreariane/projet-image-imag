@@ -31,6 +31,7 @@ private slots:
     void open();
     void save();
     void saveIn();
+    void selection();
     void pipette();
     void afficher_histogramme();
     void RGB_to_grey();
@@ -62,6 +63,8 @@ private:
     QAction *ouvrirAct;
     QAction *saveAct;
     QAction *saveInAct;
+
+    QAction *selectionAct;
     QAction *pipetteAct;
     QAction *histoAct;
     QAction *RGB_to_greyAct;

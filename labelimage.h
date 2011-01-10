@@ -11,6 +11,7 @@ class LabelImage : public QLabel
 public:
     LabelImage();
     void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
     int X0,Y0,X1,Y1;
 
 

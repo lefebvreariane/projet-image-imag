@@ -8,7 +8,7 @@
 
 enum Mode
 {
-    AUCUN, PIPETTE, HISTO, GREY, FLOU, FUSION, DECOUPAGE
+    AUCUN,SELECTION, PIPETTE, HISTO, GREY, FLOU, FUSION, DECOUPAGE
         };
 
 class Controleur : public QObject

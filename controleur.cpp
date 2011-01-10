@@ -14,10 +14,19 @@ void Controleur::clic_recu()
     case AUCUN: {
             break;
         }
-    case PIPETTE: {
-            pipette(z->resultLabel->X0,z->resultLabel->Y0);
+    case SELECTION: {
+            qDebug()<< "X0 = " << z->resultLabel->X0;
+            qDebug()<< "Y0 = " << z->resultLabel->Y0;
+            qDebug()<< "X1 = " << z->resultLabel->X1;
+            qDebug()<< "Y1 = " << z->resultLabel->Y1;
             break;
         }
+    case PIPETTE: {
+            pipette(z->resultLabel->X1,z->resultLabel->Y1);
+            break;
+            break;
+        }
+
     default: {
 
         }
