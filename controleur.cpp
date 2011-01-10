@@ -5,20 +5,71 @@
 Controleur::Controleur(ZoneDessin *zone)
 {
     z = zone;
+    sX0 = -1;
+    sX1 = -1;
+    sY0 = -1;
+    sY1 = -1;
+}
+
+int min(int i, int j)
+{
+    if(i>j)
+        return j;
+    else
+        return i;
+}
+
+int max(int i, int j)
+{
+    if(i<j)
+        return j;
+    else
+        return i;
 }
 
 void Controleur::clic_recu()
 {
 
     switch (mode) {
-    case AUCUN: {
-            break;
-        }
     case SELECTION: {
-            qDebug()<< "X0 = " << z->resultLabel->X0;
-            qDebug()<< "Y0 = " << z->resultLabel->Y0;
-            qDebug()<< "X1 = " << z->resultLabel->X1;
-            qDebug()<< "Y1 = " << z->resultLabel->Y1;
+
+            int cX0 = min(z->resultLabel->X0,z->resultLabel->X1);
+            int cY0 = min(z->resultLabel->Y0,z->resultLabel->Y1);
+            int cX1 = max(z->resultLabel->X0,z->resultLabel->X1) - cX0;
+            int cY1 = max(z->resultLabel->Y0,z->resultLabel->Y1) - cY0;
+
+
+            qDebug()<< "X0 = " << cX0;
+            qDebug()<< "Y0 = " << cY0;
+            qDebug()<< "X1 = " << cX1;
+            qDebug()<< "Y1 = " << cY1;
+
+            QPainter paint(&(z->image));
+            if (sX0 == -1 || (cX0 < sX0 || cY0 < sY0 || z->resultLabel->X0 > sX0 + sX1 || z->resultLabel->Y0 > sY0 + sY1))
+            {
+                sX0 = cX0;
+                sY0 = cY0;
+                sX1 = cX1;
+                sY1 = cY1;
+                qDebug()<< "nouvelle selec";
+            }
+            else
+            {
+                sX0 += z->resultLabel->X1 - z->resultLabel->X0;
+                sY0 += z->resultLabel->Y1 - z->resultLabel->Y0;
+                if (sX0 < 0)
+                    sX0 = 0;
+                if (sY0 < 0)
+                    sY0 = 0;
+                if (sX1 + sX0 > z->image.width())
+                    sX1 = z->image.width() - sX0;
+                if (sY1 + sY0 > z->image.height())
+                    sY1 = z->image.width() - sY0;
+                qDebug()<< "deplacement";
+            }
+            paint.drawRect(sX0,sY0,sX1,sY1);
+            z->afficher_image();
+
             break;
         }
     case PIPETTE: {
@@ -183,24 +234,6 @@ void Controleur::appliquer_flou()
     //qDebug()<< "image floutee un pixel:" << qRed(z->image.pixel(distPixel,distPixel)) << " ; " << qRed(z->image.pixel(distPixel,distPixel)) << " ; " << qBlue(z->image.pixel(distPixel,distPixel));
 
     z->afficher_image();
-}
-
-
-
-int min(int i, int j)
-{
-    if(i>j)
-        return j;
-    else
-        return i;
-}
-
-int max(int i, int j)
-{
-    if(i<j)
-        return j;
-    else
-        return i;
 }
 
 QImage Controleur::decouper()
