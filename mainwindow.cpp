@@ -94,6 +94,9 @@ void MainWindow::createActions()
     fusionAct = new QAction(tr("&Fusion"), this);
     connect(fusionAct, SIGNAL(triggered()), this, SLOT(fusion()));
 
+    decoupageAct = new QAction(tr("&DecoupageTest"), this);
+    connect(decoupageAct, SIGNAL(triggered()), this, SLOT(decouper()));
+
 }
 
 void MainWindow::createMenus()
@@ -118,6 +121,7 @@ void MainWindow::createMenus()
     toolsMenu->addAction(RGB_to_greyAct);
     toolsMenu->addAction(flouAct);
     toolsMenu->addAction(fusionAct);
+    toolsMenu->addAction(decoupageAct);
 
 
 
@@ -177,13 +181,13 @@ void MainWindow::afficher_histogramme()
 
 void MainWindow::RGB_to_grey()
 {
-    c->mode = GREY;
+    c->RGB_to_grey();
     qDebug()<<"RGB_to_grey";
 }
 
 void MainWindow::appliquer_flou()
 {
-    c->mode = FLOU;
+    c->appliquer_flou();
     qDebug()<<"appliquer_flou";
 }
 
@@ -191,6 +195,13 @@ void MainWindow::fusion()
 {
     c->mode = FUSION;
     qDebug()<<"fusion";
+}
+
+void MainWindow::decouper()
+{
+    z->image = c->decouper();
+    z->afficher_image();
+    qDebug() << "decoupage";
 }
 
 

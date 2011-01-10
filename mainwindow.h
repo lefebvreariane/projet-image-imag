@@ -36,6 +36,7 @@ private slots:
     void RGB_to_grey();
     void appliquer_flou();
     void fusion();
+    void decouper();
 
 
 
@@ -48,6 +49,7 @@ private:
     void createMenus();
     void createStatusBar();
     void createToolBars();
+
 
 
     static const int TAILLE_PANNEAU_LATERAL = 100;
@@ -65,6 +67,7 @@ private:
     QAction *RGB_to_greyAct;
     QAction *flouAct;
     QAction *fusionAct;
+    QAction*decoupageAct;
 
     ZoneDessin *z;
     QScrollArea *scrollArea;
