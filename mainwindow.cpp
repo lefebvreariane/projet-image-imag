@@ -7,10 +7,11 @@ MainWindow::MainWindow()
     createActions();
     createToolBars();
     createAreas();
-    createControleur();
     createMenus();
     createStatusBar();
-    resize(1024,728);
+
+    createControleur();
+    resize(500,400);
 
 }
 
@@ -32,7 +33,7 @@ void MainWindow::createAreas()
     scrollArea->setAlignment(Qt::AlignCenter);
 
     QHBoxLayout *layout = new QHBoxLayout;
-    QFrame *panneauDroite = new QFrame;
+    panneauDroite = new QFrame;
     QVBoxLayout *layoutPanneauDroite = new QVBoxLayout;
 
     panneauDroite->setMaximumWidth(TAILLE_PANNEAU_LATERAL);
@@ -40,6 +41,7 @@ void MainWindow::createAreas()
     fenetrePipette = new FenetrePipette;
     layoutPanneauDroite->addWidget(fenetrePipette);
     panneauDroite->setLayout(layoutPanneauDroite);
+    panneauDroite->hide();
 
     layout->addWidget(scrollArea);
     layout->addWidget(panneauDroite);
@@ -55,6 +57,7 @@ void MainWindow::createControleur()
     c = new Controleur(z);
     connect(z->resultLabel, SIGNAL(clic()), c, SLOT(clic_recu()));
     connect(c, SIGNAL(afficher_pixel(int,int,int)), fenetrePipette, SLOT(afficher_pixel(int,int,int)));
+    connect(fenetrePipette, SIGNAL(afficher_panneauDroite(bool)),this,SLOT(afficher_panneauDroite(bool)));
 
     c->mode = SELECTION;
 }
@@ -132,6 +135,13 @@ void MainWindow::createMenus()
 
 }
 
+void MainWindow::MAJ_affichage()
+{
+    if (c->mode != PIPETTE )
+        afficher_panneauDroite(false);
+}
+
+
 void MainWindow::open()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
@@ -176,44 +186,67 @@ void MainWindow::selection()
 {
     c->mode = SELECTION;
     qDebug()<<"selection";
+    MAJ_affichage();
 }
 
 void MainWindow::pipette()
 {
     c->mode = PIPETTE;
     qDebug()<<"pipette";
+    MAJ_affichage();
 }
 
 void MainWindow::afficher_histogramme()
 {
     c->mode = HISTO;
     qDebug()<<"afficher_histogramme";
+    c->afficher_histogrammes();
+    MAJ_affichage();
 }
 
 void MainWindow::RGB_to_grey()
 {
+    c->mode = SELECTION;
+
     c->RGB_to_grey();
     qDebug()<<"RGB_to_grey";
+
+    MAJ_affichage();
 }
 
 void MainWindow::appliquer_flou()
 {
+    c->mode = SELECTION;
+
     c->appliquer_flou();
     qDebug()<<"appliquer_flou";
+    MAJ_affichage();
 }
 
 void MainWindow::fusion()
 {
     c->mode = FUSION;
     qDebug()<<"fusion";
+    MAJ_affichage();
 }
 
 void MainWindow::decouper()
 {
+    c->mode = SELECTION;
+
     z->image = c->decouper();
     z->afficher_image();
     c->reInitSelection();
     qDebug() << "decoupage";
+    MAJ_affichage();
+}
+
+void MainWindow::afficher_panneauDroite(bool b)
+{
+    if (b)
+        panneauDroite->show();
+    else
+        panneauDroite->hide();
 }
 
 

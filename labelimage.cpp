@@ -8,11 +8,11 @@ LabelImage::LabelImage()
     X1=-1;
     Y0=-1;
     Y1=-1;
+
 }
 
 void LabelImage::mousePressEvent(QMouseEvent *event)
 {
-    qDebug()<<"PRESS";
     QPoint pos = event->pos();
     X0= pos.x();
     Y0= pos.y();
@@ -25,7 +25,6 @@ void LabelImage::mousePressEvent(QMouseEvent *event)
 void LabelImage::mouseReleaseEvent(QMouseEvent *event)
 
 {
-    qDebug()<<"RELEASE";
     QPoint pos = event->pos();
     X1= pos.x();
     Y1= pos.y();

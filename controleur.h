@@ -4,6 +4,7 @@
 #include <ZoneDessin.h>
 #include <QWidget>
 #include <QObject>
+#include <histogramme.h>
 
 
 enum Mode
@@ -15,12 +16,18 @@ class Controleur : public QObject
 {
     Q_OBJECT
 public:
+    void RGB_to_grey();
+    void appliquer_flou();
+    void afficher_histogrammes();
+
+
     Controleur(ZoneDessin *zone);
     Mode mode;
     void reInitSelection();
 
 public slots:
     void clic_recu();
+
     QImage decouper();
 
 signals:
@@ -28,11 +35,13 @@ signals:
 
 private:
     void pipette(int x, int y);
-    void RGB_to_grey();
-    void appliquer_flou();
     int sX0, sX1, sY0, sY1;
     QPainter paint;
+
+    QImage flouter_coins(QImage imIn, QImage imOut, int distPixel, int tailleFiltre);
+    QImage flouter_bords(QImage imIn, QImage imOut, int distPixel, int tailleFiltre);
     ZoneDessin *z;
+    Histogramme *histogramme;
 
 };
 

@@ -5,19 +5,64 @@
 Controleur::Controleur(ZoneDessin *zone)
 {
     z = zone;
+    sX0 = -1;
+    sX1 = -1;
+    sY0 = -1;
+    sY1 = -1;
     histogramme = new Histogramme (z->image);
+}
+
+void Controleur::reInitSelection()
+{
+    sX0 = -1;
+    sX1 = -1;
+    sY0 = -1;
+    sY1 = -1;
+}
+
+int min(int i, int j)
+{
+    if(i>j)
+        return j;
+    else
+        return i;
+}
+
+int max(int i, int j)
+{
+    if(i<j)
+        return j;
+    else
+        return i;
 }
 
 void Controleur::clic_recu()
 {
 
     switch (mode) {
-
     case SELECTION: {
-            qDebug()<< "X0 = " << z->resultLabel->X0;
-            qDebug()<< "Y0 = " << z->resultLabel->Y0;
-            qDebug()<< "X1 = " << z->resultLabel->X1;
-            qDebug()<< "Y1 = " << z->resultLabel->Y1;
+
+            qDebug()<< "X0 = " << sX0;
+            qDebug()<< "Y0 = " << sY0;
+            qDebug()<< "X1 = " << sX1;
+            qDebug()<< "Y1 = " << sY1;
+
+            QPainter paint(&(z->image));
+            if (sX0 == -1 || !(z->resultLabel->X0 > sX0 && z->resultLabel->X0 < sX0 + sX1 &&
+                z->resultLabel->Y0 > sY0 && z->resultLabel->Y0 < sY0 + sY1))
+            {
+                sX0 = min(z->resultLabel->X0,z->resultLabel->X1);
+                sY0 = min(z->resultLabel->Y0,z->resultLabel->Y1);
+                sX1 = max(z->resultLabel->X0,z->resultLabel->X1) - sX0;
+                sY1 = max(z->resultLabel->Y0,z->resultLabel->Y1) - sY0;
+            }
+            else
+            {
+                sX0 += z->resultLabel->X1 - z->resultLabel->X0;
+                sY0 += z->resultLabel->Y1 - z->resultLabel->Y0;
+            }
+            paint.drawRect(sX0,sY0,sX1,sY1);
+            z->afficher_image();
             break;
         }
     case PIPETTE: {
@@ -184,36 +229,24 @@ void Controleur::appliquer_flou()
 }
 
 
-
-int min(int i, int j)
-{
-    if(i>j)
-        return j;
-    else
-        return i;
-}
-
-int max(int i, int j)
-{
-    if(i<j)
-        return j;
-    else
-        return i;
-}
-
 QImage Controleur::decouper()
 {
     int x = 0, y = 0;
-    int largeur = max(z->resultLabel->X0, z->resultLabel->X1) - min(z->resultLabel->X0, z->resultLabel->X1);
-    int hauteur = max(z->resultLabel->Y0, z->resultLabel->Y1) - min(z->resultLabel->Y0, z->resultLabel->Y1);
-    QImage resImage(largeur,hauteur,z->image.format());
+    //int largeur = max(z->resultLabel->X0, z->resultLabel->X1) - min(z->resultLabel->X0, z->resultLabel->X1);
+    //int hauteur = max(z->resultLabel->Y0, z->resultLabel->Y1) - min(z->resultLabel->Y0, z->resultLabel->Y1);
+    //QImage resImage(largeur,hauteur,z->image.format());
+    QImage resImage(sX1,sY1,z->image.format());
 
     if(z->resultLabel->X0 == z->resultLabel->X1 || z->resultLabel->Y0 == z->resultLabel->Y1)
         resImage = z->image;
     else {
-        for(int i=min(z->resultLabel->X0,z->resultLabel->X1); i<max(z->resultLabel->X0,z->resultLabel->X1); i++) {
-            for(int j=min(z->resultLabel->Y0,z->resultLabel->Y1); j<max(z->resultLabel->Y0,z->resultLabel->Y1); j++)
-                resImage.setPixel(QPoint(x,y++),z->image.pixel(i,j));
+        for(int i=sX0; i<sX0 + sX1; i++) {
+            for(int j=sY0; j<sY0 + sY1; j++) {
+                if (i < 0 || i > z->image.width() || j < 0 || j > z->image.height())
+                    resImage.setPixel(QPoint(x,y++),qRgba(255,255,255,0));
+                else
+                    resImage.setPixel(QPoint(x,y++),z->image.pixel(i,j));
+            }
             x++;
             y = 0;
         }
