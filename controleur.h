@@ -20,8 +20,6 @@ public:
 
 public slots:
     void clic_recu();
-    void RGB_to_grey();
-    void appliquer_flou();
     QImage decouper();
 
 signals:
@@ -29,8 +27,8 @@ signals:
 
 private:
     void pipette(int x, int y);
-	void RGB_to_grey();
-	void appliquer_flou();
+    void RGB_to_grey();
+    void appliquer_flou();
     int sX0, sX1, sY0, sY1;
     QPainter paint;
     ZoneDessin *z;
