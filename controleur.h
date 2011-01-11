@@ -38,8 +38,6 @@ private:
     int sX0, sX1, sY0, sY1;
     QPainter paint;
 
-    QImage flouter_coins(QImage imIn, QImage imOut, int distPixel, int tailleFiltre);
-    QImage flouter_bords(QImage imIn, QImage imOut, int distPixel, int tailleFiltre);
     ZoneDessin *z;
     Histogramme *histogramme;
 
