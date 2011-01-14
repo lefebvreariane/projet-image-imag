@@ -5,6 +5,8 @@
 #include <QWidget>
 #include <QObject>
 #include <histogramme.h>
+#include <matConvo.h>
+#include "noyaupascal.h"
 
 
 enum Mode
