@@ -174,21 +174,27 @@ void Controleur::appliquer_flou()
     int i,j,k,l, s, t;
     int compteur;
     double r,g,b; // composantes de la nouvelle couleur
-    // t est la taille de la matrice qui devra etre rentré par l'utilisateur...
-    int tf = 7;
-    MatConvo *m = new MatConvo(tf,1);
+    TypeConvo tConv = GAUSS;
+    MatConvo *m = new MatConvo();
 
-    // pour gauss:
-    // coef est le coef max du noyau de gauss entré par l'utilisateur...
-    // int coef = 9;
-    // NoyauPascal p(coef);
-    // p.calcul_taille();
-    // MatConvo m = new MatConvo(p.taille, coef);
-    // m.noyau_coef();
-    // m.noyau_gauss_bruit();
+    if(tConv == MOYENNE){
+        // t est la taille de la matrice qui devra etre rentré par l'utilisateur...
+        int tf = 3;
+        m->allouerMem(tf,1);
+        m->noyau_moyenne();
+    }
+    else if( tConv == GAUSS){
+            // coef est le coef max du noyau de gauss entré par l'utilisateur...
+            int coef = -12;
+            NoyauPascal p(coef);
+            p.calcul_taille();
+            m->allouerMem(p.getTaille(),p.getCoef());
+            m->noyau_coef();
+            m->noyau_gauss_bruit();
+    }
+    else
+        qDebug()<<"erreur, aucune matrice n'a ete initialisee";
 
-  qDebug()<<"Je suis dans app_flou et taille = "<<m->getTFiltre();
-    m->noyau_moyenne();
     int distPixel = (int) m->getTFiltre()/2;
   qDebug()<< "taille du filtre:"<< m->getTFiltre()<< " ; distance du pixel central:"<< distPixel;
 
@@ -202,8 +208,12 @@ void Controleur::appliquer_flou()
             // le filtre et lui même, seulement s'ils ne sont pas en
             // dehors de la zone image)
             r = g = b = 0;
-            compteur = m->getTFiltre()*m->getTFiltre();
-            qDebug()<<"compteur: "<<compteur;
+            compteur = 0;
+            for (int x=0 ; x<m->getTFiltre() ; x++)
+                for (int y=0 ; y<m->getTFiltre() ; y++)
+                    compteur += m->getMat2(x,y);
+
+            //qDebug()<<"compteur: "<<compteur;
 
             for (k=-distPixel, s=0 ; k<=distPixel && s<m->getTFiltre(); k++, s++)
             {
@@ -220,7 +230,6 @@ void Controleur::appliquer_flou()
                 }
             }
             // Puis on divise la somme par le nombre d'additions effectuees
-          qDebug()<<"compteur:"<<compteur;
             if (compteur != 0)
             {
                 r = r/(compteur);
@@ -230,12 +239,9 @@ void Controleur::appliquer_flou()
             }
         }
     }
-    qDebug()<< "image originale un pixel:" << qRed(z->image.pixel(distPixel,distPixel)) << " ; " << qRed(z->image.pixel(distPixel,distPixel)) << " ; " << qBlue(z->image.pixel(distPixel,distPixel));
     z->image = imFloue;
-    qDebug()<< "image floutee un pixel:" << qRed(z->image.pixel(distPixel,distPixel)) << " ; " << qRed(z->image.pixel(distPixel,distPixel)) << " ; " << qBlue(z->image.pixel(distPixel,distPixel));
-
     z->afficher_image();
-    delete(m);
+    m->~MatConvo();
 }
 
 QImage Controleur::decouper()

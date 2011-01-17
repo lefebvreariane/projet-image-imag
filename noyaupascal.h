@@ -8,13 +8,17 @@ private:
     int coef;
 
 public:
+    // CONSTRUCTEUR
     NoyauPascal(int coefficient);
 
+    // ACCESSEURS
     int getTaille();
     int getCoef();
 
+    // MODIFICATEUR
     void setTaille(int val);
 
+    // FONCTION
     void calcul_taille();
 };
 
