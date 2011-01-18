@@ -29,7 +29,7 @@ public:
 signals:
 
 public slots:
-
+    void changer_image(QImage);
 };
 
 #endif // ZONEDESSIN_H

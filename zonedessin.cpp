@@ -27,3 +27,9 @@ void ZoneDessin::ecrire_image()
 {
 
 }
+
+void ZoneDessin::changer_image(QImage img)
+{
+    image = img;
+    afficher_image();
+}

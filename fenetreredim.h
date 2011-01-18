@@ -9,7 +9,7 @@ class FenetreRedim : public QWidget
 public:
     explicit FenetreRedim(QWidget *parent = 0);
 
-    void changer_image(QImage i);
+    void initialiser(QImage i);
 
 
 signals:

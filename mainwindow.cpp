@@ -254,7 +254,7 @@ void MainWindow::redimentionner()
     verifier_fusion();
     c->changer_mode(REDIM);
     qDebug()<<"redim";
-    fenetreRedim->changer_image(z->image);
+    fenetreRedim->initialiser(z->image);
     fenetreRedim->MAJ_valeurs_redim();
     MAJ_affichage();
 }

@@ -30,7 +30,7 @@ FenetreRedim::FenetreRedim(QWidget *parent) :
     spin_rapport->setAccelerated(true);
     spin_rapport->setMinimum(1);
     spin_rapport->setMaximum(9999);
-    spin_rapport->setValue(100);
+
     spin_rapport->setSuffix("%");
     spin_rapport->setEnabled(false);
     connect(spin_rapport,SIGNAL(valueChanged(int)),this,SLOT(MAJ_valeurs_redim()));
@@ -44,7 +44,7 @@ FenetreRedim::FenetreRedim(QWidget *parent) :
     spin_perso_larg->setAccelerated(true);
     spin_perso_larg->setMinimum(1);
     spin_perso_larg->setMaximum(9999);
-    spin_perso_larg->setValue(100);
+
     spin_perso_larg->setSuffix("%");
     spin_perso_larg->setEnabled(false);
     connect(spin_perso_larg,SIGNAL(valueChanged(int)),this,SLOT(MAJ_valeurs_redim()));
@@ -53,7 +53,7 @@ FenetreRedim::FenetreRedim(QWidget *parent) :
     spin_perso_haut->setAccelerated(true);
     spin_perso_haut->setMinimum(1);
     spin_perso_haut->setMaximum(9999);
-    spin_perso_haut->setValue(100);
+
     spin_perso_haut->setSuffix("%");
     spin_perso_haut->setEnabled(false);
     connect(spin_perso_haut,SIGNAL(valueChanged(int)),this,SLOT(MAJ_valeurs_redim()));
@@ -66,7 +66,7 @@ FenetreRedim::FenetreRedim(QWidget *parent) :
     spin_taille_larg->setAccelerated(true);
     spin_taille_larg->setMinimum(1);
     spin_taille_larg->setMaximum(9999);
-    spin_taille_larg->setValue(100);
+
     spin_taille_larg->setSuffix(" pixels");
     spin_taille_larg->setEnabled(false);
     connect(spin_taille_larg,SIGNAL(valueChanged(int)),this,SLOT(MAJ_valeurs_redim()));
@@ -75,7 +75,7 @@ FenetreRedim::FenetreRedim(QWidget *parent) :
     spin_taille_haut->setAccelerated(true);
     spin_taille_haut->setMinimum(1);
     spin_taille_haut->setMaximum(9999);
-    spin_taille_haut->setValue(100);
+
     spin_taille_haut->setSuffix(" pixels");
     spin_taille_haut->setEnabled(false);
     connect(spin_taille_haut,SIGNAL(valueChanged(int)),this,SLOT(MAJ_valeurs_redim()));
@@ -183,6 +183,13 @@ void FenetreRedim::clic_annuler(){
     this->hide();
 }
 
-void FenetreRedim::changer_image(QImage i){
+void FenetreRedim::initialiser(QImage i){
     image = i;
+    tailleOrigine->setText("Taille d'origine: " + QString::number(image.width()) + " x " + QString::number(image.height()) + " pixels" );
+    tailleRedim->setText("Nouvelle taille: " + QString::number(image.width()) + " x " + QString::number(image.height()) + " pixels" );
+    spin_rapport->setValue(100);
+    spin_perso_larg->setValue(100);
+    spin_perso_haut->setValue(100);
+    spin_taille_larg->setValue(image.width());
+    spin_taille_haut->setValue(image.height());
 }

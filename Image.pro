@@ -10,26 +10,40 @@ TARGET = Image
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
+SOURCES += \
     zonedessin.cpp \
+    noyaupascal.cpp \
+    matconvo.cpp \
+    mainwindow.cpp \
+    main.cpp \
     labelimage.cpp \
-    controleur.cpp \
+    histogramme.cpp \
+    fenetreredim.cpp \
     fenetrepipette.cpp \
-    histogramme.cpp
+    fenetrehistogramme.cpp \
+    fenetrefusion.cpp \
+    controleur.cpp
 
-HEADERS  += mainwindow.h \
+HEADERS  += \
     zonedessin.h \
+    noyaupascal.h \
+    matconvo.h \
+    mainwindow.h \
     labelimage.h \
-    controleur.h \
+    histogramme.h \
+    fenetreredim.h \
     fenetrepipette.h \
-    histogramme.h
+    fenetrehistogramme.h \
+    fenetrefusion.h \
+    controleur.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
 
 OTHER_FILES += \
     save.png \
-    open.png
+    open.png \
+    Image.pro.user \
+    Image.pro \
 
 RESOURCES += \
     images/icones.qrc \
