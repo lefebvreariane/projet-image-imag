@@ -20,6 +20,7 @@ private:
     int coef;
     int tFiltre;
     int *mat1;
+    int tCourante;
     int **mat2;
 
 public:
@@ -33,16 +34,20 @@ public:
     int getTFiltre();
     int getCoef();
     int getMat1(int i);
+    int getTCourante();
     int getMat2(int i, int j);
 
     // MODIFICATEURS
     void setTFiltre(int t);
     void setCoef(int c);
     void setMat1(int i, int val);
+    void setTCourante(int i);
+    void inc_tCourante();
     void setMat2(int i, int j, int val);
 
     // FONCTIONS BOOLEENNES
     bool isNullMat1();
+    bool isPleineMat1();
     bool isNullMat2();
 
     // FONCTIONS
@@ -50,6 +55,8 @@ public:
     void noyau_gauss_bruit();
     void noyau_coef();
     void noyau_moyenne();
+    void ajouter_gris(int gris);
+    int gris_median(int med);
 
 };
 

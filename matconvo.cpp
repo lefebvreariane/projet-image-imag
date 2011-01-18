@@ -4,7 +4,9 @@
 
 // CONSTRUCTEUR
 MatConvo::MatConvo()
-{}
+{
+    tCourante = 0;
+}
 
 // DESTRUCTEUR
 MatConvo::~MatConvo()
@@ -31,6 +33,11 @@ int MatConvo::getMat1(int i)
     return this->mat1[i];
 }
 
+int MatConvo::getTCourante()
+{
+    return this->tCourante;
+}
+
 int MatConvo::getMat2(int i, int j)
 {
     return this->mat2[i][j];
@@ -50,7 +57,17 @@ void MatConvo::setCoef(int c)
 void MatConvo::setMat1(int i, int val)
 {
     this->mat1[i] = val;
-    qDebug()<<"mat1["<<i<<"] = "<<mat1[i];
+    //qDebug()<<"mat1["<<i<<"] = "<<mat1[i];
+}
+
+void MatConvo::setTCourante(int i)
+{
+    this->tCourante = i;
+}
+
+void MatConvo::inc_tCourante()
+{
+    this->tCourante++;
 }
 
 void MatConvo::setMat2(int i, int j, int val)
@@ -63,6 +80,11 @@ void MatConvo::setMat2(int i, int j, int val)
 bool MatConvo::isNullMat1()
 {
     return this->mat1==NULL;
+}
+
+bool MatConvo::isPleineMat1()
+{
+    return getTCourante() == getTFiltre();
 }
 
 bool MatConvo::isNullMat2()
@@ -140,3 +162,28 @@ void MatConvo::noyau_moyenne()
     }
 }
 
+void MatConvo::ajouter_gris(int gris)
+{
+    if (isPleineMat1())
+    {
+        qDebug()<<"matrice pleine, il y a erreur!!!";
+        return;
+    }
+    int i = 0,j;
+    while (i<getTCourante() && gris>= getMat1(i))
+       i++;
+    if (i != getTCourante())
+    {
+        for (j=getTCourante()-1 ; j>=i ; j--)
+        {
+            setMat1(j+1,getMat1(j));
+        }
+    }
+    setMat1(i,gris);
+    inc_tCourante();
+}
+
+int MatConvo::gris_median(int med)
+{
+    return getMat1(med);
+}
