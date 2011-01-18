@@ -7,14 +7,16 @@ class Histogramme : public QWidget
 {
     Q_OBJECT
 public:
-    explicit Histogramme(QImage i,QWidget *parent = 0);
+    explicit Histogramme(QWidget *parent = 0);
     void paintEvent(QPaintEvent * event);
+    QImage image;
+    int couche;
 
 signals:
 
 public slots:
 private:
-    QImage image;
+    void calcul_histo(int *tab);
     int maxi(int* tab, int taille);
 
 };

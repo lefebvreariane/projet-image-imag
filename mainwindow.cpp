@@ -11,7 +11,7 @@ MainWindow::MainWindow()
     createStatusBar();
 
     createControleur();
-    resize(500,400);
+    resize(800,600);
 
 }
 
@@ -33,18 +33,36 @@ void MainWindow::createAreas()
     scrollArea->setAlignment(Qt::AlignCenter);
 
     QHBoxLayout *layout = new QHBoxLayout;
+
+    //Ajout du panneau pipette
     panneauDroite = new QFrame;
     QVBoxLayout *layoutPanneauDroite = new QVBoxLayout;
-
     panneauDroite->setMaximumWidth(TAILLE_PANNEAU_LATERAL);
     panneauDroite->setMinimumWidth(TAILLE_PANNEAU_LATERAL);
+    panneauDroite->setMinimumHeight(250);
     fenetrePipette = new FenetrePipette;
     layoutPanneauDroite->addWidget(fenetrePipette);
     panneauDroite->setLayout(layoutPanneauDroite);
     panneauDroite->hide();
 
+    //Ajout de la fenetre histogramme
+    fenetreHistogramme = new FenetreHistogramme;
+
+    //ajout du paneau de la fusion
+    fenetreFusion = new FenetreFusion;
+    fenetreFusion->hide();
+
+    //Ajout de la fenetre redimentionnement
+    fenetreRedim = new FenetreRedim;
+    fenetreRedim->hide();
+
+
     layout->addWidget(scrollArea);
     layout->addWidget(panneauDroite);
+    layout->addWidget(fenetreFusion);
+    layout->addWidget(fenetreRedim);
+
+
     zoneTravail->setLayout(layout);
     zoneTravail->show();
 
@@ -58,8 +76,11 @@ void MainWindow::createControleur()
     connect(z->resultLabel, SIGNAL(clic()), c, SLOT(clic_recu()));
     connect(c, SIGNAL(afficher_pixel(int,int,int)), fenetrePipette, SLOT(afficher_pixel(int,int,int)));
     connect(fenetrePipette, SIGNAL(afficher_panneauDroite(bool)),this,SLOT(afficher_panneauDroite(bool)));
+    connect(fenetreFusion,SIGNAL(changer_image(QImage)),c->z,SLOT(changer_image(QImage)));
+    connect(fenetreFusion, SIGNAL(changer_mode(Mode)), c, SLOT(changer_mode(Mode)) );
+    connect(fenetreHistogramme,SIGNAL(masquer_fenetre()),this,SLOT(masquer_histogramme()));
 
-    c->mode = SELECTION;
+    c->changer_mode(SELECTION);
 }
 
 
@@ -70,39 +91,41 @@ void MainWindow::createStatusBar()
 
 void MainWindow::createActions()
 {
-    exitAct = new QAction(tr("&Quitter"), this);
+    exitAct = new QAction(tr("Quitter"), this);
     connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
-    ouvrirAct = new QAction(QIcon(":/icones/open.png"), tr("&Ouvrir..."), this);
+    ouvrirAct = new QAction(QIcon(":/icones/open.png"), tr("Ouvrir..."), this);
     connect(ouvrirAct, SIGNAL(triggered()), this , SLOT(open()));
 
-    saveAct = new QAction(QIcon(":/icones/save.png"),tr("&Enregistrer"), this);
+    saveAct = new QAction(QIcon(":/icones/save.png"),tr("Enregistrer"), this);
     connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
 
-    saveInAct = new QAction(tr("&Enregistrer sous..."), this);
+    saveInAct = new QAction(tr("Enregistrer sous..."), this);
     connect(saveInAct, SIGNAL(triggered()), this, SLOT(saveIn()));
 
-    pipetteAct = new QAction(tr("&Pipette"), this);
+    pipetteAct = new QAction(tr("Pipette"), this);
     connect(pipetteAct, SIGNAL(triggered()), this, SLOT(pipette()));
 
-    selectionAct = new QAction(tr("&Selection"), this);
+    selectionAct = new QAction(tr("Selection"), this);
     connect(selectionAct, SIGNAL(triggered()), this, SLOT(selection()));
 
-    histoAct = new QAction(tr("&Histogrammes"), this);
+    histoAct = new QAction(tr("Histogrammes"), this);
     connect(histoAct, SIGNAL(triggered()), this, SLOT(afficher_histogramme()));
 
-    RGB_to_greyAct = new QAction(tr("&Niveaux de gris"), this);
+    RGB_to_greyAct = new QAction(tr("Niveaux de gris"), this);
     connect(RGB_to_greyAct, SIGNAL(triggered()), this, SLOT(RGB_to_grey()));
 
-    flouAct = new QAction(tr("&Flou"), this);
+    flouAct = new QAction(tr("Flou"), this);
     connect(flouAct, SIGNAL(triggered()), this, SLOT(appliquer_flou()));
 
-    fusionAct = new QAction(tr("&Fusion"), this);
+    fusionAct = new QAction(tr("Fusion"), this);
     connect(fusionAct, SIGNAL(triggered()), this, SLOT(fusion()));
 
-    decoupageAct = new QAction(tr("&Decoupage"), this);
+    decoupageAct = new QAction(tr("Decoupage"), this);
     connect(decoupageAct, SIGNAL(triggered()), this, SLOT(decouper()));
 
+    redimAct = new QAction(tr("Redimentionnement"), this);
+    connect(redimAct, SIGNAL(triggered()), this, SLOT(redimentionner()));
 }
 
 void MainWindow::createMenus()
@@ -129,6 +152,7 @@ void MainWindow::createMenus()
     toolsMenu->addAction(flouAct);
     toolsMenu->addAction(fusionAct);
     toolsMenu->addAction(decoupageAct);
+    toolsMenu->addAction(redimAct);
 
 
 
@@ -137,20 +161,33 @@ void MainWindow::createMenus()
 
 void MainWindow::MAJ_affichage()
 {
-    if (c->mode != PIPETTE )
-        afficher_panneauDroite(false);
+    afficher_panneauDroite(false);
+
+    switch (c->mode) {
+    case REDIM:
+        fenetreRedim->show();
+        break;
+
+    default:
+        fenetreRedim->hide();
+        break;
+    }
+
 }
 
+void MainWindow::verifier_fusion()
+{
+    if (c->mode == FUSION) // On a quitte la fusion, il faut annuler
+        fenetreFusion->finir_fusion(false);
+}
 
 void MainWindow::open()
 {
-    QString fileName = QFileDialog::getOpenFileName(this,
-                                                    tr("Ouvrir un fichier"), QDir::currentPath());
+    fileName = QFileDialog::getOpenFileName(this, tr("Ouvrir un fichier"), QDir::currentPath());
     if (!fileName.isEmpty()) {
         QImage image(fileName);
         if (image.isNull()) {
-            QMessageBox::information(this, tr("ImageViewer"),
-                                     tr("Imppossible d'ouvrir %1.").arg(fileName));
+            QMessageBox::information(this, tr("ImageViewer"), tr("Imppossible d'ouvrir %1.").arg(fileName));
             return;
         }
         z->image = image;
@@ -159,54 +196,89 @@ void MainWindow::open()
         saveInAct->setEnabled(true);
         c->reInitSelection();
 
+        if (c->mode == FUSION)
+            fusion();
+        c->changer_mode(SELECTION);
+        MAJ_affichage();
+
     }
 }
 
 
 void MainWindow::save()
 {
+    if ( fileName.isEmpty())
+        saveIn();
 
-}
-
-void MainWindow::saveIn()
-{
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Enregistrer fichier"), QDir::currentPath(),
-                                                    "*.jpeg\n *.jpg\n *.png\n *.bmp\n *.ppm\n *.tiff\n *.xbm\n *.xpm\n");
-    QImageWriter *imgW = new QImageWriter();
-
-
-    if (!fileName.isEmpty()){
+    else
+    {
+        QImageWriter *imgW = new QImageWriter();
         imgW->setFileName(fileName);
         z->ecrire_image();
         imgW->write(z->image);
     }
 }
 
+void MainWindow::saveIn()
+{
+    fileName = QFileDialog::getSaveFileName(this, tr("Enregistrer fichier"), QDir::currentPath(),"*.jpg\n *.jpeg\n *.png\n *.bmp\n *.ppm\n *.tiff\n *.xbm\n *.xpm\n");
+
+    QImageWriter *imgW = new QImageWriter();
+    imgW->setFileName(fileName);
+    z->ecrire_image();
+    imgW->write(z->image);
+
+
+
+}
+
 void MainWindow::selection()
 {
-    c->mode = SELECTION;
+    verifier_fusion();
+    c->changer_mode(SELECTION);
     qDebug()<<"selection";
     MAJ_affichage();
 }
 
 void MainWindow::pipette()
 {
-    c->mode = PIPETTE;
+    verifier_fusion();
+    c->changer_mode(PIPETTE);
     qDebug()<<"pipette";
     MAJ_affichage();
 }
 
+
+void MainWindow::redimentionner()
+{
+    verifier_fusion();
+    c->changer_mode(REDIM);
+    qDebug()<<"redim";
+    fenetreRedim->changer_image(z->image);
+    fenetreRedim->MAJ_valeurs_redim();
+    MAJ_affichage();
+}
+
+
 void MainWindow::afficher_histogramme()
 {
-    c->mode = HISTO;
+    verifier_fusion();
+    c->changer_mode( HISTO);
     qDebug()<<"afficher_histogramme";
-    c->afficher_histogrammes();
+    fenetreHistogramme->histogramme->image = z->image;
+    fenetreHistogramme->histogramme->repaint();
+    fenetreHistogramme->show();
     MAJ_affichage();
+}
+
+void MainWindow::masquer_histogramme(){
+    fenetreHistogramme->hide();
 }
 
 void MainWindow::RGB_to_grey()
 {
-    c->mode = SELECTION;
+    verifier_fusion();
+    c->changer_mode(SELECTION);
 
     c->RGB_to_grey();
     qDebug()<<"RGB_to_grey";
@@ -216,7 +288,8 @@ void MainWindow::RGB_to_grey()
 
 void MainWindow::appliquer_flou()
 {
-    c->mode = SELECTION;
+    verifier_fusion();
+    c->changer_mode(SELECTION);
 
     c->appliquer_flou();
     qDebug()<<"appliquer_flou";
@@ -225,14 +298,18 @@ void MainWindow::appliquer_flou()
 
 void MainWindow::fusion()
 {
-    c->mode = FUSION;
+    c->changer_mode(FUSION);
     qDebug()<<"fusion";
+    fenetreFusion->fusion(z->image);
+    fenetreFusion->show();
+
     MAJ_affichage();
 }
 
 void MainWindow::decouper()
 {
-    c->mode = SELECTION;
+    verifier_fusion();
+    c->changer_mode(SELECTION);
 
     z->image = c->decouper();
     z->afficher_image();
@@ -247,6 +324,7 @@ void MainWindow::afficher_panneauDroite(bool b)
         panneauDroite->show();
     else
         panneauDroite->hide();
+    ;
 }
 
 

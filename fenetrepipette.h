@@ -12,8 +12,8 @@ public:
     QLabel *labelR;
     QLabel *labelG;
     QLabel *labelB;
-    QLabel *labelY;
-    QLabel *labelU;
+    QLabel *labelH;
+    QLabel *labelS;
     QLabel *labelV;
 
 
@@ -28,6 +28,11 @@ public slots:
 
 private:
 QImage apercu;
+/*
+int min(int a, int b, int c);
+int max(int a, int b, int c);
+QColor*  RGBtoHSV(int var_R, int var_G, int var_B);
+*/
 
 };
 

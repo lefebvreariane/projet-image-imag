@@ -30,6 +30,7 @@ public:
 
 public slots:
     void clic_recu();
+    void changer_mode(Mode);
 
     QImage decouper();
 

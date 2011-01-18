@@ -22,6 +22,11 @@ void Controleur::reInitSelection()
     sY1 = -1;
 }
 
+void Controleur::changer_mode(Mode m )
+{
+    mode = m;
+}
+
 int min(int i, int j)
 {
     if(i>j)

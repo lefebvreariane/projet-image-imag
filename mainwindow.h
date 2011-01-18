@@ -5,6 +5,9 @@
 #include <ZoneDessin.h>
 #include <controleur.h>
 #include <fenetrepipette.h>
+#include <fenetrehistogramme.h>
+#include <fenetrefusion.h>
+#include <fenetreredim.h>
 
 QT_BEGIN_NAMESPACE
 class QLabel;
@@ -27,6 +30,7 @@ public:
 
 
 
+
 private slots:
     void open();
     void save();
@@ -39,6 +43,10 @@ private slots:
     void fusion();
     void decouper();
     void afficher_panneauDroite(bool);
+    void masquer_histogramme();
+    void redimentionner();
+
+
 
 
 
@@ -52,16 +60,21 @@ private:
     void createStatusBar();
     void createToolBars();
     void MAJ_affichage();
+    void verifier_fusion();
+
+
 
 
 
     static const int TAILLE_PANNEAU_LATERAL = 100;
+    QString fileName;
 
     QMenu *fileMenu;
     QMenu *editMenu;
     QMenu *toolsMenu;
 
     QFrame *panneauDroite;
+    QFrame *panneauFusion;
 
     QAction *exitAct;
     QAction *ouvrirAct;
@@ -74,12 +87,16 @@ private:
     QAction *RGB_to_greyAct;
     QAction *flouAct;
     QAction *fusionAct;
-    QAction*decoupageAct;
+    QAction *decoupageAct;
+    QAction *redimAct;
 
     ZoneDessin *z;
     QScrollArea *scrollArea;
     QToolBar *fileToolBar;
     FenetrePipette *fenetrePipette;
+    FenetreHistogramme *fenetreHistogramme;
+    FenetreFusion *fenetreFusion;
+    FenetreRedim *fenetreRedim;
 
 };
 
