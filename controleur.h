@@ -11,7 +11,7 @@
 
 enum Mode
 {
-    SELECTION, PIPETTE, HISTO, GREY, FLOU, FUSION, DECOUPAGE
+    SELECTION, PIPETTE, HISTO, GREY, MEDIAN, FLOU, FUSION, DECOUPAGE
         };
 
 class Controleur : public QObject
@@ -19,9 +19,10 @@ class Controleur : public QObject
     Q_OBJECT
 public:
     void RGB_to_grey();
+    void appliquer_median();
     void appliquer_flou();
     void afficher_histogrammes();
-
+    QImage redimensionner(int l, int h);
 
     Controleur(ZoneDessin *zone);
     Mode mode;

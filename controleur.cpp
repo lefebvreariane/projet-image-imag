@@ -51,7 +51,7 @@ void Controleur::clic_recu()
 
             QPainter paint(&(z->image));
             if (sX0 == -1 || !(z->resultLabel->X0 > sX0 && z->resultLabel->X0 < sX0 + sX1 &&
-                z->resultLabel->Y0 > sY0 && z->resultLabel->Y0 < sY0 + sY1))
+                               z->resultLabel->Y0 > sY0 && z->resultLabel->Y0 < sY0 + sY1))
             {
                 sX0 = min(z->resultLabel->X0,z->resultLabel->X1);
                 sY0 = min(z->resultLabel->Y0,z->resultLabel->Y1);
@@ -117,26 +117,29 @@ void Controleur::RGB_to_grey()
     z->afficher_image();
 }
 
-    /*void Controleur::appliquer_flou()
+void Controleur::appliquer_median()
 {
-    QImage imFloue = z->image.copy(0,0,z->image.width(),z->image.height());
-    int i,j,k,l;
-    int compteur;
-    double r,g,b; // composantes de la nouvelle couleur
-    int tailleFiltre = 7;
-    int distPixel = (int) tailleFiltre/2;
+    qDebug()<<"fonction appliquer_median;";
+    QImage imFiltree = z->image.copy(0,0,z->image.width(),z->image.height());
+    int gris;
+    int i,j, k, l;
+    // ATTENTION verifier que l'image est IsGreyScale() avant d'appeler
+    // cette fonction.
 
-    // On applique le filtre de moyenne (à 1) de taille 3 par default
-    for(i=0 ; i<=imFloue.width()-1 ; i++)
+
+    // rentrer taille du filtre median
+    int taille = 3;
+    int nv = taille*taille;
+    int distPixel = (int) taille/2;
+    qDebug()<<"taille filtre: "<<taille<<" ; NbVoisins: "<<nv<<" ; distPixel : "<<distPixel;
+
+    MatConvo *voisins = new MatConvo();
+    voisins->allouerMem(nv,1);
+    for (i=0 ; i<=imFiltree.width()-1 ; i++)
     {
-        for(j=0 ; j<=imFloue.height()-1 ; j++)
+        for (j=0 ; j<=imFiltree.height()-1 ; j++)
         {
-            // On fait la somme des taille^2 pixels (des taille^2 qui
-            // entourent le point sur lequel on est entrain d'appliquer
-            // le filtre et lui même, seulement s'ils ne sont pas en
-			// dehors de la zone image)
-            r = g = b = 0;
-            compteur = tailleFiltre*tailleFiltre;
+            voisins->setTCourante(0);
             for (k=-distPixel ; k<=distPixel ; k++)
             {
                 for(l=-distPixel ; l<=distPixel ; l++)
@@ -144,29 +147,22 @@ void Controleur::RGB_to_grey()
                     if ((i+k>=0) && (i+k<=z->image.width()-1) &&
                         (j+l>=0) && (j+l<=z->image.height()-1))
                     {
-                        r += qRed(z->image.pixel(i+k,j+l));
-                        g += qGreen(z->image.pixel(i+k,j+l));
-                        b += qBlue(z->image.pixel(i+k,j+l));
+                        voisins->ajouter_gris(qRed(z->image.pixel(i+k,j+l)));
                     }
-                    else compteur--;
                 }
             }
-            // Puis on divise la somme par le nombre d'additions effectuees
-            if (compteur != 0)
+            if (voisins->getTCourante() != 0)
             {
-                r = r/(compteur);
-                g = g/(compteur);
-                b = b/(compteur);
-              imFloue.setPixel(i,j,qRgb((int)r,(int)g,(int)b));
+                //voisins->ranger_gris();
+                gris = voisins->gris_median((int) voisins->getTCourante()/2);
+                imFiltree.setPixel(i,j,qRgb((int)gris,(int)gris,(int)gris));
             }
         }
     }
-    //qDebug()<< "image originale un pixel:" << qRed(z->image.pixel(distPixel,distPixel)) << " ; " << qRed(z->image.pixel(distPixel,distPixel)) << " ; " << qBlue(z->image.pixel(distPixel,distPixel));
-    z->image = imFloue;
-    //qDebug()<< "image floutee un pixel:" << qRed(z->image.pixel(distPixel,distPixel)) << " ; " << qRed(z->image.pixel(distPixel,distPixel)) << " ; " << qBlue(z->image.pixel(distPixel,distPixel));
-
+    z->image = imFiltree;
     z->afficher_image();
-}*/
+    voisins->~MatConvo();
+}
 
 void Controleur::appliquer_flou()
 {
@@ -184,19 +180,19 @@ void Controleur::appliquer_flou()
         m->noyau_moyenne();
     }
     else if( tConv == GAUSS){
-            // coef est le coef max du noyau de gauss entré par l'utilisateur...
-            int coef = -12;
-            NoyauPascal p(coef);
-            p.calcul_taille();
-            m->allouerMem(p.getTaille(),p.getCoef());
-            m->noyau_coef();
-            m->noyau_gauss_bruit();
+        // coef est le coef max du noyau de gauss entré par l'utilisateur...
+        int coef = -12;
+        NoyauPascal p(coef);
+        p.calcul_taille();
+        m->allouerMem(p.getTaille(),p.getCoef());
+        m->noyau_coef();
+        m->noyau_gauss_bruit();
     }
     else
         qDebug()<<"erreur, aucune matrice n'a ete initialisee";
 
     int distPixel = (int) m->getTFiltre()/2;
-  qDebug()<< "taille du filtre:"<< m->getTFiltre()<< " ; distance du pixel central:"<< distPixel;
+    qDebug()<< "taille du filtre:"<< m->getTFiltre()<< " ; distance du pixel central:"<< distPixel;
 
     // On applique le filtre choisi taille t (à 1) sur l'image
     for(i=0 ; i<=imFloue.width()-1 ; i++)
@@ -235,7 +231,7 @@ void Controleur::appliquer_flou()
                 r = r/(compteur);
                 g = g/(compteur);
                 b = b/(compteur);
-              imFloue.setPixel(i,j,qRgb((int)r,(int)g,(int)b));
+                imFloue.setPixel(i,j,qRgb((int)r,(int)g,(int)b));
             }
         }
     }
@@ -273,4 +269,133 @@ QImage Controleur::decouper()
 void Controleur::afficher_histogrammes()
 {
     histogramme->show();
+}
+
+QImage down(QImage base, int l, int h) {
+
+    QImage res(l,h,base.format());
+    double ratioL, ratioH;
+    double compteurH = 0, compteurL = 0;
+    int iR = 0, jR = 0;
+
+    //Reduction de la taille de l'image :
+    ratioL = (double) base.width() / (double) l;
+    ratioH = (double) base.height() / (double) h ;
+
+    int cptL = 0, cptH = 0;
+
+
+    for(int i = 0; i < l; i++) {
+        for(int j = 0; j < h; j++) {
+            int r = 0, g = 0, b = 0;
+            compteurL += ratioL;
+            compteurH += ratioH;
+            //qDebug() << compteurL << "," << ratioL;
+            //if (iR > 330)
+            //  return res;
+
+            //qDebug() << compteurL <<"," << compteurH;
+            for(cptL = 0; cptL < (int) compteurL/* && cptL+iR < base.width()*/; cptL++) {
+                for(cptH = 0; cptH < (int) compteurH/* && cptH+jR < base.height()*/; cptH++) {
+                    r += ((QColor) base.pixel(cptL+iR, cptH+jR)).red();
+                    g += ((QColor) base.pixel(cptL+iR, cptH+jR)).green();
+                    b += ((QColor) base.pixel(cptL+iR, cptH+jR)).blue();
+                    //        qDebug() << "lecture en " << cptL+iR << "," << cptH+jR << '!' << compteurL << "," << compteurH;
+                }
+            }
+
+            jR = (int) ((double)  j*(ratioH)) ;
+            //qDebug() << "ecriture en " << i << "," << j;
+            res.setPixel(QPoint(i,j), (QColor(r/(cptL*cptH),g/(cptL*cptH),b/(cptL*cptH),255).rgb()));
+            //qDebug() << compteurL << (int) compteurL;
+            compteurL -= (int) compteurL;
+
+            compteurH -= (int) compteurH;
+        }
+        //qDebug() << iR << "," << cptL;
+        iR = (int) ((double) i*(ratioL ));
+
+        jR = 0;
+
+
+    }
+
+    return res;
+}
+
+QImage up(QImage base, int l, int h) {
+
+    QImage res(l,h,base.format());
+    double ratioL, ratioH;
+    double compteurH = 0, compteurL = 0;
+    int iR = 0, jR = 0;
+
+    //Augmentation de la taille de l'image :
+    ratioH = (double) base.height() / ((double) h - base.height());
+    ratioL = (double) base.width() / ((double) l - base.width());
+    for(int iB=0; iB < base.width(); iB++) {
+        for(int jB=0; jB<base.height(); jB++) {
+            // On parcours l'image et copie chaque pixel
+            res.setPixel(QPoint(iR,jR++),base.pixel(iB,jB));
+            //S'il y a un redimensionnement sur la hauteur on rajoute les pixels necessaire
+            if (h > base.height()) {
+                compteurH ++;
+                while (compteurH >= ratioH) {
+                    res.setPixel(QPoint(iR,jR++),base.pixel(iB,jB));
+                    compteurH -= ratioH;
+                }
+            }
+        }
+        //Dans le cas d'un nombre de pixel impair la hauteur de l'image ne sera pas atteinte
+        if (jR != res.height()) {
+            res.setPixel(QPoint(iR,jR),res.pixel(iR,jR-1));
+            jR++;
+        }
+        //S'il y a un redimensionnement sur la largeur on rajoute les pixels necessaire
+        if (l > base.width()) {
+            compteurL ++;
+            while (compteurL >= ratioL) {
+                iR++;
+                for(int j=0 ; j < res.height(); j++)
+                    res.setPixel(QPoint(iR,j),res.pixel(iR-1,j));
+                compteurL -= ratioL;
+            }
+        }
+        iR++;
+        jR = 0;
+        compteurH = 0;
+    }
+    //Dans le cas d'un nombre de pixel impaire la largeur de l'image ne sera pas atteinte
+    if (iR != res.width()) {
+        for(int j=0 ; j < res.height(); j++)
+            res.setPixel(QPoint(iR,j),res.pixel(iR-1,j));
+    }
+
+    return res;
+}
+
+
+QImage Controleur::redimensionner(int l, int h)
+{
+    QImage res(l,h,z->image.format());
+
+
+
+    if (l<z->image.width() && h<z->image.height()) // si la diminution est sur les deux taille
+        res = down(z->image,l ,h);
+    else if (l < z->image.width()) // si elle n'est que sur la largeur
+        res = down(z->image,l ,z->image.height());
+    else if (h < z->image.height()) // si elle n'est que sur la hauteur
+        res = down(z->image,z->image.width(),h);
+    else
+        res = z->image;
+
+    if (l>z->image.width() && h>z->image.height()) // meme shéma
+        res = up(res,l, h);
+    else if (l > z->image.width())
+        res = up(res, l, z->image.height());
+    else if (h > z->image.height())
+        res = up(res, z->image.height(), h);
+
+    return res;
 }
