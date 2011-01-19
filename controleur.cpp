@@ -121,8 +121,33 @@ void Controleur::RGB_to_grey()
     }
     z->afficher_image();
 }
+MatConvo *Controleur::creer_filtre(int coefOuTaille, TypeConvo tConv)
+{
+    MatConvo *m = new MatConvo();
+    if(tConv == MOYENNE){
+        // tf est la taille de la matrice qui devra etre rentré par l'utilisateur...
+        //int tf = 3;
+        m->allouerMem(coefOuTaille,1);
+        m->noyau_moyenne();
+        return m;
+    }
+    else if( tConv == GAUSS){
+        // coef est le coef max du noyau de gauss entré par l'utilisateur...
+        int coef = -12;
+        NoyauPascal p(coef);
+        p.calcul_taille();
+        m->allouerMem(p.getTaille(),p.getCoef());
+        m->noyau_coef();
+        m->noyau_gauss_bruit();
+        return m;
+    }
+    else {
+        qDebug()<<"erreur, aucune matrice n'a pas ete initialisee";
+        return NULL;
+    }
+}
 
-void Controleur::appliquer_median()
+void Controleur::appliquer_median(int taille)
 {
     qDebug()<<"fonction appliquer_median;";
     QImage imFiltree = z->image.copy(0,0,z->image.width(),z->image.height());
@@ -133,7 +158,7 @@ void Controleur::appliquer_median()
 
 
     // rentrer taille du filtre median
-    int taille = 3;
+    //int taille = 3;
     int nv = taille*taille;
     int distPixel = (int) taille/2;
     qDebug()<<"taille filtre: "<<taille<<" ; NbVoisins: "<<nv<<" ; distPixel : "<<distPixel;
@@ -152,7 +177,7 @@ void Controleur::appliquer_median()
                     if ((i+k>=0) && (i+k<=z->image.width()-1) &&
                         (j+l>=0) && (j+l<=z->image.height()-1))
                     {
-                        voisins->ajouter_gris(qRed(z->image.pixel(i+k,j+l)));
+                        voisins->ajouter_val_mat1(qRed(z->image.pixel(i+k,j+l)));
                     }
                 }
             }
@@ -169,17 +194,18 @@ void Controleur::appliquer_median()
     voisins->~MatConvo();
 }
 
-void Controleur::appliquer_flou()
+void Controleur::appliquer_flou(MatConvo *m)
 {
     QImage imFloue = z->image.copy(0,0,z->image.width(),z->image.height());
     int i,j,k,l, s, t;
     int compteur;
     double r,g,b; // composantes de la nouvelle couleur
-    TypeConvo tConv = GAUSS;
+    // tconv est le type de matrice de convo: flou de GAUSS ou flou par la MOYENNE
+    /*TypeConvo tConv = GAUSS;//ou MOYENNE;
     MatConvo *m = new MatConvo();
 
     if(tConv == MOYENNE){
-        // t est la taille de la matrice qui devra etre rentré par l'utilisateur...
+        // tf est la taille de la matrice qui devra etre rentré par l'utilisateur...
         int tf = 3;
         m->allouerMem(tf,1);
         m->noyau_moyenne();
@@ -194,8 +220,8 @@ void Controleur::appliquer_flou()
         m->noyau_gauss_bruit();
     }
     else
-        qDebug()<<"erreur, aucune matrice n'a ete initialisee";
-
+        qDebug()<<"erreur, aucune matrice n'a pas ete initialisee";
+*/
     int distPixel = (int) m->getTFiltre()/2;
     qDebug()<< "taille du filtre:"<< m->getTFiltre()<< " ; distance du pixel central:"<< distPixel;
 

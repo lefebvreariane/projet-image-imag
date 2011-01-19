@@ -19,8 +19,9 @@ class Controleur : public QObject
     Q_OBJECT
 public:
     void RGB_to_grey();
-    void appliquer_median();
-    void appliquer_flou();
+    MatConvo *creer_filtre(int coefOuTaille, TypeConvo tconv);
+    void appliquer_median(int taille);
+    void appliquer_flou(MatConvo *);
     void afficher_histogrammes();
 
     ZoneDessin *z;
