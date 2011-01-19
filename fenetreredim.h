@@ -13,6 +13,7 @@ public:
 
 
 signals:
+    void redim(int, int);
 
 public slots:
 
@@ -24,7 +25,7 @@ public slots:
 
 private:
     QImage image;
-    int largeur_redim, longueur_redim;
+    int largeur_redim, hauteur_redim;
     QRadioButton *origine;
     QRadioButton *rapport;
     QRadioButton *rapport_perso;

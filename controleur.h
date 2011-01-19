@@ -22,7 +22,7 @@ public:
     void appliquer_median();
     void appliquer_flou();
     void afficher_histogrammes();
-    QImage redimensionner(int l, int h);
+
     ZoneDessin *z;
     Controleur(ZoneDessin *zone);
     Mode mode;
@@ -31,6 +31,7 @@ public:
 public slots:
     void clic_recu();
     void changer_mode(Mode);
+    void redimensionner(int l, int h);
 
     QImage decouper();
 

@@ -151,19 +151,19 @@ void FenetreRedim::clic_radioBouton(){
 void FenetreRedim::MAJ_valeurs_redim(){
     if (origine->isChecked()){
         largeur_redim = image.width();
-        longueur_redim = image.height();
+        hauteur_redim = image.height();
     }
     else if (rapport->isChecked()){
         largeur_redim = image.width()*spin_rapport->value()/100;
-        longueur_redim = image.height()*spin_rapport->value()/100;
+        hauteur_redim = image.height()*spin_rapport->value()/100;
     }
     else if (rapport_perso->isChecked()){
         largeur_redim = image.width()*spin_perso_larg->value()/100;
-        longueur_redim = image.height()*spin_perso_haut->value()/100;
+        hauteur_redim = image.height()*spin_perso_haut->value()/100;
     }
     else if (taille_perso->isChecked()){
         largeur_redim = spin_taille_larg->value();
-        longueur_redim = spin_taille_haut->value();
+        hauteur_redim = spin_taille_haut->value();
     }
     MAJ_resume();
 }
@@ -171,11 +171,11 @@ void FenetreRedim::MAJ_valeurs_redim(){
 void FenetreRedim::MAJ_resume(){
 
     tailleOrigine->setText("Taille d'origine: " + QString::number(image.width()) + " x " + QString::number(image.height()) + " pixels" );
-    tailleRedim->setText("Nouvelle taille: " + QString::number(largeur_redim) + " x " + QString::number(longueur_redim) + " pixels" );
+    tailleRedim->setText("Nouvelle taille: " + QString::number(largeur_redim) + " x " + QString::number(hauteur_redim) + " pixels" );
 }
 
 void FenetreRedim::clic_ok(){
-
+    emit redim(largeur_redim, hauteur_redim);
     this->hide();
 }
 

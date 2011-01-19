@@ -79,6 +79,7 @@ void MainWindow::createControleur()
     connect(fenetreFusion,SIGNAL(changer_image(QImage)),c->z,SLOT(changer_image(QImage)));
     connect(fenetreFusion, SIGNAL(changer_mode(Mode)), c, SLOT(changer_mode(Mode)) );
     connect(fenetreHistogramme,SIGNAL(masquer_fenetre()),this,SLOT(masquer_histogramme()));
+    connect(fenetreRedim,SIGNAL(redim(int,int)),c,SLOT(redimensionner(int,int)));
 
     c->changer_mode(SELECTION);
 }

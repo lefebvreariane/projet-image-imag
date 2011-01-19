@@ -380,7 +380,7 @@ QImage up(QImage base, int l, int h) {
 }
 
 
-QImage Controleur::redimensionner(int l, int h)
+void Controleur::redimensionner(int l, int h)
 {
     QImage res(l,h,z->image.format());
 
@@ -402,5 +402,6 @@ QImage Controleur::redimensionner(int l, int h)
     else if (h > z->image.height())
         res = up(res, z->image.height(), h);
 
-    return res;
+    z->image = res;
+    z->afficher_image();
 }
