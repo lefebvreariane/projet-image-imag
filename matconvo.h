@@ -49,14 +49,16 @@ public:
     bool isNullMat1();
     bool isPleineMat1();
     bool isNullMat2();
+    bool isPleineMat2();
 
     // FONCTIONS
     void allouerMem(int tailleFiltre, int coefficient);
     void noyau_gauss_bruit();
     void noyau_coef();
     void noyau_moyenne();
-    void ajouter_gris(int gris);
+    void ajouter_val_mat1(int val);
     int gris_median(int med);
+    void ajouter_val_mat2(int val);
 
 };
 

@@ -92,6 +92,11 @@ bool MatConvo::isNullMat2()
     return this->mat2==NULL;
 }
 
+bool MatConvo::isPleineMat2()
+{
+    return getTCourante() == (getTFiltre()*getTFiltre());
+}
+
 // FONCTIONS
 void MatConvo::allouerMem(int tailleFiltre, int coefficient)
 {
@@ -162,7 +167,7 @@ void MatConvo::noyau_moyenne()
     }
 }
 
-void MatConvo::ajouter_gris(int gris)
+void MatConvo::ajouter_val_mat1(int val)
 {
     if (isPleineMat1())
     {
@@ -170,7 +175,7 @@ void MatConvo::ajouter_gris(int gris)
         return;
     }
     int i = 0,j;
-    while (i<getTCourante() && gris>= getMat1(i))
+    while (i<getTCourante() && val>= getMat1(i))
        i++;
     if (i != getTCourante())
     {
@@ -179,11 +184,24 @@ void MatConvo::ajouter_gris(int gris)
             setMat1(j+1,getMat1(j));
         }
     }
-    setMat1(i,gris);
+    setMat1(i,val);
     inc_tCourante();
 }
 
 int MatConvo::gris_median(int med)
 {
     return getMat1(med);
+}
+
+void MatConvo::ajouter_val_mat2(int val)
+{
+    if (isPleineMat2())
+    {
+        qDebug()<<"matrice pleine, il y a erreur!!!";
+        return;
+    }
+
+    setMat2((int) getTCourante()/getTFiltre(),getTCourante()%getTFiltre(),val);
+    qDebug()<<"ajouter: "<<(int) getTCourante()/getTFiltre()<<" , "<<getTCourante()%getTFiltre()<<" ; valeur: "<<val;
+    inc_tCourante();
 }
