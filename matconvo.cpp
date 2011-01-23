@@ -205,3 +205,43 @@ void MatConvo::ajouter_val_mat2(int val)
     qDebug()<<"ajouter: "<<(int) getTCourante()/getTFiltre()<<" , "<<getTCourante()%getTFiltre()<<" ; valeur: "<<val;
     inc_tCourante();
 }
+
+void MatConvo::noyau_laplacien(int contraste)
+{
+    qDebug()<< "fonction noyau_laplacien;";
+    qDebug()<< "taille matrice: "<<getTFiltre();
+    qDebug()<< "matrice: ";
+
+    switch (contraste)
+    {
+    case 1:
+        setMat2(0,0,0); setMat2(0,1,1); setMat2(0,2,0);
+        setMat2(1,0,1); setMat2(1,1,-4); setMat2(1,2,1);
+        setMat2(2,0,0); setMat2(2,1,1); setMat2(2,2,0);
+        break;
+    case 2:
+        setMat2(0,0,1); setMat2(0,1,1); setMat2(0,2,1);
+        setMat2(1,0,1); setMat2(1,1,-8); setMat2(1,2,1);
+        setMat2(2,0,1); setMat2(2,1,1); setMat2(2,2,1);
+        break;
+    case 3:
+        setMat2(0,0,1); setMat2(0,1,2); setMat2(0,2,1);
+        setMat2(1,0,2); setMat2(1,1,-12); setMat2(1,2,2);
+        setMat2(2,0,1); setMat2(2,1,2); setMat2(2,2,1);
+        break;
+    default:
+        qDebug()<<"il n'y a que 3 sorte de contraste (faible:1 , moyen:2 , fort: 3)";
+        break;
+    }
+}
+
+void MatConvo::noyau_impulsionnel()
+{
+    qDebug()<< "fonction noyau_impulsionnel;";
+    qDebug()<< "taille matrice: "<<getTFiltre();
+    qDebug()<< "matrice: ";
+
+    setMat2(0,0,0); setMat2(0,1,0); setMat2(0,2,0);
+    setMat2(1,0,0); setMat2(1,1,1); setMat2(1,2,0);
+    setMat2(2,0,0); setMat2(2,1,0); setMat2(2,2,0);
+}

@@ -5,14 +5,8 @@
 
 enum TypeConvo
 {
-    GAUSS, MOYENNE, CONTOUR_LAPLACIEN, CONTOUR_SOBEL, NOYAU, GRADIENT_X, GRADIENT_Y
+    GAUSS, MOYENNE, GRADIENT_X, GRADIENT_Y
 };
-
-/*enum Dimension
-{
-    DIMENSION1, DIMENSION2
-};*/
-
 
 class MatConvo
 {
@@ -59,6 +53,8 @@ public:
     void ajouter_val_mat1(int val);
     int gris_median(int med);
     void ajouter_val_mat2(int val);
+    void noyau_laplacien(int contraste);
+    void noyau_impulsionnel();
 
 };
 
