@@ -1,12 +1,13 @@
 #include "controleur.h"
 #include "zonedessin.h"
 #include "matconvo.h"
-#include "noyaupascal.h"
+#include "filtres.h"
 #include <QtGui>
 
 Controleur::Controleur(ZoneDessin *zone)
 {
     z = zone;
+    f = new Filtres();
     sX0 = -1;
     sX1 = -1;
     sY0 = -1;
@@ -98,177 +99,80 @@ void Controleur::pipette(int x, int y)
 }
 
 void Controleur::RGB_to_grey()
-{   //lit l'image qui correspond au LabelImage (z->resultLabel)
-    //traite l'image
-    //affiche l'image correspondante
-
-    if(!z->image.isNull() && !z->image.allGray())
-    {
-        double greyD;
-        int greyI,i,j;
-
-        for (i=0 ; i<z->image.width() ; i++)
-        {
-            for(j=0 ; j<z->image.height() ; j++)
-            {
-                QColor c = z->image.pixel(i,j);
-                greyD = c.red()*0.299 + c.green()*0.587 + c.blue()*0.114 + 0.5;
-                greyI = (int) greyD;
-                z->image.setPixel(i,j,qRgb(greyI,greyI,greyI));
-            }
-        }
-        //z->image.setColorCount(256);
-    }
+{
+    z->image = this->f->RGB_to_grey(z->image);
     z->afficher_image();
 }
-MatConvo *Controleur::creer_filtre(int coefOuTaille, TypeConvo tConv)
+
+void Controleur::inverser_couleurs()
 {
-    MatConvo *m = new MatConvo();
-    if(tConv == MOYENNE){
-        // tf est la taille de la matrice qui devra etre rentré par l'utilisateur...
-        //int tf = 3;
-        m->allouerMem(coefOuTaille,1);
-        m->noyau_moyenne();
-        return m;
+    QImage imIn = z->image.copy(0,0,z->image.width(),z->image.height());
+    QImage imOut = z->image.copy(0,0,z->image.width(),z->image.height());
+
+    for (int i=0 ; i<z->image.width() ; i++)
+    {
+        for(int j=0 ; j<z->image.height() ; j++)
+        {
+            imOut.setPixel(i,j,qRgb(255-qRed(imIn.pixel(i,j)),255-qGreen(imIn.pixel(i,j)),255-qBlue(imIn.pixel(i,j))));
+        }
     }
-    else if( tConv == GAUSS){
-        // coef est le coef max du noyau de gauss entré par l'utilisateur...
-        int coef = -12;
-        NoyauPascal p(coef);
-        p.calcul_taille();
-        m->allouerMem(p.getTaille(),p.getCoef());
-        m->noyau_coef();
-        m->noyau_gauss_bruit();
-        return m;
-    }
-    else {
-        qDebug()<<"erreur, aucune matrice n'a pas ete initialisee";
-        return NULL;
-    }
+    z->image = imOut;
+    z->afficher_image();
 }
 
+MatConvo *Controleur::creer_filtre(int coefOuTaille, TypeConvo tConv)
+{
+    return this->f->creer_filtre(coefOuTaille,tConv);
+}
+
+MatConvo *Controleur::creer_laplacien(int numero)
+{
+    return this->f->creer_laplacien(numero);
+}
+
+MatConvo *Controleur::creer_impulsionnel()
+{
+    return this->f->creer_impulsionnel();
+}
 void Controleur::appliquer_median(int taille)
 {
     qDebug()<<"fonction appliquer_median;";
-    QImage imFiltree = z->image.copy(0,0,z->image.width(),z->image.height());
-    int gris;
-    int i,j, k, l;
-    // ATTENTION verifier que l'image est IsGreyScale() avant d'appeler
-    // cette fonction.
-
-
-    // rentrer taille du filtre median
-    //int taille = 3;
-    int nv = taille*taille;
-    int distPixel = (int) taille/2;
-    qDebug()<<"taille filtre: "<<taille<<" ; NbVoisins: "<<nv<<" ; distPixel : "<<distPixel;
-
-    MatConvo *voisins = new MatConvo();
-    voisins->allouerMem(nv,1);
-    for (i=0 ; i<=imFiltree.width()-1 ; i++)
-    {
-        for (j=0 ; j<=imFiltree.height()-1 ; j++)
-        {
-            voisins->setTCourante(0);
-            for (k=-distPixel ; k<=distPixel ; k++)
-            {
-                for(l=-distPixel ; l<=distPixel ; l++)
-                {
-                    if ((i+k>=0) && (i+k<=z->image.width()-1) &&
-                        (j+l>=0) && (j+l<=z->image.height()-1))
-                    {
-                        voisins->ajouter_val_mat1(qRed(z->image.pixel(i+k,j+l)));
-                    }
-                }
-            }
-            if (voisins->getTCourante() != 0)
-            {
-                //voisins->ranger_gris();
-                gris = voisins->gris_median((int) voisins->getTCourante()/2);
-                imFiltree.setPixel(i,j,qRgb((int)gris,(int)gris,(int)gris));
-            }
-        }
-    }
-    z->image = imFiltree;
+    z->image = this->f->appliquer_median(taille, z->image);
     z->afficher_image();
-    voisins->~MatConvo();
 }
 
 void Controleur::appliquer_flou(MatConvo *m)
 {
-    QImage imFloue = z->image.copy(0,0,z->image.width(),z->image.height());
-    int i,j,k,l, s, t;
-    int compteur;
-    double r,g,b; // composantes de la nouvelle couleur
-    // tconv est le type de matrice de convo: flou de GAUSS ou flou par la MOYENNE
-    /*TypeConvo tConv = GAUSS;//ou MOYENNE;
-    MatConvo *m = new MatConvo();
-
-    if(tConv == MOYENNE){
-        // tf est la taille de la matrice qui devra etre rentré par l'utilisateur...
-        int tf = 3;
-        m->allouerMem(tf,1);
-        m->noyau_moyenne();
-    }
-    else if( tConv == GAUSS){
-        // coef est le coef max du noyau de gauss entré par l'utilisateur...
-        int coef = -12;
-        NoyauPascal p(coef);
-        p.calcul_taille();
-        m->allouerMem(p.getTaille(),p.getCoef());
-        m->noyau_coef();
-        m->noyau_gauss_bruit();
-    }
-    else
-        qDebug()<<"erreur, aucune matrice n'a pas ete initialisee";
-*/
-    int distPixel = (int) m->getTFiltre()/2;
-    qDebug()<< "taille du filtre:"<< m->getTFiltre()<< " ; distance du pixel central:"<< distPixel;
-
-    // On applique le filtre choisi taille t (à 1) sur l'image
-    for(i=0 ; i<=imFloue.width()-1 ; i++)
-    {
-        for(j=0 ; j<=imFloue.height()-1 ; j++)
-        {
-            // On fait la somme des taille^2 pixels (des taille^2 qui
-            // entourent le point sur lequel on est entrain d'appliquer
-            // le filtre et lui même, seulement s'ils ne sont pas en
-            // dehors de la zone image)
-            r = g = b = 0;
-            compteur = 0;
-            for (int x=0 ; x<m->getTFiltre() ; x++)
-                for (int y=0 ; y<m->getTFiltre() ; y++)
-                    compteur += m->getMat2(x,y);
-
-            //qDebug()<<"compteur: "<<compteur;
-
-            for (k=-distPixel, s=0 ; k<=distPixel && s<m->getTFiltre(); k++, s++)
-            {
-                for(l=-distPixel, t=0 ; l<=distPixel && t<m->getTFiltre() ; l++, t++)
-                {
-                    if ((i+k>=0) && (i+k<=z->image.width()-1) &&
-                        (j+l>=0) && (j+l<=z->image.height()-1))
-                    {
-                        r = r + (m->getMat2(s,t)*qRed(z->image.pixel(i+k,j+l)));
-                        g = g + (m->getMat2(s,t)*qGreen(z->image.pixel(i+k,j+l)));
-                        b = b + (m->getMat2(s,t)*qBlue(z->image.pixel(i+k,j+l)));
-                    }
-                    else compteur = compteur - m->getMat2(s,t);
-                }
-            }
-            // Puis on divise la somme par le nombre d'additions effectuees
-            if (compteur != 0)
-            {
-                r = r/(compteur);
-                g = g/(compteur);
-                b = b/(compteur);
-                imFloue.setPixel(i,j,qRgb((int)r,(int)g,(int)b));
-            }
-        }
-    }
-    z->image = imFloue;
+    qDebug()<<"fonction appliquer_flou;";
+    z->image = this->f->appliquer_flou(m,z->image);
     z->afficher_image();
-    m->~MatConvo();
+}
+void Controleur::seuillage(int seuil)
+{
+    qDebug()<<"fonction rehaussement_contraste;";
+    z->image = this->f->seuillage(seuil, z->image);
+    z->afficher_image();
+}
+
+void Controleur::rehaussement_contraste()
+{
+    qDebug()<<"fonction rehaussement_contraste;";
+    z->image = this->f->rehaussement_contraste(z->image);
+    z->afficher_image();
+}
+
+/*void Controleur::appliquer_laplacien(int numero)
+{
+    qDebug()<<"fonction appliquer_laplacien;";
+    z->image = this->f->appliquer_laplacien(numero,z->image);
+    z->afficher_image();
+}*/
+
+void Controleur::appliquer_rehaussement(int alpha)
+{
+    qDebug()<<"fonction appliquer_laplacien;";
+    z->image = this->f->appliquer_rehaussement(alpha,z->image);
+    z->afficher_image();
 }
 
 QImage Controleur::decouper()
@@ -406,7 +310,7 @@ QImage up(QImage base, int l, int h) {
 }
 
 
-void Controleur::redimensionner(int l, int h)
+QImage Controleur::redimensionner(int l, int h)
 {
     QImage res(l,h,z->image.format());
 
@@ -428,6 +332,5 @@ void Controleur::redimensionner(int l, int h)
     else if (h > z->image.height())
         res = up(res, z->image.height(), h);
 
-    z->image = res;
-    z->afficher_image();
+    return res;
 }
