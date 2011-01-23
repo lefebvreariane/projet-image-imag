@@ -1,0 +1,286 @@
+#include "filtres.h"
+#include "matconvo.h"
+#include "noyaupascal.h"
+#include <QtGui>
+
+Filtres::Filtres()
+{
+}
+
+QImage Filtres::RGB_to_grey(QImage imIn)
+{   //lit l'image qui correspond au LabelImage (z->resultLabel)
+    //traite l'image
+    //affiche l'image correspondante
+
+    if(!imIn.isNull() && !imIn.allGray())
+    {
+        double greyD;
+        int greyI,i,j;
+
+        for (i=0 ; i<imIn.width() ; i++)
+        {
+            for(j=0 ; j<imIn.height() ; j++)
+            {
+                QColor c = imIn.pixel(i,j);
+                greyD = c.red()*0.299 + c.green()*0.587 + c.blue()*0.114 + 0.5;
+                greyI = (int) greyD;
+                imIn.setPixel(i,j,qRgb(greyI,greyI,greyI));
+            }
+        }
+    }
+    return imIn;
+}
+
+MatConvo *Filtres::creer_filtre(int coefOuTaille, TypeConvo tConv)
+{
+    MatConvo *m = new MatConvo();
+    if(tConv == MOYENNE){
+        m->allouerMem(coefOuTaille,1);
+        m->noyau_moyenne();
+        return m;
+    }
+    else if( tConv == GAUSS){
+        NoyauPascal p(coefOuTaille);
+        p.calcul_taille();
+        m->allouerMem(p.getTaille(),p.getCoef());
+        m->noyau_coef();
+        m->noyau_gauss_bruit();
+        return m;
+    }
+    else {
+        qDebug()<<"erreur, aucune matrice n'a pas ete initialisee";
+        return NULL;
+    }
+}
+MatConvo *Filtres::creer_laplacien(int numero)
+{
+    MatConvo *m = new MatConvo();
+    if(numero == 1 || numero == 2 || numero == 3){
+        m->allouerMem(3,1);
+        m->noyau_laplacien(numero);
+        return m;
+    }
+    else {
+        qDebug()<<"erreur, aucune matrice n'a pas ete initialisee";
+        return NULL;
+    }
+}
+
+MatConvo *Filtres::creer_impulsionnel()
+{
+    MatConvo *m = new MatConvo();
+    m->allouerMem(3,1);
+    m->noyau_impulsionnel();
+    return m;
+}
+
+QImage Filtres::appliquer_median(int taille, QImage imIn)
+{
+    qDebug()<<"fonction appliquer_median;";
+    QImage imFiltree = imIn.copy(0,0,imIn.width(),imIn.height());
+    int gris;
+    int i,j, k, l;
+    // ATTENTION verifier que l'image est IsGreyScale() avant d'appeler
+    // cette fonction.
+
+
+    // rentrer taille du filtre median
+    //int taille = 3;
+    int nv = taille*taille;
+    int distPixel = (int) taille/2;
+    qDebug()<<"taille filtre: "<<taille<<" ; NbVoisins: "<<nv<<" ; distPixel : "<<distPixel;
+
+    MatConvo *voisins = new MatConvo();
+    voisins->allouerMem(nv,1);
+    for (i=0 ; i<=imFiltree.width()-1 ; i++)
+    {
+        for (j=0 ; j<=imFiltree.height()-1 ; j++)
+        {
+            voisins->setTCourante(0);
+            for (k=-distPixel ; k<=distPixel ; k++)
+            {
+                for(l=-distPixel ; l<=distPixel ; l++)
+                {
+                    if ((i+k>=0) && (i+k<imIn.width()) &&
+                        (j+l>=0) && (j+l<imIn.height()))
+                    {
+                        voisins->ajouter_val_mat1(qRed(imIn.pixel(i+k,j+l)));
+                    }
+                }
+            }
+            if (voisins->getTCourante() != 0)
+            {
+                //voisins->ranger_gris();
+                gris = voisins->gris_median((int) voisins->getTCourante()/2);
+                imFiltree.setPixel(i,j,qRgb((int)gris,(int)gris,(int)gris));
+            }
+        }
+    }
+    voisins->~MatConvo();
+    return imFiltree;
+}
+
+QImage Filtres::appliquer_flou(MatConvo *m, QImage imIn)
+{
+    QImage imFloue = imIn.copy(0,0,imIn.width(),imIn.height());
+    int i,j,k,l, s, t;
+    int compteur;
+    double r,g,b; // composantes de la nouvelle couleur
+
+    int distPixel = (int) m->getTFiltre()/2;
+    qDebug()<< "taille du filtre:"<< m->getTFiltre()<< " ; distance du pixel central:"<< distPixel;
+
+    // On applique le filtre choisi taille t (à 1) sur l'image
+    for(i=0 ; i<=imFloue.width()-1 ; i++)
+    {
+        for(j=0 ; j<=imFloue.height()-1 ; j++)
+        {
+            // On fait la somme des taille^2 pixels (des taille^2 qui
+            // entourent le point sur lequel on est entrain d'appliquer
+            // le filtre et lui même, seulement s'ils ne sont pas en
+            // dehors de la zone image)
+            r = g = b = 0;
+            compteur = 0;
+            for (int x=0 ; x<m->getTFiltre() ; x++)
+                for (int y=0 ; y<m->getTFiltre() ; y++)
+                    compteur += m->getMat2(x,y);
+
+            //qDebug()<<"compteur: "<<compteur;
+
+            for (k=-distPixel, s=0 ; k<=distPixel && s<m->getTFiltre(); k++, s++)
+            {
+                for(l=-distPixel, t=0 ; l<=distPixel && t<m->getTFiltre() ; l++, t++)
+                {
+                    if ((i+k>=0) && (i+k<imIn.width()) &&
+                        (j+l>=0) && (j+l<imIn.height()))
+                    {
+                        r = r + (m->getMat2(s,t)*qRed(imIn.pixel(i+k,j+l)));
+                        g = g + (m->getMat2(s,t)*qGreen(imIn.pixel(i+k,j+l)));
+                        b = b + (m->getMat2(s,t)*qBlue(imIn.pixel(i+k,j+l)));
+                    }
+                    else compteur = compteur - m->getMat2(s,t);
+                }
+            }
+            // Puis on divise la somme par le nombre d'additions effectuees
+            if (compteur != 0)
+            {
+                r = r/(compteur);
+                g = g/(compteur);
+                b = b/(compteur);
+                imFloue.setPixel(i,j,qRgb((int)r,(int)g,(int)b));
+            }
+        }
+    }
+    m->~MatConvo();
+    return imFloue;
+}
+
+QImage Filtres::info_contours(QImage imIn)
+{
+    //this->RGB_to_grey();
+    int r,g,b;
+    QImage imOut = imIn.copy(0,0,imIn.width(),imIn.height());
+    imIn = this->appliquer_flou(this->creer_filtre(2,GAUSS),imIn);
+    for (int i=0 ; i<imIn.width() ; i++)
+    {
+        for(int j=0 ; j<imIn.height() ; j++)
+        {
+            r = 2*(qRed(imOut.pixel(i,j)) - qRed(imIn.pixel(i,j)));
+            g = 2*(qGreen(imOut.pixel(i,j)) - qGreen(imIn.pixel(i,j)));
+            b = 2*(qBlue(imOut.pixel(i,j)) - qBlue(imIn.pixel(i,j)));
+            imOut.setPixel(i,j,qRgb(r,g,b));
+        }
+    }
+    return imOut;
+}
+
+QImage Filtres::seuillage(int seuil, QImage imIn)
+{
+    QImage imContours = this->info_contours(imIn);
+    QImage imOut = imIn.copy(0,0,imIn.width(),imIn.height());
+
+    for (int i=0 ; i<imIn.width() ; i++)
+    {
+        for (int j=0 ; j<imIn.height() ; j++)
+        {
+            if (qRed(imContours.pixel(i,j)) < seuil)
+                imOut.setPixel(i,j,qRgb(0,0,0));
+            else
+                imOut.setPixel(i,j,qRgb(255,255,255));
+        }
+    }
+    imOut = this->appliquer_median(3,imOut);
+    return imOut;
+}
+
+QImage Filtres::rehaussement_contraste(QImage imIn)
+{
+    int r,g,b;
+    QImage imRehaussee = imIn.copy(0,0,imIn.width(),imIn.height());
+    QImage imContours = this->seuillage(160,imIn);
+    for (int i=0 ; i<imIn.width() ; i++)
+    {
+        for(int j=0 ; j<imIn.height() ; j++)
+        {
+            r = qRed(imIn.pixel(i,j)) + qRed(imContours.pixel(i,j));
+            g = qGreen(imIn.pixel(i,j)) + qGreen(imContours.pixel(i,j));
+            b = qBlue(imIn.pixel(i,j)) + qBlue(imContours.pixel(i,j));
+            imRehaussee.setPixel(i,j,qRgb(r,g,b));
+        }
+    }
+    return imRehaussee;
+}
+
+QImage Filtres::appliquer_rehaussement(int alpha, QImage imIn)
+{
+    MatConvo *m = this->creer_filtre(3,MOYENNE);
+    MatConvo *d = this->creer_impulsionnel();
+
+    d->setMat2(1,1,alpha+1);
+    for (int i=0 ; i<m->getTFiltre() ; i++)
+        for(int j=0 ; j<m->getTFiltre() ; j++)
+            m->setMat2(i,j,(m->getMat2(i,j)*d->getMat2(i,j))-1);
+
+    QImage imOut = imIn.copy(0,0,imIn.width(),imIn.height());
+    int i,j,k,l,s,t;
+    double r,g,b; // composantes de la nouvelle couleur
+
+    int distPixel = (int) m->getTFiltre()/2;
+    qDebug()<< "taille du filtre:"<< m->getTFiltre()<< " ; distance du pixel central:"<< distPixel;
+
+    for(i=distPixel ; i<imOut.width()-distPixel ; i++)
+    {
+        for(j=distPixel ; j<imOut.height()-distPixel ; j++)
+        {
+            r = g = b = 0;
+            for (k=-distPixel, s=0 ; k<=distPixel && s<m->getTFiltre(); k++, s++)
+            {
+                for(l=-distPixel, t=0 ; l<=distPixel && t<m->getTFiltre() ; l++, t++)
+                {
+                    r = r + (m->getMat2(s,t)*qRed(imIn.pixel(i+k,j+l)));
+                    g = g + (m->getMat2(s,t)*qGreen(imIn.pixel(i+k,j+l)));
+                    b = b + (m->getMat2(s,t)*qBlue(imIn.pixel(i+k,j+l)));
+                }
+            }
+            r = r/alpha;
+            if (r < 0)
+                r = 0;
+            if (r>255)
+                r = 255;
+            g = g/alpha;
+            if (g < 0)
+                g = 0;
+            if (g>255)
+                g = 255;
+            b = b/alpha;
+            if (b < 0)
+                b = 0;
+            if (b>255)
+                b = 255;
+            imOut.setPixel(i,j,qRgb((int)r,(int)g,(int)b));
+        }
+    }
+    m->~MatConvo();
+    d->~MatConvo();
+    return imOut;
+}
