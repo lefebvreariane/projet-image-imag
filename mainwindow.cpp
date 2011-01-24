@@ -1,6 +1,4 @@
-#include <QtGui>
 #include "mainwindow.h"
-#include <QHBoxLayout>
 
 MainWindow::MainWindow()
 {
@@ -12,6 +10,7 @@ MainWindow::MainWindow()
 
     createControleur();
     resize(800,600);
+    //this->showMaximized();
 
 }
 
@@ -30,6 +29,7 @@ void MainWindow::createAreas()
     scrollArea = new QScrollArea;
     scrollArea->setBackgroundRole(QPalette::Dark);
     scrollArea->setWidget(z->resultLabel);
+
     scrollArea->setAlignment(Qt::AlignCenter);
 
     QHBoxLayout *layout = new QHBoxLayout;
@@ -56,11 +56,20 @@ void MainWindow::createAreas()
     fenetreRedim = new FenetreRedim;
     fenetreRedim->hide();
 
+    //Ajout des fenetres de filtres
+    fenetreFlous = new FenetreFlous;
+    fenetreFlous->hide();
+
+    fenetreFiltres = new FenetreFiltres;
+    fenetreFiltres->hide();
+
 
     layout->addWidget(scrollArea);
     layout->addWidget(panneauDroite);
     layout->addWidget(fenetreFusion);
     layout->addWidget(fenetreRedim);
+    layout->addWidget(fenetreFlous);
+    layout->addWidget(fenetreFiltres);
 
 
     zoneTravail->setLayout(layout);
@@ -74,12 +83,15 @@ void MainWindow::createControleur()
 {
     c = new Controleur(z);
     connect(z->resultLabel, SIGNAL(clic()), c, SLOT(clic_recu()));
+    connect(z,SIGNAL(fusionner(QImage,QImage,QImage)),fenetreFusion,SLOT(fusion_basique(QImage,QImage,QImage)));
     connect(c, SIGNAL(afficher_pixel(int,int,int)), fenetrePipette, SLOT(afficher_pixel(int,int,int)));
     connect(fenetrePipette, SIGNAL(afficher_panneauDroite(bool)),this,SLOT(afficher_panneauDroite(bool)));
     connect(fenetreFusion,SIGNAL(changer_image(QImage)),c->z,SLOT(changer_image(QImage)));
     connect(fenetreFusion, SIGNAL(changer_mode(Mode)), c, SLOT(changer_mode(Mode)) );
     connect(fenetreHistogramme,SIGNAL(masquer_fenetre()),this,SLOT(masquer_histogramme()));
     connect(fenetreRedim,SIGNAL(redim(int,int)),c,SLOT(redimensionner(int,int)));
+    connect(fenetreFlous,SIGNAL(appliquer_flou(int,TypeConvo)),c,SLOT(appliquer_flou(int,TypeConvo)));
+    connect(fenetreFlous,SIGNAL(appliquer_mediane(int)),c,SLOT(appliquer_median(int)));
 
     c->changer_mode(SELECTION);
 }
@@ -92,41 +104,75 @@ void MainWindow::createStatusBar()
 
 void MainWindow::createActions()
 {
+    QShortcut *keyDecoup= new QShortcut(QKeySequence::Delete,this);
+    QShortcut *keyOpen = new QShortcut(QKeySequence::Open,this);
+    QShortcut *keySave = new QShortcut(QKeySequence::Save,this);
+    QShortcut *keyQuit = new QShortcut(QKeySequence::Quit,this);
+    QShortcut *keySelec = new QShortcut((tr("Ctrl+S")),this);
+    QShortcut *keyPipette = new QShortcut((tr("Ctrl+P")),this);
+    QShortcut *keyHisto = new QShortcut((tr("Ctrl+H")),this);
+    QShortcut *keyRedim = new QShortcut((tr("Ctrl+R")),this);
+
     exitAct = new QAction(tr("Quitter"), this);
     connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
+    connect(keyQuit, SIGNAL(activated()),this, SLOT(close()));
+
 
     ouvrirAct = new QAction(QIcon(":/icones/open.png"), tr("Ouvrir..."), this);
     connect(ouvrirAct, SIGNAL(triggered()), this , SLOT(open()));
+    connect(keyOpen, SIGNAL(activated()),this, SLOT(open()));
+
 
     saveAct = new QAction(QIcon(":/icones/save.png"),tr("Enregistrer"), this);
     connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
+    connect(keySave, SIGNAL(activated()),this, SLOT(save()));
+
 
     saveInAct = new QAction(tr("Enregistrer sous..."), this);
     connect(saveInAct, SIGNAL(triggered()), this, SLOT(saveIn()));
 
     pipetteAct = new QAction(tr("Pipette"), this);
     connect(pipetteAct, SIGNAL(triggered()), this, SLOT(pipette()));
+    connect(keyPipette, SIGNAL(activated()),this, SLOT(pipette()));
+
 
     selectionAct = new QAction(tr("Selection"), this);
     connect(selectionAct, SIGNAL(triggered()), this, SLOT(selection()));
+    connect(keySelec, SIGNAL(activated()),this, SLOT(selection()));
+
 
     histoAct = new QAction(tr("Histogrammes"), this);
     connect(histoAct, SIGNAL(triggered()), this, SLOT(afficher_histogramme()));
+    connect(keyHisto, SIGNAL(activated()),this, SLOT(afficher_histogramme()));
+
 
     RGB_to_greyAct = new QAction(tr("Niveaux de gris"), this);
     connect(RGB_to_greyAct, SIGNAL(triggered()), this, SLOT(RGB_to_grey()));
 
+    inversAct = new QAction(tr("Inverser les couleurs"), this);
+    connect(inversAct, SIGNAL(triggered()), this, SLOT(inverser_couleurs()));
+
     flouAct = new QAction(tr("Flou"), this);
     connect(flouAct, SIGNAL(triggered()), this, SLOT(appliquer_flou()));
+
+    medianAct = new QAction(tr("Reduction de bruit"), this);
+    connect(medianAct, SIGNAL(triggered()), this, SLOT(median()));
+
+    filtreAct = new QAction(tr("Filtre personnalisé"), this);
+    connect(filtreAct, SIGNAL(triggered()), this, SLOT(filtre_perso()));
 
     fusionAct = new QAction(tr("Fusion"), this);
     connect(fusionAct, SIGNAL(triggered()), this, SLOT(fusion()));
 
     decoupageAct = new QAction(tr("Decoupage"), this);
     connect(decoupageAct, SIGNAL(triggered()), this, SLOT(decouper()));
+    connect(keyDecoup, SIGNAL(activated()),this, SLOT(decouper()));
 
     redimAct = new QAction(tr("Redimentionnement"), this);
     connect(redimAct, SIGNAL(triggered()), this, SLOT(redimentionner()));
+    connect(keyRedim, SIGNAL(activated()),this, SLOT(redimentionner()));
+
+
 }
 
 void MainWindow::createMenus()
@@ -138,11 +184,6 @@ void MainWindow::createMenus()
     fileMenu->addAction(saveInAct);
     fileMenu->addSeparator();
     fileMenu->addAction(exitAct);
-    saveAct->setDisabled(true);
-    saveInAct->setDisabled(true);
-
-    /*Creation de la barre de menu Edition*/
-    //editMenu = menuBar()->addMenu("&Edition");
 
     /*Creation de la barre de menu Outils*/
     toolsMenu = menuBar()->addMenu("&Outils");
@@ -150,29 +191,78 @@ void MainWindow::createMenus()
     toolsMenu->addAction(pipetteAct);
     toolsMenu->addAction(histoAct);
     toolsMenu->addAction(RGB_to_greyAct);
-    toolsMenu->addAction(flouAct);
+    toolsMenu->addAction(inversAct);
     toolsMenu->addAction(fusionAct);
     toolsMenu->addAction(decoupageAct);
     toolsMenu->addAction(redimAct);
 
+    /*Creation de la barre de menu Filtres*/
+    filtreMenu = menuBar()->addMenu("&Filtres");
+    filtreMenu->addAction(flouAct);
+    filtreMenu->addAction(medianAct);
+    filtreMenu->addAction(filtreAct);
 
+    activer_menus(false);
+}
 
+void MainWindow::activer_menus(bool b)
+{
+    if (!b){
 
+        saveAct->setDisabled(true);
+        saveInAct->setDisabled(true);
+        selectionAct->setDisabled(true);
+        pipetteAct->setDisabled(true);
+        histoAct->setDisabled(true);
+        RGB_to_greyAct->setDisabled(true);
+        inversAct->setDisabled(true);
+        fusionAct->setDisabled(true);
+        decoupageAct->setDisabled(true);
+        redimAct->setDisabled(true);
+        flouAct->setDisabled(true);
+        medianAct->setDisabled(true);
+        filtreAct->setDisabled(true);
+    }
+    else
+    {
+        saveAct->setDisabled(false);
+        saveInAct->setDisabled(false);
+        selectionAct->setDisabled(false);
+        pipetteAct->setDisabled(false);
+        histoAct->setDisabled(false);
+        RGB_to_greyAct->setDisabled(false);
+        inversAct->setDisabled(false);
+        fusionAct->setDisabled(false);
+        decoupageAct->setDisabled(false);
+        redimAct->setDisabled(false);
+        flouAct->setDisabled(false);
+        medianAct->setDisabled(false);
+        filtreAct->setDisabled(false);
+    }
 }
 
 void MainWindow::MAJ_affichage()
 {
     afficher_panneauDroite(false);
 
-    switch (c->mode) {
-    case REDIM:
+    if (c->mode == REDIM)
         fenetreRedim->show();
-        break;
-
-    default:
+    else
         fenetreRedim->hide();
-        break;
-    }
+
+    if(c->mode == FLOU)
+        fenetreFlous->show();
+    else
+        fenetreFlous->hide();
+
+    if(c->mode == FILTRE)
+        fenetreFiltres->show();
+    else
+        fenetreFiltres->hide();
+
+
+    z->init_affichage();
+    z->afficher_image();
 
 }
 
@@ -191,10 +281,8 @@ void MainWindow::open()
             QMessageBox::information(this, tr("ImageViewer"), tr("Imppossible d'ouvrir %1.").arg(fileName));
             return;
         }
-        z->image = image;
-        z->afficher_image();
-        saveAct->setEnabled(true);
-        saveInAct->setEnabled(true);
+        z->changer_image(image);
+        activer_menus(true);
         c->reInitSelection();
 
         if (c->mode == FUSION)
@@ -237,16 +325,16 @@ void MainWindow::selection()
 {
     verifier_fusion();
     c->changer_mode(SELECTION);
-    qDebug()<<"selection";
     MAJ_affichage();
+    statusBar()->showMessage("Selectionner une zone");
 }
 
 void MainWindow::pipette()
 {
     verifier_fusion();
     c->changer_mode(PIPETTE);
-    qDebug()<<"pipette";
     MAJ_affichage();
+    statusBar()->showMessage("Cliquer pour afficher un pixel");
 }
 
 
@@ -254,10 +342,10 @@ void MainWindow::redimentionner()
 {
     verifier_fusion();
     c->changer_mode(REDIM);
-    qDebug()<<"redim";
     fenetreRedim->initialiser(z->image);
     fenetreRedim->MAJ_valeurs_redim();
     MAJ_affichage();
+    statusBar()->showMessage("Redimentionnement");
 }
 
 
@@ -265,7 +353,6 @@ void MainWindow::afficher_histogramme()
 {
     verifier_fusion();
     c->changer_mode( HISTO);
-    qDebug()<<"afficher_histogramme";
     fenetreHistogramme->histogramme->image = z->image;
     fenetreHistogramme->histogramme->repaint();
     fenetreHistogramme->show();
@@ -280,31 +367,27 @@ void MainWindow::RGB_to_grey()
 {
     verifier_fusion();
     c->changer_mode(SELECTION);
-
     c->RGB_to_grey();
-    qDebug()<<"RGB_to_grey";
-
     MAJ_affichage();
+    statusBar()->showMessage("L'image est en niveaux de gris");
 }
 
-void MainWindow::appliquer_flou()
+void MainWindow::inverser_couleurs()
 {
     verifier_fusion();
     c->changer_mode(SELECTION);
-
-    c->appliquer_flou();
-    qDebug()<<"appliquer_flou";
+    c->inverser_couleurs();
     MAJ_affichage();
 }
+
 
 void MainWindow::fusion()
 {
     c->changer_mode(FUSION);
-    qDebug()<<"fusion";
-    fenetreFusion->fusion(z->image);
+    fenetreFusion->initFusion(z->image);
     fenetreFusion->show();
-
     MAJ_affichage();
+    statusBar()->showMessage("Ouvrir un fichier pour le fusionner");
 }
 
 void MainWindow::decouper()
@@ -312,10 +395,9 @@ void MainWindow::decouper()
     verifier_fusion();
     c->changer_mode(SELECTION);
 
-    z->image = c->decouper();
-    z->afficher_image();
+    z->changer_image(c->decouper());
     c->reInitSelection();
-    qDebug() << "decoupage";
+    statusBar()->showMessage("L'image a été découpée");
     MAJ_affichage();
 }
 
@@ -328,4 +410,31 @@ void MainWindow::afficher_panneauDroite(bool b)
     ;
 }
 
+void MainWindow::appliquer_flou()
+{
+    verifier_fusion();
+    c->changer_mode(FLOU);
+
+    //statusBar()->showMessage("L'image a été floutée");
+
+    fenetreFlous->Radio_lineaire->setChecked(true);
+
+    MAJ_affichage();
+}
+
+void  MainWindow::median(){
+    verifier_fusion();
+    c->changer_mode(FLOU);
+    fenetreFlous->Radio_median->setChecked(true);
+
+    MAJ_affichage();
+
+}
+
+void  MainWindow::filtre_perso(){
+    verifier_fusion();
+    c->changer_mode(FILTRE);
+    MAJ_affichage();
+
+}
 

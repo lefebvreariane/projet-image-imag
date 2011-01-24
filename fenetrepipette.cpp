@@ -1,6 +1,4 @@
 #include "fenetrepipette.h"
-#include <QtGui>
-
 
 FenetrePipette::FenetrePipette(QWidget *parent) :
         QWidget(parent)
@@ -9,6 +7,7 @@ FenetrePipette::FenetrePipette(QWidget *parent) :
     QGridLayout *layoutPipette = new QGridLayout;
 
     labelCouleur = new QLabel;
+    labelCouleur->setAlignment(Qt::AlignCenter);
     layoutPipette->addWidget(labelCouleur,0,0);
     apercu = QImage(20,20,QImage::Format_RGB32);
 

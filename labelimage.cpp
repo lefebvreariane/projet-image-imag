@@ -1,6 +1,4 @@
 #include "labelimage.h"
-#include <QtGui>
-
 
 LabelImage::LabelImage()
 {

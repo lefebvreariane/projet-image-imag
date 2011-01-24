@@ -1,7 +1,7 @@
 #ifndef HISTOGRAMME_H
 #define HISTOGRAMME_H
 
-#include <QWidget>
+#include <QtGui>
 
 class Histogramme : public QWidget
 {
@@ -16,7 +16,7 @@ signals:
 
 public slots:
 private:
-    void calcul_histo(int *tab);
+    void calcul_histo(int *tab, QColor c);
     int maxi(int* tab, int taille);
 
 };

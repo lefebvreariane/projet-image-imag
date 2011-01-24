@@ -1,6 +1,5 @@
 #include "zonedessin.h"
 
-#include <QtGui>
 ZoneDessin::ZoneDessin(QWidget *parent) :
         QWidget(parent)
 {
@@ -11,16 +10,14 @@ ZoneDessin::ZoneDessin(QWidget *parent) :
     //painter(&resultImage);
 
     image.load(":/images/logo.png");
-    afficher_image();
-
-    //resultLabel->setPixmap(QPixmap(":/images/logo.png"));
-    //resultLabel->adjustSize();
+    changer_image(image);
 }
 
 void ZoneDessin::afficher_image()
 {
-    resultLabel->setPixmap(QPixmap::fromImage(image));
+    resultLabel->setPixmap(QPixmap::fromImage(image_affichages));
     resultLabel->adjustSize();
+
 }
 
 void ZoneDessin::ecrire_image()
@@ -31,5 +28,11 @@ void ZoneDessin::ecrire_image()
 void ZoneDessin::changer_image(QImage img)
 {
     image = img;
+    init_affichage();
     afficher_image();
+}
+
+void ZoneDessin::init_affichage()
+{
+    image_affichages = image.copy();
 }

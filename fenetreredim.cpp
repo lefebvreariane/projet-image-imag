@@ -1,4 +1,3 @@
-#include <QtGui>
 #include "fenetreredim.h"
 
 FenetreRedim::FenetreRedim(QWidget *parent) :

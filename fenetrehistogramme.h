@@ -2,7 +2,6 @@
 #define FENETREHISTOGRAMME_H
 
 #include <QtGui>
-#include <QWidget>
 #include <histogramme.h>
 
 

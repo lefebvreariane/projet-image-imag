@@ -1,4 +1,3 @@
-#include <QtGui>
 #include "fenetrehistogramme.h"
 
 FenetreHistogramme::FenetreHistogramme(QWidget *parent) :
@@ -32,7 +31,6 @@ FenetreHistogramme::FenetreHistogramme(QWidget *parent) :
 }
 
 void FenetreHistogramme::changer_histo(int couche){
-    qDebug()<<couche;
     histogramme->couche = couche;
     histogramme->repaint();
 }

@@ -1,6 +1,6 @@
 #ifndef LABELIMAGE_H
 #define LABELIMAGE_H
-
+#include <QtGui>
 #include <QWidget>
 #include <QLabel>
 

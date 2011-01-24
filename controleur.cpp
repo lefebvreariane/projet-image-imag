@@ -1,18 +1,15 @@
 #include "controleur.h"
 #include "zonedessin.h"
 #include "matconvo.h"
-#include "filtres.h"
-#include <QtGui>
+#include "noyaupascal.h"
 
 Controleur::Controleur(ZoneDessin *zone)
 {
     z = zone;
-    f = new Filtres();
     sX0 = -1;
     sX1 = -1;
     sY0 = -1;
     sY1 = -1;
-    //histogramme = new Histogramme (z->image);
 }
 
 void Controleur::reInitSelection()
@@ -49,13 +46,8 @@ void Controleur::clic_recu()
 
     switch (mode) {
     case SELECTION: {
-
-            qDebug()<< "X0 = " << sX0;
-            qDebug()<< "Y0 = " << sY0;
-            qDebug()<< "X1 = " << sX1;
-            qDebug()<< "Y1 = " << sY1;
-
-            QPainter paint(&(z->image));
+            z->init_affichage();
+            QPainter paint(&(z->image_affichages));
             if (sX0 == -1 || !(z->resultLabel->X0 > sX0 && z->resultLabel->X0 < sX0 + sX1 &&
                                z->resultLabel->Y0 > sY0 && z->resultLabel->Y0 < sY0 + sY1))
             {
@@ -69,6 +61,11 @@ void Controleur::clic_recu()
                 sX0 += z->resultLabel->X1 - z->resultLabel->X0;
                 sY0 += z->resultLabel->Y1 - z->resultLabel->Y0;
             }
+            QPen pen(Qt::DashLine);
+            pen.setColor(Qt::black);
+            paint.setPen(pen);
+
+
             paint.drawRect(sX0,sY0,sX1,sY1);
             z->afficher_image();
             break;
@@ -88,20 +85,13 @@ void Controleur::clic_recu()
 void Controleur::pipette(int x, int y)
 {
     QColor pixel = z->image.pixel(x,y);
-    /*
-    qDebug()<<pixel.red();
-    qDebug()<<pixel.green();
-    qDebug()<<pixel.blue();
-    qDebug()<<pixel.alpha();
-*/
     emit afficher_pixel(pixel.red(), pixel.green(),pixel.blue());
 
 }
 
 void Controleur::RGB_to_grey()
 {
-    z->image = this->f->RGB_to_grey(z->image);
-    z->afficher_image();
+    z->changer_image(f->RGB_to_grey(z->image));
 }
 
 void Controleur::inverser_couleurs()
@@ -116,8 +106,7 @@ void Controleur::inverser_couleurs()
             imOut.setPixel(i,j,qRgb(255-qRed(imIn.pixel(i,j)),255-qGreen(imIn.pixel(i,j)),255-qBlue(imIn.pixel(i,j))));
         }
     }
-    z->image = imOut;
-    z->afficher_image();
+    z->changer_image(imOut);
 }
 
 MatConvo *Controleur::creer_filtre(int coefOuTaille, TypeConvo tConv)
@@ -137,28 +126,26 @@ MatConvo *Controleur::creer_impulsionnel()
 void Controleur::appliquer_median(int taille)
 {
     qDebug()<<"fonction appliquer_median;";
-    z->image = this->f->appliquer_median(taille, z->image);
-    z->afficher_image();
+    z->changer_image(f->appliquer_median(taille, z->image));
 }
 
-void Controleur::appliquer_flou(MatConvo *m)
+void Controleur::appliquer_flou(int taille,TypeConvo tConv)
 {
     qDebug()<<"fonction appliquer_flou;";
-    z->image = this->f->appliquer_flou(m,z->image);
-    z->afficher_image();
+    z->changer_image(f->appliquer_flou(creer_filtre(taille,tConv),z->image));
 }
+
+
 void Controleur::seuillage(int seuil)
 {
     qDebug()<<"fonction rehaussement_contraste;";
-    z->image = this->f->seuillage(seuil, z->image);
-    z->afficher_image();
+    z->changer_image(f->seuillage(seuil, z->image));
 }
 
 void Controleur::rehaussement_contraste()
 {
     qDebug()<<"fonction rehaussement_contraste;";
-    z->image = this->f->rehaussement_contraste(z->image);
-    z->afficher_image();
+    z->changer_image(f->rehaussement_contraste(z->image));
 }
 
 /*void Controleur::appliquer_laplacien(int numero)
@@ -171,8 +158,7 @@ void Controleur::rehaussement_contraste()
 void Controleur::appliquer_rehaussement(int alpha)
 {
     qDebug()<<"fonction appliquer_laplacien;";
-    z->image = this->f->appliquer_rehaussement(alpha,z->image);
-    z->afficher_image();
+    z->changer_image(f->appliquer_rehaussement(alpha,z->image));
 }
 
 QImage Controleur::decouper()
@@ -310,7 +296,8 @@ QImage up(QImage base, int l, int h) {
 }
 
 
-QImage Controleur::redimensionner(int l, int h)
+
+void Controleur::redimensionner(int l, int h)
 {
     QImage res(l,h,z->image.format());
 
@@ -332,5 +319,5 @@ QImage Controleur::redimensionner(int l, int h)
     else if (h > z->image.height())
         res = up(res, z->image.height(), h);
 
-    return res;
+    z->changer_image(res);
 }

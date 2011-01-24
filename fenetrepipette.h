@@ -1,7 +1,6 @@
 #ifndef FENETREPIPETTE_H
 #define FENETREPIPETTE_H
 #include <QtGui>
-#include <QWidget>
 
 class FenetrePipette : public QWidget
 {

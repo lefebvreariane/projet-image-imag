@@ -8,6 +8,9 @@
 #include <fenetrehistogramme.h>
 #include <fenetrefusion.h>
 #include <fenetreredim.h>
+#include <fenetreflous.h>
+#include <fenetrefiltres.h>
+#include "noyaupascal.h"
 
 QT_BEGIN_NAMESPACE
 class QLabel;
@@ -45,11 +48,9 @@ private slots:
     void afficher_panneauDroite(bool);
     void masquer_histogramme();
     void redimentionner();
-
-
-
-
-
+    void median();
+    void filtre_perso();
+    void inverser_couleurs();
 
 
 private:
@@ -61,16 +62,12 @@ private:
     void createToolBars();
     void MAJ_affichage();
     void verifier_fusion();
-
-
-
-
-
+    void activer_menus(bool b);
     static const int TAILLE_PANNEAU_LATERAL = 100;
     QString fileName;
 
     QMenu *fileMenu;
-    QMenu *editMenu;
+    QMenu *filtreMenu;
     QMenu *toolsMenu;
 
     QFrame *panneauDroite;
@@ -85,10 +82,13 @@ private:
     QAction *pipetteAct;
     QAction *histoAct;
     QAction *RGB_to_greyAct;
+    QAction *inversAct;
     QAction *flouAct;
     QAction *fusionAct;
     QAction *decoupageAct;
     QAction *redimAct;
+    QAction *filtreAct;
+    QAction *medianAct;
 
     ZoneDessin *z;
     QScrollArea *scrollArea;
@@ -97,6 +97,8 @@ private:
     FenetreHistogramme *fenetreHistogramme;
     FenetreFusion *fenetreFusion;
     FenetreRedim *fenetreRedim;
+    FenetreFlous *fenetreFlous;
+    FenetreFiltres *fenetreFiltres;
 
 };
 

@@ -22,7 +22,10 @@ SOURCES += \
     fenetrepipette.cpp \
     fenetrehistogramme.cpp \
     fenetrefusion.cpp \
-    controleur.cpp
+    controleur.cpp \
+    fenetreflous.cpp \
+    fenetrefiltres.cpp \
+    filtres.cpp
 
 HEADERS  += \
     zonedessin.h \
@@ -35,7 +38,10 @@ HEADERS  += \
     fenetrepipette.h \
     fenetrehistogramme.h \
     fenetrefusion.h \
-    controleur.h
+    controleur.h \
+    fenetreflous.h \
+    fenetrefiltres.h \
+    filtres.h
 
 FORMS    += mainwindow.ui \
 

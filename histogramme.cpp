@@ -1,6 +1,4 @@
 #include "histogramme.h"
-#include <QtGui>
-
 
 Histogramme::Histogramme(QWidget *parent) :
         QWidget(parent)
@@ -54,16 +52,16 @@ void Histogramme::paintEvent(QPaintEvent * event)
     /*calcul de l'histogramme a afficher*/
     switch (couche) {
     case 0: // RGB
-        calcul_histo(rgb);
+        calcul_histo(rgb, Qt::black);
         break;
     case 1: // ROUGE
-        calcul_histo(rouge);
+        calcul_histo(rouge, QColor(200,0,0,255));
         break;
     case 2: // VERT
-        calcul_histo(vert);
+        calcul_histo(vert, QColor(0,200,0,255));
         break;
     case 3: // BLEU
-        calcul_histo(bleu);
+        calcul_histo(bleu, QColor(0,0,200,255));
         break;
     default:
         break;
@@ -86,24 +84,22 @@ int Histogramme::maxi(int* tab, int taille)
     return max;
 }
 
-void Histogramme::calcul_histo(int *tab){
+void Histogramme::calcul_histo(int *tab, QColor c){
     int i;
     int maximum = maxi(tab,256);
 
     QPainter painter(this) ;
     painter.setWindow(0,0,255,maximum);
+
+    //Affichage du repere
     painter.setPen(Qt::black);
     painter.setBrush(Qt::white);
+    painter.drawRect(0,0,255,maximum);
 
-    /*Affichage de l'histogramme*/
+    //Affichage de l'histogramme
     for(i=0; i<256 ; i++)
     {
-        painter.fillRect(1*i,maximum-tab[i],2,tab[i],Qt::red);
+        painter.fillRect(1*i,maximum-tab[i],2,tab[i],c);
     }
-
-
-    /*Affichage du repere*/
-    painter.drawLine(0,0,0,maximum) ;
-    painter.drawLine(0,maximum-1,255,maximum-1) ;
 }
 

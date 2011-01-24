@@ -19,17 +19,20 @@ public:
 
     explicit ZoneDessin(QWidget *parent = 0);
     QImage image;
-    QImage resultImage;
+    QImage image_affichages;
     QPainter *painter;
     LabelImage *resultLabel;
 
-    void afficher_image();
+    void init_affichage();
     void ecrire_image();
+    void afficher_image();
 
 signals:
+    void fusionner(QImage,QImage,QImage);
 
 public slots:
     void changer_image(QImage);
+
 };
 
 #endif // ZONEDESSIN_H
