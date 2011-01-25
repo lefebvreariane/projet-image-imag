@@ -23,6 +23,9 @@ public:
     MatConvo *creer_gradient_moins_x(TypeConvo tConv);
     MatConvo *creer_gradient_moins_y(TypeConvo tConv);
 
+    QImage norme_gradient(QImage imX, QImage imY);
+    QImage norme_4gradients(TypeConvo tConv);
+
     QImage appliquer_median(int taille, QImage imIn);
     QImage appliquer_flou(MatConvo *m, QImage imIn);
     QImage appliquer_rehaussement(int alpha, QImage imIn);
@@ -30,7 +33,6 @@ public:
     QImage appliquer_filtre(MatConvo *m, QImage imIn);
 
     QImage seuillage(int seuil, QImage imContours);
-    QImage norme_gradient(QImage imX, QImage imY);
     double orientation(QImage grad_x, QImage grad_y, int x, int y);
     QImage supp_non_maxima(QImage imX, QImage imY, QImage imNorme);
     /*QImage info_contours(QImage imIn);*/

@@ -517,6 +517,16 @@ QImage Filtres::norme_gradient(QImage imX, QImage imY)
     }
     return imNorme;
 }
+QImage Filtres::norme_4gradients(TypeConvo tConv)
+{
+    QImage imX = this->appliquer_filtre(this->creer_gradient_x(tConv),z->image);
+    QImage imY = this->appliquer_filtre(this->creer_gradient_y(tConv),z->image);
+    QImage imNorme1 = this->f->norme_gradient(imX,imY);
+    QImage imMoinsX = this->f->appliquer_filtre(this->f->creer_gradient_moins_x(tConv),z->image);
+    QImage imMoinsY = this->f->appliquer_filtre(this->f->creer_gradient_moins_y(tConv),z->image);
+    QImage imNorme2 = this->f->norme_gradient(imMoinsX,imMoinsY);
+    return this->norme_gradient(imNorme1,imNorme2);
+}
 
 QImage Filtres::inverser_couleurs(QImage imIn)
 {
