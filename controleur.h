@@ -20,12 +20,27 @@ public:
     void RGB_to_grey();
     void inverser_couleurs();
     MatConvo *creer_filtre(int coefOuTaille, TypeConvo tconv);
-    MatConvo *creer_laplacien(int numero);
+    MatConvo *creer_laplacien(int numero, int alpha);
+    MatConvo *creer_rehausseur_laplacien(int numero, int alpha);
     MatConvo *creer_impulsionnel();
-    void seuillage(int seuil);
-    void rehaussement_contraste();
+    MatConvo *creer_gradient_x(TypeConvo tConv);
+    MatConvo *creer_gradient_y(TypeConvo tConv);
+    void appliquer_gradient_moins_x(TypeConvo tConv);
+    void appliquer_gradient_moins_y(TypeConvo tConv);
+    void appliquer_gradient_x(TypeConvo tConv);
+    void appliquer_gradient_y(TypeConvo tConv);
+    void norme_gradient(TypeConvo tConv);
+    void norme_4gradients(TypeConvo tConv);
+
+    void appliquer_median(int taille);
+    void appliquer_flou(MatConvo *);
+    /*void seuillage(int seuil);
+    void rehaussement_contraste();*/
     void appliquer_rehaussement(int alpha);
+    void appliquer_laplacien(MatConvo *m);
     void afficher_histogrammes();
+    void eclaircir(int alpha);
+    void supp_non_maxima(TypeConvo tConv);
 
     ZoneDessin *z;
     Controleur(ZoneDessin *zone);
