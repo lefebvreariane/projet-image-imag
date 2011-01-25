@@ -20,6 +20,8 @@ public:
     MatConvo *creer_impulsionnel();
     MatConvo *creer_gradient_x(TypeConvo tConv);
     MatConvo *creer_gradient_y(TypeConvo tConv);
+    MatConvo *creer_gradient_moins_x(TypeConvo tConv);
+    MatConvo *creer_gradient_moins_y(TypeConvo tConv);
 
     QImage appliquer_median(int taille, QImage imIn);
     QImage appliquer_flou(MatConvo *m, QImage imIn);
@@ -27,9 +29,10 @@ public:
     QImage appliquer_laplacien(MatConvo *, QImage imIn);
     QImage appliquer_filtre(MatConvo *m, QImage imIn);
 
-    QImage seuillage(int seuil, QImage imIn);
-    QImage norme_gradient(QImage imIn, TypeConvo tConv);
+    QImage seuillage(int seuil, QImage imContours);
+    QImage norme_gradient(QImage imX, QImage imY);
     double orientation(QImage grad_x, QImage grad_y, int x, int y);
+    QImage supp_non_maxima(QImage imX, QImage imY, QImage imNorme);
     /*QImage info_contours(QImage imIn);*/
     /*QImage rehaussement_contraste(QImage imIn);*/
 };

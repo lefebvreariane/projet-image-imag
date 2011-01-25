@@ -252,14 +252,13 @@ QImage Filtres::appliquer_laplacien(MatConvo *m, QImage imIn)
     return imOut;
 }*/
 
-QImage Filtres::seuillage(int seuil, QImage imIn)
+QImage Filtres::seuillage(int seuil, QImage imContours)
 {
-    QImage imContours = this->norme_gradient(imIn,GRADIENT_SOBEL);
-    QImage imOut = imIn.copy(0,0,imIn.width(),imIn.height());
+    QImage imOut = imContours.copy(0,0,imContours.width(),imContours.height());
 
-    for (int i=0 ; i<imIn.width() ; i++)
+    for (int i=0 ; i<imContours.width() ; i++)
     {
-        for (int j=0 ; j<imIn.height() ; j++)
+        for (int j=0 ; j<imContours.height() ; j++)
         {
             if (qRed(imContours.pixel(i,j)) < seuil)
                 imOut.setPixel(i,j,qRgb(0,0,0));
@@ -484,11 +483,27 @@ MatConvo *Filtres::creer_gradient_y(TypeConvo tConv)
         return NULL;
 }
 
-QImage Filtres::norme_gradient(QImage imIn, TypeConvo tConv)
+MatConvo *Filtres::creer_gradient_moins_x(TypeConvo tConv)
 {
-    QImage imX = this->appliquer_filtre(this->creer_gradient_x(tConv),imIn);
-    QImage imY = this->appliquer_filtre(this->creer_gradient_y(tConv),imIn);
-    QImage imNorme = imIn.copy(0,0,imIn.width(),imIn.height());
+    MatConvo *m = this->creer_gradient_x(tConv);
+    for (int i=0 ; i<m->getTFiltre() ; i++)
+        for (int j=0 ; j<m->getTFiltre() ; j++)
+            m->setMat2(i,j,-m->getMat2(i,j));
+    return m;
+}
+
+MatConvo *Filtres::creer_gradient_moins_y(TypeConvo tConv)
+{
+    MatConvo *m = this->creer_gradient_y(tConv);
+    for (int i=0 ; i<m->getTFiltre() ; i++)
+        for (int j=0 ; j<m->getTFiltre() ; j++)
+            m->setMat2(i,j,-m->getMat2(i,j));
+    return m;
+}
+
+QImage Filtres::norme_gradient(QImage imX, QImage imY)
+{
+    QImage imNorme = imX.copy(0,0,imX.width(),imX.height());
 
     int gris;
 
@@ -520,4 +535,63 @@ QImage Filtres::inverser_couleurs(QImage imIn)
 double Filtres::orientation(QImage grad_x, QImage grad_y, int x, int y)
 {
     return atan(grad_x.pixel(x,y)/grad_y.pixel(x,y));
+}
+
+QImage Filtres::supp_non_maxima(QImage imX, QImage imY, QImage imNorme)
+{
+    int progress=0;
+    QImage imOut = imX.copy(0,0,imX.width(),imX.height());
+
+    for(int x = 1; x < imOut.width() - 1; x++) {
+        progress++;
+        for(int y = 1 ; y < imOut.height() - 1; y++) {
+            int dx, dy;
+
+            if(imX.pixel(x,y) > 0) dx = 1;
+            else dx = -1;
+
+            if(imY.pixel(x,y) > 0) dy = 1;
+            else dy = -1;
+
+            int a1, a2, b1, b2, A, B, point;
+            QRgb val;
+            if(abs(imX.pixel(x,y)) > abs(imY.pixel(x,y)))
+            {
+                a1 = imNorme.pixel(x+dx,y);
+                a2 = imNorme.pixel(x+dx,y-dy);
+                b1 = imNorme.pixel(x-dx,y);
+                b2 = imNorme.pixel(x-dx,y+dy);
+                A = (abs(imX.pixel(x,y)) - abs(imY.pixel(x,y)))*a1 + abs(imY.pixel(x,y))*a2;
+                B = (abs(imX.pixel(x,y)) - abs(imY.pixel(x,y)))*b1 + abs(imY.pixel(x,y))*b2;
+                point = imNorme.pixel(x,y) * abs(imX.pixel(x,y));
+                if(point >= A && point > B) {
+                    val = qRgb(qRed(abs(imX.pixel(x,y))),qGreen(abs(imX.pixel(x,y))),qBlue(abs(imX.pixel(x,y))));
+                    imOut.setPixel(x,y,val);
+                }
+                else {
+                    val = qRgb(0,0,0);
+                    imOut.setPixel(x,y,val);
+                }
+            }
+            else
+            {
+                a1 = imNorme.pixel(x,y-dy);
+                a2 = imNorme.pixel(x+dx,y-dy);
+                b1 = imNorme.pixel(x,y+dy);
+                b2 = imNorme.pixel(x-dx,y+dy);
+                A = (abs(imY.pixel(x,y)) - abs(imX.pixel(x,y)))*a1 + abs(imX.pixel(x,y))*a2;
+                B = (abs(imY.pixel(x,y)) - abs(imX.pixel(x,y)))*b1 + abs(imX.pixel(x,y))*b2;
+                point = imNorme.pixel(x,y) * abs(imY.pixel(x,y));
+                if(point >= A && point > B) {
+                    val = qRgb(qRed(abs(imY.pixel(x,y))),qGreen(abs(imY.pixel(x,y))),qBlue(abs(imY.pixel(x,y))));
+                    imOut.setPixel(x,y,val);
+                }
+                else {
+                    val = qRgb(0,0,0);
+                    imOut.setPixel(x,y,val);
+                }
+            }
+        }
+    }
+    return imOut;
 }
