@@ -6,6 +6,7 @@
 Controleur::Controleur(ZoneDessin *zone)
 {
     z = zone;
+    f = new Filtres();
     sX0 = -1;
     sX1 = -1;
     sY0 = -1;
@@ -114,14 +115,29 @@ MatConvo *Controleur::creer_filtre(int coefOuTaille, TypeConvo tConv)
     return this->f->creer_filtre(coefOuTaille,tConv);
 }
 
-MatConvo *Controleur::creer_laplacien(int numero)
+MatConvo *Controleur::creer_laplacien(int numero, int alpha)
 {
-    return this->f->creer_laplacien(numero);
+    return this->f->creer_laplacien(numero, alpha);
+}
+
+MatConvo *Controleur::creer_rehausseur_laplacien(int numero, int alpha)
+{
+    return this->f->creer_rehausseur_laplacien(numero, alpha);
 }
 
 MatConvo *Controleur::creer_impulsionnel()
 {
     return this->f->creer_impulsionnel();
+}
+
+MatConvo *Controleur::creer_gradient_x(TypeConvo tConv)
+{
+    return this->f->creer_gradient_x(tConv);
+}
+
+MatConvo *Controleur::creer_gradient_y(TypeConvo tConv)
+{
+    return this->f->creer_gradient_y(tConv);
 }
 void Controleur::appliquer_median(int taille)
 {
@@ -144,10 +160,7 @@ void Controleur::appliquer_flou(MatConvo *m)
     qDebug()<<"fonction appliquer_flou;";
     z->changer_image(f->appliquer_flou(m,z->image));
 }
-
-
-
-void Controleur::seuillage(int seuil)
+/*void Controleur::seuillage(int seuil)
 {
     qDebug()<<"fonction rehaussement_contraste;";
     z->changer_image(f->seuillage(seuil, z->image));
@@ -157,19 +170,71 @@ void Controleur::rehaussement_contraste()
 {
     qDebug()<<"fonction rehaussement_contraste;";
     z->changer_image(f->rehaussement_contraste(z->image));
-}
-
-/*void Controleur::appliquer_laplacien(int numero)
-{
-    qDebug()<<"fonction appliquer_laplacien;";
-    z->image = this->f->appliquer_laplacien(numero,z->image);
-    z->afficher_image();
 }*/
 
 void Controleur::appliquer_rehaussement(int alpha)
 {
     qDebug()<<"fonction appliquer_laplacien;";
-    z->changer_image(f->appliquer_rehaussement(alpha,z->image));
+    z->changer_image(this->f->appliquer_rehaussement(alpha,z->image));
+}
+
+void Controleur::appliquer_laplacien(MatConvo *m)
+{
+    qDebug()<<"fonction appliquer_laplacien;";
+    z->changer_image(this->f->appliquer_laplacien(m,z->image));
+}
+
+void Controleur::appliquer_gradient_x(TypeConvo tConv)
+{
+    z->changer_image(this->f->appliquer_filtre(this->creer_gradient_x(tConv), z->image));
+    z->changer_image(this->f->RGB_to_grey(z->image));
+}
+void Controleur::appliquer_gradient_y(TypeConvo tConv)
+{
+    z->changer_image(this->f->appliquer_filtre(this->creer_gradient_y(tConv), z->image));
+    z->changer_image(this->f->RGB_to_grey(z->image));
+}
+void Controleur::appliquer_gradient_moins_x(TypeConvo tConv)
+{
+    z->changer_image(this->f->appliquer_filtre(this->creer_gradient_moins_x(tConv), z->image));
+    z->changer_image(this->f->RGB_to_grey(z->image));
+}
+
+void Controleur::appliquer_gradient_moins_y(TypeConvo tConv)
+{
+    z->changer_image(this->f->appliquer_filtre(this->creer_gradient_moins_y(tConv), z->image));
+    z->changer_image(this->f->RGB_to_grey(z->image));
+}
+
+void Controleur::norme_gradient(TypeConvo tConv)
+{
+    QImage imX = this->f->appliquer_filtre(this->creer_gradient_x(tConv),z->image);
+    QImage imY = this->f->appliquer_filtre(this->creer_gradient_y(tConv),z->image);
+    z->changer_image(this->f->norme_gradient(imX,imY));
+}
+
+void Controleur::norme_4gradients(TypeConvo tConv)
+{
+    QImage imX = this->f->appliquer_filtre(this->creer_gradient_x(tConv),z->image);
+    QImage imY = this->f->appliquer_filtre(this->creer_gradient_y(tConv),z->image);
+    QImage imNorme1 = this->f->norme_gradient(imX,imY);
+    QImage imMoinsX = this->f->appliquer_filtre(this->f->creer_gradient_moins_x(tConv),z->image);
+    QImage imMoinsY = this->f->appliquer_filtre(this->f->creer_gradient_moins_y(tConv),z->image);
+    QImage imNorme2 = this->f->norme_gradient(imMoinsX,imMoinsY);
+    z->changer_image(this->f->norme_gradient(imNorme1,imNorme2));
+}
+
+void Controleur::supp_non_maxima(TypeConvo tConv)
+{
+    QImage imX = this->f->appliquer_filtre(this->creer_gradient_x(tConv),z->image);
+    QImage imY = this->f->appliquer_filtre(this->creer_gradient_y(tConv),z->image);
+    QImage imNorme = this->f->norme_gradient(imX,imY);
+    z->changer_image(this->f->supp_non_maxima(imX,imY,imNorme));
+}
+
+void Controleur::eclaircir(int alpha)
+{
+    z->changer_image(this->f->eclaircir(alpha,z->image));
 }
 
 QImage Controleur::decouper()
