@@ -5,7 +5,7 @@
 
 enum TypeConvo
 {
-    GAUSS, MOYENNE, GRADIENT_X, GRADIENT_Y
+    GAUSS, MOYENNE, GRADIENT_SOBEL, GRADIENT_PREWITT
 };
 
 class MatConvo
@@ -53,8 +53,10 @@ public:
     void ajouter_val_mat1(int val);
     int gris_median(int med);
     void ajouter_val_mat2(int val);
-    void noyau_laplacien(int contraste);
     void noyau_impulsionnel();
+    void noyau_laplacien(int numero);
+    void gradient_x_lisse(TypeConvo tConv);
+    void gradient_y_lisse(TypeConvo tConv);
 
 };
 

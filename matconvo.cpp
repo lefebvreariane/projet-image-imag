@@ -206,13 +206,13 @@ void MatConvo::ajouter_val_mat2(int val)
     inc_tCourante();
 }
 
-void MatConvo::noyau_laplacien(int contraste)
+void MatConvo::noyau_laplacien(int numero)
 {
     qDebug()<< "fonction noyau_laplacien;";
     qDebug()<< "taille matrice: "<<getTFiltre();
     qDebug()<< "matrice: ";
 
-    switch (contraste)
+    switch (numero)
     {
     case 1:
         setMat2(0,0,0); setMat2(0,1,1); setMat2(0,2,0);
@@ -244,4 +244,44 @@ void MatConvo::noyau_impulsionnel()
     setMat2(0,0,0); setMat2(0,1,0); setMat2(0,2,0);
     setMat2(1,0,0); setMat2(1,1,1); setMat2(1,2,0);
     setMat2(2,0,0); setMat2(2,1,0); setMat2(2,2,0);
+}
+
+void MatConvo::gradient_x_lisse(TypeConvo tConv)
+{
+    qDebug()<< "fonction gradient_x_lisse;";
+    qDebug()<< "taille matrice: "<<getTFiltre();
+    qDebug()<< "matrice: ";
+
+    if (tConv == GRADIENT_SOBEL)
+    {
+        setMat2(0,0,1); setMat2(0,1,0); setMat2(0,2,-1);
+        setMat2(1,0,2); setMat2(1,1,0); setMat2(1,2,-2);
+        setMat2(2,0,1); setMat2(2,1,0); setMat2(2,2,-1);
+    }
+    else if (tConv == GRADIENT_PREWITT)
+    {
+        setMat2(0,0,1); setMat2(0,1,0); setMat2(0,2,-1);
+        setMat2(1,0,1); setMat2(1,1,0); setMat2(1,2,-1);
+        setMat2(2,0,1); setMat2(2,1,0); setMat2(2,2,-1);
+    }
+}
+
+void MatConvo::gradient_y_lisse(TypeConvo tConv)
+{
+    qDebug()<< "fonction gradient_x_lisse;";
+    qDebug()<< "taille matrice: "<<getTFiltre();
+    qDebug()<< "matrice: ";
+
+    if (tConv == GRADIENT_SOBEL)
+    {
+        setMat2(0,0,1); setMat2(0,1,2); setMat2(0,2,1);
+        setMat2(1,0,0); setMat2(1,1,0); setMat2(1,2,0);
+        setMat2(2,0,-1); setMat2(2,1,-2); setMat2(2,2,-1);
+    }
+    else if (tConv == GRADIENT_PREWITT)
+    {
+        setMat2(0,0,1); setMat2(0,1,1); setMat2(0,2,1);
+        setMat2(1,0,0); setMat2(1,1,0); setMat2(1,2,0);
+        setMat2(2,0,-1); setMat2(2,1,-1); setMat2(2,2,-1);
+    }
 }
