@@ -24,7 +24,7 @@ public:
     MatConvo *creer_gradient_moins_y(TypeConvo tConv);
 
     QImage norme_gradient(QImage imX, QImage imY);
-    QImage norme_4gradients(TypeConvo tConv);
+    QImage norme_4gradients(TypeConvo tConv, QImage imIn);
 
     QImage appliquer_median(int taille, QImage imIn);
     QImage appliquer_flou(MatConvo *m, QImage imIn);

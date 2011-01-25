@@ -517,14 +517,18 @@ QImage Filtres::norme_gradient(QImage imX, QImage imY)
     }
     return imNorme;
 }
-QImage Filtres::norme_4gradients(TypeConvo tConv)
+QImage Filtres::norme_4gradients(TypeConvo tConv, QImage imIn)
 {
-    QImage imX = this->appliquer_filtre(this->creer_gradient_x(tConv),z->image);
-    QImage imY = this->appliquer_filtre(this->creer_gradient_y(tConv),z->image);
-    QImage imNorme1 = this->f->norme_gradient(imX,imY);
-    QImage imMoinsX = this->f->appliquer_filtre(this->f->creer_gradient_moins_x(tConv),z->image);
-    QImage imMoinsY = this->f->appliquer_filtre(this->f->creer_gradient_moins_y(tConv),z->image);
-    QImage imNorme2 = this->f->norme_gradient(imMoinsX,imMoinsY);
+    QImage imX = this->appliquer_filtre(this->creer_gradient_x(tConv),imIn);
+    imX = this->RGB_to_grey(imX);
+    QImage imY = this->appliquer_filtre(this->creer_gradient_y(tConv),imIn);
+    imY = this->RGB_to_grey(imY);
+    QImage imNorme1 = this->norme_gradient(imX,imY);
+    QImage imMoinsX = this->appliquer_filtre(this->creer_gradient_moins_x(tConv),imIn);
+    imMoinsX = this->RGB_to_grey(imMoinsX);
+    QImage imMoinsY = this->appliquer_filtre(this->creer_gradient_moins_y(tConv),imIn);
+    imMoinsX = this->RGB_to_grey(imMoinsX);
+    QImage imNorme2 = this->norme_gradient(imMoinsX,imMoinsY);
     return this->norme_gradient(imNorme1,imNorme2);
 }
 
