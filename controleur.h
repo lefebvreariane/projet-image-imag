@@ -32,8 +32,6 @@ public:
     void norme_gradient(TypeConvo tConv);
     void norme_4gradients(TypeConvo tConv);
 
-    void appliquer_median(int taille);
-    void appliquer_flou(MatConvo *);
     /*void seuillage(int seuil);
     void rehaussement_contraste();*/
     void appliquer_rehaussement(int alpha);
@@ -55,6 +53,7 @@ public slots:
     void appliquer_median(int taille);
     void appliquer_flou(int taille,TypeConvo tConv);
     void appliquer_flou(MatConvo *m);
+    void appliquer_filtre(MatConvo *m);
 
     QImage decouper();
 

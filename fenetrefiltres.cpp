@@ -32,14 +32,22 @@ FenetreFiltres::FenetreFiltres(QWidget *parent) :
     connect(slider,SIGNAL(valueChanged(int)),this, SLOT(changement_taille_matrice(int)));
     slider->setValue(2);
 
+    QLabel *labelAlpha = new QLabel("Alpha:  ");
+    spin_alpha = new QSpinBox();
+    spin_alpha->setMinimum(1);
+    spin_alpha->setMaximum(999);
+    spin_alpha->setValue(1);
+
 
     QGridLayout *layoutFiltres = new QGridLayout;
     layoutFiltres->addWidget(taille_matrice,0,0,1,2);
     layoutFiltres->addWidget(slider,1,0,1,2);
-
     layoutFiltres->addWidget(vue,2,0,1,2);
-    layoutFiltres->addWidget(boutonOk,3,0);
-    layoutFiltres->addWidget(boutonAnnuler,3,1);
+    layoutFiltres->addWidget(labelAlpha,3,0);
+    layoutFiltres->addWidget(spin_alpha,3,1);
+
+    layoutFiltres->addWidget(boutonOk,4,0);
+    layoutFiltres->addWidget(boutonAnnuler,4,1);
 
 
     setLayout(layoutFiltres);
@@ -53,7 +61,7 @@ void FenetreFiltres::clic_ok(){
     QModelIndex index;
     QVariant element;
     MatConvo *m = new MatConvo();
-    m->allouerMem(taille,1);
+    m->allouerMem(taille,spin_alpha->value());
     for(int i =0; i<taille; i++){
         for(int j=0; j<taille; j++){
             index = modele_matrice->index(i,j);

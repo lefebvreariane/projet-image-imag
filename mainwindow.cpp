@@ -93,7 +93,7 @@ void MainWindow::createControleur()
     connect(fenetreRedim,SIGNAL(redim(int,int)),c,SLOT(redimensionner(int,int)));
     connect(fenetreFlous,SIGNAL(appliquer_flou(int,TypeConvo)),c,SLOT(appliquer_flou(int,TypeConvo)));
     connect(fenetreFlous,SIGNAL(appliquer_mediane(int)),c,SLOT(appliquer_median(int)));
-    connect(fenetreFiltres,SIGNAL(appliquer_filtre_perso(MatConvo*)),c,SLOT(appliquer_flou(MatConvo*)));
+    connect(fenetreFiltres,SIGNAL(appliquer_filtre_perso(MatConvo*)),c,SLOT(appliquer_filtre(MatConvo*)));
 
     c->changer_mode(SELECTION);
 }

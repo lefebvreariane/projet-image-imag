@@ -30,6 +30,7 @@ private:
     QTableView *vue;
     QStandardItemModel *modele_matrice;
     QSlider *slider;
+    QSpinBox *spin_alpha;
 };
 
 #endif // FENETREFILTRES_H

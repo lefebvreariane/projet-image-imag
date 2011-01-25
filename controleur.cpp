@@ -160,6 +160,12 @@ void Controleur::appliquer_flou(MatConvo *m)
     qDebug()<<"fonction appliquer_flou;";
     z->changer_image(f->appliquer_flou(m,z->image));
 }
+
+void Controleur::appliquer_filtre(MatConvo *m)
+{
+    qDebug()<<"fonction appliquer_filtre;";
+    z->changer_image(f->appliquer_filtre(m,z->image));
+}
 /*void Controleur::seuillage(int seuil)
 {
     qDebug()<<"fonction rehaussement_contraste;";
@@ -196,13 +202,13 @@ void Controleur::appliquer_gradient_y(TypeConvo tConv)
 }
 void Controleur::appliquer_gradient_moins_x(TypeConvo tConv)
 {
-    z->changer_image(this->f->appliquer_filtre(this->creer_gradient_moins_x(tConv), z->image));
+    z->changer_image(this->f->appliquer_filtre(this->f->creer_gradient_moins_x(tConv), z->image));
     z->changer_image(this->f->RGB_to_grey(z->image));
 }
 
 void Controleur::appliquer_gradient_moins_y(TypeConvo tConv)
 {
-    z->changer_image(this->f->appliquer_filtre(this->creer_gradient_moins_y(tConv), z->image));
+    z->changer_image(this->f->appliquer_filtre(this->f->creer_gradient_moins_y(tConv), z->image));
     z->changer_image(this->f->RGB_to_grey(z->image));
 }
 
