@@ -317,17 +317,17 @@ QImage Filtres::appliquer_rehaussement(int alpha, QImage imIn)
                     b = b + (m->getMat2(s,t)*qBlue(imIn.pixel(i+k,j+l)));
                 }
             }
-            r = r/alpha;
+            r = r/alpha ;//+125;
             if (r < 0)
                 r = 0;
             if (r>255)
                 r = 255;
-            g = g/alpha;
+            g = g/alpha ;//+ 125;
             if (g < 0)
                 g = 0;
             if (g>255)
                 g = 255;
-            b = b/alpha;
+            b = b/alpha ;//+ 125;
             if (b < 0)
                 b = 0;
             if (b>255)
@@ -335,7 +335,7 @@ QImage Filtres::appliquer_rehaussement(int alpha, QImage imIn)
             imOut.setPixel(i,j,qRgb((int)r,(int)g,(int)b));
         }
     }
-    if (alpha <10)
+    /*if (alpha <10)
         imOut = this->eclaircir(250,imOut);
     else if (alpha == 10)
         imOut = this->eclaircir(210, imOut);
@@ -352,7 +352,7 @@ QImage Filtres::appliquer_rehaussement(int alpha, QImage imIn)
     else if (alpha == 16)
         imOut = this->eclaircir(90, imOut);
     else if (alpha > 17)
-        imOut = this->eclaircir(50, imOut);
+        imOut = this->eclaircir(50, imOut);*/
     m->~MatConvo();
     d->~MatConvo();
     return imOut;
@@ -561,10 +561,10 @@ QImage Filtres::supp_non_maxima(QImage imX, QImage imY, QImage imNorme)
         for(int y = 1 ; y < imOut.height() - 1; y++) {
             int dx, dy;
 
-            if(imX.pixel(x,y) > 0) dx = 1;
+            if(imX.pixel(x,y) > qRgb(0,0,0)) dx = 1;
             else dx = -1;
 
-            if(imY.pixel(x,y) > 0) dy = 1;
+            if(imY.pixel(x,y) > qRgb(0,0,0)) dy = 1;
             else dy = -1;
 
             int a1, a2, b1, b2, A, B, point;
