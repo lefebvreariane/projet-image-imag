@@ -25,7 +25,8 @@ SOURCES += \
     controleur.cpp \
     fenetreflous.cpp \
     fenetrefiltres.cpp \
-    filtres.cpp
+    filtres.cpp \
+    tabfiltres.cpp
 
 HEADERS  += \
     zonedessin.h \
@@ -41,7 +42,8 @@ HEADERS  += \
     controleur.h \
     fenetreflous.h \
     fenetrefiltres.h \
-    filtres.h
+    filtres.h \
+    tabfiltres.h
 
 FORMS    += mainwindow.ui \
 

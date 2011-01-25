@@ -39,11 +39,13 @@ public slots:
     void redimensionner(int l, int h);
     void appliquer_median(int taille);
     void appliquer_flou(int taille,TypeConvo tConv);
+    void appliquer_flou(MatConvo *m);
 
     QImage decouper();
 
 signals:
     void afficher_pixel(int r, int g, int b);
+    void changer_message_barre(QString, int);
 
 private:
     Filtres *f;

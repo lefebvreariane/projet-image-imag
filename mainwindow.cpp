@@ -82,6 +82,7 @@ void MainWindow::createAreas()
 void MainWindow::createControleur()
 {
     c = new Controleur(z);
+    connect(c,SIGNAL(changer_message_barre(QString,int)),this,SLOT(changer_message_barre(QString,int)));
     connect(z->resultLabel, SIGNAL(clic()), c, SLOT(clic_recu()));
     connect(z,SIGNAL(fusionner(QImage,QImage,QImage)),fenetreFusion,SLOT(fusion_basique(QImage,QImage,QImage)));
     connect(c, SIGNAL(afficher_pixel(int,int,int)), fenetrePipette, SLOT(afficher_pixel(int,int,int)));
@@ -92,6 +93,7 @@ void MainWindow::createControleur()
     connect(fenetreRedim,SIGNAL(redim(int,int)),c,SLOT(redimensionner(int,int)));
     connect(fenetreFlous,SIGNAL(appliquer_flou(int,TypeConvo)),c,SLOT(appliquer_flou(int,TypeConvo)));
     connect(fenetreFlous,SIGNAL(appliquer_mediane(int)),c,SLOT(appliquer_median(int)));
+    connect(fenetreFiltres,SIGNAL(appliquer_filtre_perso(MatConvo*)),c,SLOT(appliquer_flou(MatConvo*)));
 
     c->changer_mode(SELECTION);
 }
@@ -100,6 +102,14 @@ void MainWindow::createControleur()
 void MainWindow::createStatusBar()
 {
     statusBar()->showMessage(tr("Prêt"));
+}
+void MainWindow::changer_message_barre(QString message,int t){
+    if (t==0){
+        statusBar()->showMessage(message);
+    }
+    else
+        statusBar()->showMessage(message,t);
+
 }
 
 void MainWindow::createActions()
@@ -418,7 +428,7 @@ void MainWindow::appliquer_flou()
     //statusBar()->showMessage("L'image a été floutée");
 
     fenetreFlous->Radio_lineaire->setChecked(true);
-
+    fenetreFlous->clic_radioBouton();
     MAJ_affichage();
 }
 
@@ -426,6 +436,8 @@ void  MainWindow::median(){
     verifier_fusion();
     c->changer_mode(FLOU);
     fenetreFlous->Radio_median->setChecked(true);
+    fenetreFlous->clic_radioBouton();
+
 
     MAJ_affichage();
 

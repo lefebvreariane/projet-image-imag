@@ -125,8 +125,12 @@ MatConvo *Controleur::creer_impulsionnel()
 }
 void Controleur::appliquer_median(int taille)
 {
-    qDebug()<<"fonction appliquer_median;";
-    z->changer_image(f->appliquer_median(taille, z->image));
+    if (z->image.isGrayscale()){
+        qDebug()<<"fonction appliquer_median;";
+        z->changer_image(f->appliquer_median(taille, z->image));
+    }
+    else
+        emit changer_message_barre("L'image doit être en niveaux de gris!",0);
 }
 
 void Controleur::appliquer_flou(int taille,TypeConvo tConv)
@@ -134,6 +138,13 @@ void Controleur::appliquer_flou(int taille,TypeConvo tConv)
     qDebug()<<"fonction appliquer_flou;";
     z->changer_image(f->appliquer_flou(creer_filtre(taille,tConv),z->image));
 }
+
+void Controleur::appliquer_flou(MatConvo *m)
+{
+    qDebug()<<"fonction appliquer_flou;";
+    z->changer_image(f->appliquer_flou(m,z->image));
+}
+
 
 
 void Controleur::seuillage(int seuil)

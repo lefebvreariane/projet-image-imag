@@ -51,6 +51,7 @@ private slots:
     void median();
     void filtre_perso();
     void inverser_couleurs();
+    void changer_message_barre(QString,int);
 
 
 private:
