@@ -27,10 +27,11 @@ public:
     MatConvo *creer_impulsionnel();
     MatConvo *creer_gradient_x(TypeConvo tConv);
     MatConvo *creer_gradient_y(TypeConvo tConv);
+    void passage_zero(int numero, int alpha, int seuil);
 
+    void hysteresis(int seuilBas, int seuilHaut, int i);
+    void chainage_contours(int seuilBas, int seuilHaut, TypeConvo tConv);
 
-    /*void seuillage(int seuil);
-    void rehaussement_contraste();*/
     void appliquer_rehaussement(int alpha);
     void appliquer_laplacien(MatConvo *m);
     void afficher_histogrammes();
@@ -38,7 +39,7 @@ public:
     void supp_non_maxima(TypeConvo tConv);
     void reInitSelection();
 
-
+    void mon_seuillage(TypeConvo tConv, int seuil);
     ZoneDessin *z;
     Controleur(ZoneDessin *zone);
     Mode mode;

@@ -166,17 +166,20 @@ void Controleur::appliquer_filtre(MatConvo *m)
     qDebug()<<"fonction appliquer_filtre;";
     z->changer_image(f->appliquer_filtre(m,z->image));
 }
-/*void Controleur::seuillage(int seuil)
+
+void Controleur::hysteresis(int seuilBas, int seuilHaut, int i)
 {
-    qDebug()<<"fonction rehaussement_contraste;";
-    z->changer_image(f->seuillage(seuil, z->image));
+    QImage imNorme = this->f->norme_4gradients(GRADIENT_PREWITT,z->image);
+    QImage *contours = this->f->hysteresis(seuilBas,seuilHaut,imNorme);
+    z->changer_image(contours[i]);
 }
 
-void Controleur::rehaussement_contraste()
+void Controleur::chainage_contours(int seuilBas, int seuilHaut, TypeConvo tConv)
 {
-    qDebug()<<"fonction rehaussement_contraste;";
-    z->changer_image(f->rehaussement_contraste(z->image));
-}*/
+    //z->changer_image(this->f->appliquer_median(3,z->image));
+    qDebug()<<"fonction chainage_contours";
+    z->changer_image(this->f->chainage_contours(seuilBas,seuilHaut,tConv,z->image));
+}
 
 void Controleur::appliquer_rehaussement(int alpha)
 {
@@ -194,10 +197,12 @@ void Controleur::appliquer_gradient_x(TypeConvo tConv)
 {
     z->changer_image(this->f->RGB_to_grey(f->appliquer_filtre(this->creer_gradient_x(tConv), z->image)));
 }
+
 void Controleur::appliquer_gradient_y(TypeConvo tConv)
 {
     z->changer_image(this->f->RGB_to_grey(f->appliquer_filtre(this->creer_gradient_y(tConv), z->image)));
 }
+
 void Controleur::appliquer_gradient_moins_x(TypeConvo tConv)
 {
     z->changer_image(this->f->RGB_to_grey(f->appliquer_filtre(this->f->creer_gradient_moins_x(tConv), z->image)));
@@ -233,12 +238,23 @@ void Controleur::supp_non_maxima(TypeConvo tConv)
     QImage imNorme = this->f->norme_gradient(imX,imY);
     z->changer_image(this->f->supp_non_maxima(imX,imY,imNorme));
 }
+void Controleur::passage_zero(int numero,int alpha, int seuil)
+{
+    QImage laplacien = this->f->appliquer_laplacien(this->creer_laplacien(numero,alpha),z->image);
+
+    z->changer_image(this->f->passage_zero(seuil, laplacien));
+}
 
 void Controleur::eclaircir(int alpha)
 {
     z->changer_image(this->f->eclaircir(alpha,z->image));
 }
 
+void Controleur::mon_seuillage(TypeConvo tConv, int seuil)
+{
+    QImage imNorme = this->f->norme_4gradients(tConv,z->image);
+    z->changer_image(this->f->seuillage(imNorme,seuil));
+}
 void Controleur::seuillage(int s){
     qDebug()<<s;
     QImage res = z->image.copy();
