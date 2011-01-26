@@ -18,6 +18,7 @@ public:
 
 signals:
     void changer_image(QImage);
+    void changer_image_sans_save(QImage);
     void changer_mode(Mode);
 
 public slots:

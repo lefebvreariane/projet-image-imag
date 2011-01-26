@@ -1,15 +1,19 @@
 #ifndef ZONEDESSIN_H
 #define ZONEDESSIN_H
 
+#include <QtGui>
 #include <QPainter>
 #include <QWidget>
 #include <labelimage.h>
+#include <historique.h>
 
 
 QT_BEGIN_NAMESPACE
 class QComboBox;
 class QLabel;
 class QToolButton;
+class Historique;
+
 QT_END_NAMESPACE
 
 class ZoneDessin : public QWidget
@@ -27,11 +31,17 @@ public:
     void ecrire_image();
     void afficher_image();
 
+    Historique *historique;
+
 signals:
     void fusionner(QImage,QImage,QImage);
+    void enable_undo_redo();
 
 public slots:
     void changer_image(QImage);
+    void changer_image_sans_save(QImage);
+
+
 
 };
 

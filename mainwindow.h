@@ -10,7 +10,11 @@
 #include <fenetreredim.h>
 #include <fenetreflous.h>
 #include <fenetrefiltres.h>
+#include "fenetregradient.h"
+#include "fenetrerehausseur.h"
 #include "noyaupascal.h"
+#include "historique.h"
+
 
 QT_BEGIN_NAMESPACE
 class QLabel;
@@ -52,6 +56,12 @@ private slots:
     void filtre_perso();
     void inverser_couleurs();
     void changer_message_barre(QString,int);
+    void gradient();
+    void undo();
+    void redo();
+    void enable_undo_redo();
+    void rehausseur();
+
 
 
 private:
@@ -68,6 +78,7 @@ private:
     QString fileName;
 
     QMenu *fileMenu;
+    QMenu *editMenu;
     QMenu *filtreMenu;
     QMenu *toolsMenu;
 
@@ -78,7 +89,6 @@ private:
     QAction *ouvrirAct;
     QAction *saveAct;
     QAction *saveInAct;
-
     QAction *selectionAct;
     QAction *pipetteAct;
     QAction *histoAct;
@@ -90,6 +100,10 @@ private:
     QAction *redimAct;
     QAction *filtreAct;
     QAction *medianAct;
+    QAction *gradientAct;
+    QAction *undoAct;
+    QAction *redoAct;
+    QAction *rehaussAct;
 
     ZoneDessin *z;
     QScrollArea *scrollArea;
@@ -100,6 +114,8 @@ private:
     FenetreRedim *fenetreRedim;
     FenetreFlous *fenetreFlous;
     FenetreFiltres *fenetreFiltres;
+    FenetreGradient *fenetreGradient;
+    FenetreRehausseur *fenetreRehausseur;
 
 };
 

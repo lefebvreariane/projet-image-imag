@@ -121,7 +121,7 @@ void FenetreFusion::changement_liste(int i){
 
 
     image_result = effectuer_fusion(image_source,image_fusion, image_result,type_fusion,transp_fusion,0,0);
-    emit changer_image(image_result);
+    emit changer_image_sans_save(image_result);
 
 }
 
@@ -131,7 +131,7 @@ void FenetreFusion:: changement_tansparence(int i){
     transp_fusion = i/100.0;
     label_transp_pourcentage->setText(QString::number(tansparence->value()) + "%");
     image_result = effectuer_fusion(image_source,image_fusion, image_result,type_fusion,transp_fusion,0,0);
-    emit changer_image(image_result);
+    emit changer_image_sans_save(image_result);
 }
 
 
@@ -178,7 +178,7 @@ void FenetreFusion::open()
         image_result = image_source.copy();
 
         image_result = effectuer_fusion(image_source,image_fusion, image_result,type_fusion,transp_fusion,0,0);
-        emit changer_image(image_result);
+        emit changer_image_sans_save(image_result);
     }
 }
 
@@ -195,10 +195,10 @@ void FenetreFusion::clic_annuler(){
 void FenetreFusion::finir_fusion(bool b){
     this->hide();
 
-    if(!b) // annuler la fusion
-        emit changer_image(image_source);
-    else
+    if(b) // faire la fusion
         emit changer_image(image_result);
+    else //annuler
+        emit changer_image_sans_save(image_source);
 
     emit changer_mode(SELECTION);
 }

@@ -26,7 +26,10 @@ SOURCES += \
     fenetreflous.cpp \
     fenetrefiltres.cpp \
     filtres.cpp \
-    tabfiltres.cpp
+    tabfiltres.cpp \
+    fenetregradient.cpp \
+    historique.cpp \
+    fenetrerehausseur.cpp
 
 HEADERS  += \
     zonedessin.h \
@@ -43,7 +46,10 @@ HEADERS  += \
     fenetreflous.h \
     fenetrefiltres.h \
     filtres.h \
-    tabfiltres.h
+    tabfiltres.h \
+    fenetregradient.h \
+    historique.h \
+    fenetrerehausseur.h
 
 FORMS    += mainwindow.ui \
 

@@ -268,7 +268,7 @@ void MatConvo::gradient_x_lisse(TypeConvo tConv)
 
 void MatConvo::gradient_y_lisse(TypeConvo tConv)
 {
-    qDebug()<< "fonction gradient_x_lisse;";
+    qDebug()<< "fonction gradient_y_lisse;";
     qDebug()<< "taille matrice: "<<getTFiltre();
     qDebug()<< "matrice: ";
 

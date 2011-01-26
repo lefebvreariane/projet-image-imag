@@ -63,6 +63,11 @@ void MainWindow::createAreas()
     fenetreFiltres = new FenetreFiltres;
     fenetreFiltres->hide();
 
+    fenetreGradient = new FenetreGradient;
+    fenetreGradient->hide();
+
+    fenetreRehausseur= new FenetreRehausseur;
+    fenetreRehausseur->hide();
 
     layout->addWidget(scrollArea);
     layout->addWidget(panneauDroite);
@@ -70,6 +75,8 @@ void MainWindow::createAreas()
     layout->addWidget(fenetreRedim);
     layout->addWidget(fenetreFlous);
     layout->addWidget(fenetreFiltres);
+    layout->addWidget(fenetreGradient);
+    layout->addWidget(fenetreRehausseur);
 
 
     zoneTravail->setLayout(layout);
@@ -84,16 +91,25 @@ void MainWindow::createControleur()
     c = new Controleur(z);
     connect(c,SIGNAL(changer_message_barre(QString,int)),this,SLOT(changer_message_barre(QString,int)));
     connect(z->resultLabel, SIGNAL(clic()), c, SLOT(clic_recu()));
+    connect(z,SIGNAL(enable_undo_redo()),this,SLOT(enable_undo_redo()));
     connect(z,SIGNAL(fusionner(QImage,QImage,QImage)),fenetreFusion,SLOT(fusion_basique(QImage,QImage,QImage)));
     connect(c, SIGNAL(afficher_pixel(int,int,int)), fenetrePipette, SLOT(afficher_pixel(int,int,int)));
     connect(fenetrePipette, SIGNAL(afficher_panneauDroite(bool)),this,SLOT(afficher_panneauDroite(bool)));
     connect(fenetreFusion,SIGNAL(changer_image(QImage)),c->z,SLOT(changer_image(QImage)));
+    connect(fenetreFusion,SIGNAL(changer_image_sans_save(QImage)),c->z,SLOT(changer_image_sans_save(QImage)));
     connect(fenetreFusion, SIGNAL(changer_mode(Mode)), c, SLOT(changer_mode(Mode)) );
     connect(fenetreHistogramme,SIGNAL(masquer_fenetre()),this,SLOT(masquer_histogramme()));
     connect(fenetreRedim,SIGNAL(redim(int,int)),c,SLOT(redimensionner(int,int)));
     connect(fenetreFlous,SIGNAL(appliquer_flou(int,TypeConvo)),c,SLOT(appliquer_flou(int,TypeConvo)));
     connect(fenetreFlous,SIGNAL(appliquer_mediane(int)),c,SLOT(appliquer_median(int)));
     connect(fenetreFiltres,SIGNAL(appliquer_filtre_perso(MatConvo*)),c,SLOT(appliquer_filtre(MatConvo*)));
+    connect(fenetreGradient,SIGNAL(appliquer_gradient_x(TypeConvo)),c,SLOT(appliquer_gradient_x(TypeConvo)));
+    connect(fenetreGradient,SIGNAL(appliquer_gradient_y(TypeConvo)),c,SLOT(appliquer_gradient_y(TypeConvo)));
+    connect(fenetreGradient,SIGNAL(appliquer_gradient_moins_x(TypeConvo)),c,SLOT(appliquer_gradient_moins_x(TypeConvo)));
+    connect(fenetreGradient,SIGNAL(appliquer_gradient_moins_y(TypeConvo)),c,SLOT(appliquer_gradient_moins_y(TypeConvo)));
+    connect(fenetreGradient,SIGNAL(norme_gradient(TypeConvo)),c,SLOT(norme_gradient(TypeConvo)));
+    connect(fenetreGradient,SIGNAL(norme_4gradients(TypeConvo)),c,SLOT(norme_4gradients(TypeConvo)));
+    connect(fenetreRehausseur,SIGNAL(appliquer_rehausseur_laplacien(int,int)),c,SLOT(appliquer_rehausseur_laplacien(int,int)));
 
     c->changer_mode(SELECTION);
 }
@@ -182,6 +198,19 @@ void MainWindow::createActions()
     connect(redimAct, SIGNAL(triggered()), this, SLOT(redimentionner()));
     connect(keyRedim, SIGNAL(activated()),this, SLOT(redimentionner()));
 
+    gradientAct = new QAction(tr("Gradient"), this);
+    connect(gradientAct, SIGNAL(triggered()), this, SLOT(gradient()));
+
+    rehaussAct = new QAction(tr("Rehausseur Laplacien"), this);
+    connect(rehaussAct, SIGNAL(triggered()), this, SLOT(rehausseur()));
+
+
+    undoAct = new QAction(tr("Annuler"), this);
+    connect(undoAct, SIGNAL(triggered()), this, SLOT(undo()));
+
+    redoAct = new QAction(tr("Refaire"), this);
+    connect(redoAct, SIGNAL(triggered()), this, SLOT(redo()));
+
 
 }
 
@@ -194,6 +223,11 @@ void MainWindow::createMenus()
     fileMenu->addAction(saveInAct);
     fileMenu->addSeparator();
     fileMenu->addAction(exitAct);
+
+    /*Creation de la barre de menu Edition*/
+    editMenu = menuBar()->addMenu("&Edition");
+    editMenu->addAction(undoAct);
+    editMenu->addAction(redoAct);
 
     /*Creation de la barre de menu Outils*/
     toolsMenu = menuBar()->addMenu("&Outils");
@@ -210,6 +244,8 @@ void MainWindow::createMenus()
     filtreMenu = menuBar()->addMenu("&Filtres");
     filtreMenu->addAction(flouAct);
     filtreMenu->addAction(medianAct);
+    filtreMenu->addAction(gradientAct);
+    filtreMenu->addAction(rehaussAct);
     filtreMenu->addAction(filtreAct);
 
     activer_menus(false);
@@ -232,6 +268,7 @@ void MainWindow::activer_menus(bool b)
         flouAct->setDisabled(true);
         medianAct->setDisabled(true);
         filtreAct->setDisabled(true);
+        gradientAct->setDisabled(true);
     }
     else
     {
@@ -248,7 +285,11 @@ void MainWindow::activer_menus(bool b)
         flouAct->setDisabled(false);
         medianAct->setDisabled(false);
         filtreAct->setDisabled(false);
+        gradientAct->setDisabled(false);
     }
+
+    undoAct->setDisabled(true);
+    redoAct->setDisabled(true);
 }
 
 void MainWindow::MAJ_affichage()
@@ -257,23 +298,34 @@ void MainWindow::MAJ_affichage()
 
     if (c->mode == REDIM)
         fenetreRedim->show();
-    else
+    else {
         fenetreRedim->hide();
+        if(c->mode == FLOU)
+            fenetreFlous->show();
+        else {
+            fenetreFlous->hide();
 
-    if(c->mode == FLOU)
-        fenetreFlous->show();
-    else
-        fenetreFlous->hide();
+            if(c->mode == FILTRE)
+                fenetreFiltres->show();
+            else{
+                fenetreFiltres->hide();
 
-    if(c->mode == FILTRE)
-        fenetreFiltres->show();
-    else
-        fenetreFiltres->hide();
-
+                if(c->mode == GRADIENT)
+                    fenetreGradient->show();
+                else{
+                    fenetreGradient->hide();
+                    if(c->mode == REHAUSSEUR)
+                        fenetreRehausseur->show();
+                    else{
+                        fenetreRehausseur->hide();
+                    }
+                }
+            }
+        }
+    }
 
     z->init_affichage();
     z->afficher_image();
-
 }
 
 void MainWindow::verifier_fusion()
@@ -291,7 +343,8 @@ void MainWindow::open()
             QMessageBox::information(this, tr("ImageViewer"), tr("Imppossible d'ouvrir %1.").arg(fileName));
             return;
         }
-        z->changer_image(image);
+        z->changer_image_sans_save(image);
+        z->historique->init_historique(z->image);
         activer_menus(true);
         c->reInitSelection();
 
@@ -447,6 +500,50 @@ void  MainWindow::filtre_perso(){
     verifier_fusion();
     c->changer_mode(FILTRE);
     MAJ_affichage();
+
+}
+
+void  MainWindow::gradient(){
+    verifier_fusion();
+    c->changer_mode(GRADIENT);
+    MAJ_affichage();
+
+}
+
+void  MainWindow::rehausseur(){
+    verifier_fusion();
+    c->changer_mode(REHAUSSEUR);
+    MAJ_affichage();
+
+}
+
+void  MainWindow::undo(){
+    verifier_fusion();
+    z->historique->undo();
+    enable_undo_redo();
+
+}
+
+void  MainWindow::redo(){
+    verifier_fusion();
+    z->historique->redo();
+    enable_undo_redo();
+
+}
+
+void  MainWindow::enable_undo_redo(){
+    if (z->historique->can_undo())
+        undoAct->setEnabled(true);
+    else
+        undoAct->setEnabled(false);
+
+    if (z->historique->can_redo())
+        redoAct->setEnabled(true);
+    else
+        redoAct->setEnabled(false);
+
+
+
 
 }
 

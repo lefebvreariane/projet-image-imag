@@ -60,7 +60,7 @@ FenetreFlous::FenetreFlous(QWidget *parent) :
     layoutFlous->addWidget(slider_median, 2, 1);
     layoutFlous->addWidget(label_median, 2, 2);
     layoutFlous->addWidget(boutonOk, 3, 0);
-    layoutFlous->addWidget(boutonAnnuler, 3, 1);
+    layoutFlous->addWidget(boutonAnnuler, 3, 1,1,2);
 
     setLayout(layoutFlous);
 

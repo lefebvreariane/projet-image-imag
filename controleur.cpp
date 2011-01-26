@@ -403,3 +403,7 @@ void Controleur::redimensionner(int l, int h)
 
     z->changer_image(res);
 }
+
+void Controleur::appliquer_rehausseur_laplacien(int num, int alpha){
+    appliquer_filtre(creer_rehausseur_laplacien(num, alpha));
+}
