@@ -298,31 +298,27 @@ void MainWindow::MAJ_affichage()
 
     if (c->mode == REDIM)
         fenetreRedim->show();
-    else {
+    else
         fenetreRedim->hide();
-        if(c->mode == FLOU)
-            fenetreFlous->show();
-        else {
-            fenetreFlous->hide();
+    if(c->mode == FLOU)
+        fenetreFlous->show();
+    else
+        fenetreFlous->hide();
 
-            if(c->mode == FILTRE)
-                fenetreFiltres->show();
-            else{
-                fenetreFiltres->hide();
+    if(c->mode == FILTRE)
+        fenetreFiltres->show();
+    else
+        fenetreFiltres->hide();
 
-                if(c->mode == GRADIENT)
-                    fenetreGradient->show();
-                else{
-                    fenetreGradient->hide();
-                    if(c->mode == REHAUSSEUR)
-                        fenetreRehausseur->show();
-                    else{
-                        fenetreRehausseur->hide();
-                    }
-                }
-            }
-        }
-    }
+    if(c->mode == GRADIENT)
+        fenetreGradient->show();
+    else
+        fenetreGradient->hide();
+    if(c->mode == REHAUSSEUR)
+        fenetreRehausseur->show();
+    else
+        fenetreRehausseur->hide();
+
 
     z->init_affichage();
     z->afficher_image();
