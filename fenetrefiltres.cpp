@@ -70,7 +70,7 @@ void FenetreFiltres::clic_ok(){
         }
     }
     emit appliquer_filtre_perso(m);
-    m->~MatConvo();
+    //m->~MatConvo();
     //this->hide();
 }
 

@@ -13,7 +13,7 @@ public:
 
 
 signals:
-    void redim(int, int);
+    void redim(int, int,int);
 
 public slots:
 
@@ -37,6 +37,7 @@ private:
     QSpinBox *spin_taille_haut;
     QLabel *tailleOrigine;
     QLabel *tailleRedim;
+    QComboBox *listeMode;
 
 
 };

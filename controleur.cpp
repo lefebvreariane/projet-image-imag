@@ -192,24 +192,20 @@ void Controleur::appliquer_laplacien(MatConvo *m)
 
 void Controleur::appliquer_gradient_x(TypeConvo tConv)
 {
-    z->changer_image(this->f->appliquer_filtre(this->creer_gradient_x(tConv), z->image));
-    z->changer_image(this->f->RGB_to_grey(z->image));
+    z->changer_image(this->f->RGB_to_grey(f->appliquer_filtre(this->creer_gradient_x(tConv), z->image)));
 }
 void Controleur::appliquer_gradient_y(TypeConvo tConv)
 {
-    z->changer_image(this->f->appliquer_filtre(this->creer_gradient_y(tConv), z->image));
-    z->changer_image(this->f->RGB_to_grey(z->image));
+    z->changer_image(this->f->RGB_to_grey(f->appliquer_filtre(this->creer_gradient_y(tConv), z->image)));
 }
 void Controleur::appliquer_gradient_moins_x(TypeConvo tConv)
 {
-    z->changer_image(this->f->appliquer_filtre(this->f->creer_gradient_moins_x(tConv), z->image));
-    z->changer_image(this->f->RGB_to_grey(z->image));
+    z->changer_image(this->f->RGB_to_grey(f->appliquer_filtre(this->f->creer_gradient_moins_x(tConv), z->image)));
 }
 
 void Controleur::appliquer_gradient_moins_y(TypeConvo tConv)
 {
-    z->changer_image(this->f->appliquer_filtre(this->f->creer_gradient_moins_y(tConv), z->image));
-    z->changer_image(this->f->RGB_to_grey(z->image));
+    z->changer_image(this->f->RGB_to_grey(f->appliquer_filtre(this->f->creer_gradient_moins_y(tConv), z->image)));
 }
 
 void Controleur::norme_gradient(TypeConvo tConv)
@@ -242,6 +238,105 @@ void Controleur::eclaircir(int alpha)
 {
     z->changer_image(this->f->eclaircir(alpha,z->image));
 }
+
+void Controleur::seuillage(int s){
+    qDebug()<<s;
+    QImage res = z->image.copy();
+    double greyD;
+    int i,j;
+
+    for (i=0 ; i<res.width() ; i++)
+    {
+        for(j=0 ; j<res.height() ; j++)
+        {
+            QColor c = res.pixel(i,j);
+            //transformer en niveaux de gris
+            greyD = c.red()*0.299 + c.green()*0.587 + c.blue()*0.114 + 0.5;
+            //tous les points au desssus d'un certain niveau blancs, les autres noirs
+            if (greyD>s)
+                res.setPixel(i,j,qRgb(255,255,255));
+            else
+                res.setPixel(i,j,qRgb(0,0,0));
+        }
+    }
+    //changer_image
+    z->changer_image(res);
+}
+
+void Controleur::luminosite_contraste(float lum, float cont){
+    //parametres:
+    //lum: de 0.0 (image noire) a 1.0 (image blanche)
+    //cont: de 0.0 (pas de contraste) a 1.0 (tres contrastee)
+    QImage res(z->image.width(),z->image.height(),z->image.format());
+    int i,j;
+    int r, g, b, moy_r=0, moy_g=0, moy_b=0;
+
+    //mettre lum et cont sous une autre forme pour la formule, i.e.
+    //luminosite: -1.0: l'image noire, 1.0: l'image blanche, 0.0: normal
+    //contraste: 0.0: pas de contraste (gris), 1.0: l'image normal, 2.0: tres contrastee
+    lum=lum*2-1.0;
+    cont=cont*2;
+
+    if(!z->image.isNull()){
+
+        //calculer les moyennes R,G,B dans l'image
+        for (i=0 ; i<z->image.width() ; i++)
+        {
+            for(j=0 ; j<z->image.height() ; j++)
+            {
+                QColor c = z->image.pixel(i,j);
+                moy_r+=c.red();
+                moy_g+=c.green();
+                moy_b+=c.blue();
+            }
+        }
+        i=z->image.width()*z->image.height();//optimisation
+        moy_r=moy_r/i;
+        moy_g=moy_g/i;
+        moy_b=moy_b/i;
+
+        //modifier chaque point de l'image
+        for (i=0 ; i<z->image.width() ; i++)
+        {
+            for(j=0 ; j<z->image.height() ; j++)
+            {
+                QColor c = z->image.pixel(i,j);
+                r=c.red();
+                g=c.green();
+                b=c.blue();
+
+                //modifier contraste par rapport a la moyenne, rajouter ou supprimer de la lum
+                r=((r-moy_r)*cont+moy_r)+255*lum;
+                g=((g-moy_g)*cont+moy_g)+255*lum;
+                b=((b-moy_b)*cont+moy_b)+255*lum;
+
+                //ajustement des valeurs resultats qui debordent
+                if (r>255)
+                    r=255;
+                else{
+                    if (r<0)
+                        r=0;
+                }
+                if (g>255)
+                    g=255;
+                else{
+                    if (g<0)
+                        g=0;
+                }
+                if (b>255)
+                    b=255;
+                else{
+                    if (b<0)
+                        b=0;
+                }
+
+                res.setPixel(i,j,qRgb(r,g,b));
+            }
+        }
+    }
+    z->changer_image(res);
+}
+
 
 QImage Controleur::decouper()
 {
@@ -379,7 +474,7 @@ QImage up(QImage base, int l, int h) {
 
 
 
-void Controleur::redimensionner(int l, int h)
+void Controleur::redimensionner(int l, int h, int mode)
 {
     QImage res(l,h,z->image.format());
 
@@ -406,4 +501,8 @@ void Controleur::redimensionner(int l, int h)
 
 void Controleur::appliquer_rehausseur_laplacien(int num, int alpha){
     appliquer_filtre(creer_rehausseur_laplacien(num, alpha));
+}
+
+void Controleur::appliquer_laplacien(int num, int intensite){
+    appliquer_filtre(creer_laplacien(num,intensite));
 }

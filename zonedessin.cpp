@@ -10,12 +10,10 @@ ZoneDessin::ZoneDessin(QWidget *parent) :
     //painter(&resultImage);
 
     image.load(":/images/logo.png");
-
     changer_image_sans_save(image);
+
     historique = new Historique;
     connect(historique,SIGNAL(changer_image(QImage)),this,SLOT(changer_image_sans_save(QImage)));
-
-
 
 }
 

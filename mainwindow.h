@@ -11,9 +11,13 @@
 #include <fenetreflous.h>
 #include <fenetrefiltres.h>
 #include "fenetregradient.h"
+#include "fenetreluminosite.h"
+#include "fenetreseuil.h"
 #include "fenetrerehausseur.h"
 #include "noyaupascal.h"
 #include "historique.h"
+
+
 
 
 QT_BEGIN_NAMESPACE
@@ -61,6 +65,8 @@ private slots:
     void redo();
     void enable_undo_redo();
     void rehausseur();
+    void luminosite();
+    void seuil();
 
 
 
@@ -104,6 +110,21 @@ private:
     QAction *undoAct;
     QAction *redoAct;
     QAction *rehaussAct;
+    QAction *lumAct;
+    QAction *seuilAct;
+
+    QShortcut *keyDecoup;
+    QShortcut *keyOpen;
+    QShortcut *keySave;
+    QShortcut *keyQuit;
+    QShortcut *keyUndo;
+    QShortcut *keyRedo;
+    QShortcut *keySelec;
+    QShortcut *keyPipette;
+    QShortcut *keyHisto;
+    QShortcut *keyRedim;
+
+
 
     ZoneDessin *z;
     QScrollArea *scrollArea;
@@ -116,6 +137,8 @@ private:
     FenetreFiltres *fenetreFiltres;
     FenetreGradient *fenetreGradient;
     FenetreRehausseur *fenetreRehausseur;
+    FenetreLuminosite *fenetreLuminosite;
+    FenetreSeuil *fenetreSeuil;
 
 };
 

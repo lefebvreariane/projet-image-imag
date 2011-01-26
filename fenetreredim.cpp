@@ -6,7 +6,9 @@ FenetreRedim::FenetreRedim(QWidget *parent) :
     //Creation du layout principal
     QGridLayout *layoutRedim = new QGridLayout;
     QGroupBox  *groupParam = new QGroupBox("Paramètres");
+    QGroupBox  *groupMode = new QGroupBox("Mode");
     QGroupBox  *groupResum = new QGroupBox("Résumé") ;
+
 
     // Creation des boutons
     QPushButton *boutonOk = new QPushButton("Ok");
@@ -94,6 +96,16 @@ FenetreRedim::FenetreRedim(QWidget *parent) :
     //Application du layout des parametres
     groupParam->setLayout(layoutParam);
 
+    //Groupe mode
+    listeMode = new QComboBox();
+    QVBoxLayout *layoutMode = new QVBoxLayout();
+    listeMode->addItem("Normal");
+    listeMode->addItem("Bilinéaire");
+    listeMode->addItem("Intelligent");
+    layoutMode->addWidget(listeMode);
+    groupMode->setLayout(layoutMode);
+
+
     //Cration et application du layout resumé
     QVBoxLayout *layoutResume= new QVBoxLayout;
     tailleOrigine = new QLabel;
@@ -106,9 +118,10 @@ FenetreRedim::FenetreRedim(QWidget *parent) :
 
     //application du layout principal
     layoutRedim->addWidget(groupParam,0,0,1,2);
-    layoutRedim->addWidget(groupResum,1,0,1,2);
-    layoutRedim->addWidget(boutonOk,2,0);
-    layoutRedim->addWidget(boutonAnnuler,2,1);
+    layoutRedim->addWidget(groupMode,1,0,1,2);
+    layoutRedim->addWidget(groupResum,2,0,1,2);
+    layoutRedim->addWidget(boutonOk,3,0);
+    layoutRedim->addWidget(boutonAnnuler,3,1);
 
     setLayout(layoutRedim);
 }
@@ -174,7 +187,7 @@ void FenetreRedim::MAJ_resume(){
 }
 
 void FenetreRedim::clic_ok(){
-    emit redim(largeur_redim, hauteur_redim);
+    emit redim(largeur_redim, hauteur_redim,listeMode->currentIndex());
     this->hide();
 }
 

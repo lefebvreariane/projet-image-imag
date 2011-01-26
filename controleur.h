@@ -11,7 +11,8 @@
 
 enum Mode
 {
-    SELECTION, PIPETTE, HISTO, GREY, MEDIAN, FLOU, FUSION, DECOUPAGE, REDIM, FILTRE, GRADIENT, REHAUSSEUR
+    SELECTION, PIPETTE, HISTO, GREY, MEDIAN, FLOU, FUSION,
+    DECOUPAGE, REDIM, FILTRE, GRADIENT, REHAUSSEUR, LUMINOSITE, SEUIL
         };
 
 class Controleur : public QObject
@@ -48,12 +49,11 @@ public slots:
 
     void clic_recu();
     void changer_mode(Mode);
-    void redimensionner(int l, int h);
+    void redimensionner(int l, int h, int mode);
     void appliquer_median(int taille);
     void appliquer_flou(int taille,TypeConvo tConv);
     void appliquer_flou(MatConvo *m);
     void appliquer_filtre(MatConvo *m);
-
     void appliquer_gradient_moins_x(TypeConvo tConv);
     void appliquer_gradient_moins_y(TypeConvo tConv);
     void appliquer_gradient_x(TypeConvo tConv);
@@ -61,6 +61,9 @@ public slots:
     void norme_gradient(TypeConvo tConv);
     void norme_4gradients(TypeConvo tConv);
     void appliquer_rehausseur_laplacien(int, int);
+    void seuillage(int s);
+    void luminosite_contraste(float lum, float cont);
+    void appliquer_laplacien(int, int);
 
     QImage decouper();
 

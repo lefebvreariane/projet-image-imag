@@ -14,12 +14,7 @@ MainWindow::MainWindow()
 
 }
 
-void MainWindow::createToolBars()
-{
-    fileToolBar = addToolBar(tr("Fichier"));
-    fileToolBar->addAction(ouvrirAct);
-    fileToolBar->addAction(saveAct);
-}
+
 
 void MainWindow::createAreas()
 {
@@ -69,6 +64,13 @@ void MainWindow::createAreas()
     fenetreRehausseur= new FenetreRehausseur;
     fenetreRehausseur->hide();
 
+    fenetreLuminosite = new FenetreLuminosite;
+    fenetreLuminosite->hide();
+
+    fenetreSeuil = new FenetreSeuil;
+    fenetreSeuil->hide();
+
+
     layout->addWidget(scrollArea);
     layout->addWidget(panneauDroite);
     layout->addWidget(fenetreFusion);
@@ -77,6 +79,9 @@ void MainWindow::createAreas()
     layout->addWidget(fenetreFiltres);
     layout->addWidget(fenetreGradient);
     layout->addWidget(fenetreRehausseur);
+    layout->addWidget(fenetreLuminosite);
+    layout->addWidget(fenetreSeuil);
+
 
 
     zoneTravail->setLayout(layout);
@@ -99,7 +104,7 @@ void MainWindow::createControleur()
     connect(fenetreFusion,SIGNAL(changer_image_sans_save(QImage)),c->z,SLOT(changer_image_sans_save(QImage)));
     connect(fenetreFusion, SIGNAL(changer_mode(Mode)), c, SLOT(changer_mode(Mode)) );
     connect(fenetreHistogramme,SIGNAL(masquer_fenetre()),this,SLOT(masquer_histogramme()));
-    connect(fenetreRedim,SIGNAL(redim(int,int)),c,SLOT(redimensionner(int,int)));
+    connect(fenetreRedim,SIGNAL(redim(int,int,int)),c,SLOT(redimensionner(int,int,int)));
     connect(fenetreFlous,SIGNAL(appliquer_flou(int,TypeConvo)),c,SLOT(appliquer_flou(int,TypeConvo)));
     connect(fenetreFlous,SIGNAL(appliquer_mediane(int)),c,SLOT(appliquer_median(int)));
     connect(fenetreFiltres,SIGNAL(appliquer_filtre_perso(MatConvo*)),c,SLOT(appliquer_filtre(MatConvo*)));
@@ -109,7 +114,10 @@ void MainWindow::createControleur()
     connect(fenetreGradient,SIGNAL(appliquer_gradient_moins_y(TypeConvo)),c,SLOT(appliquer_gradient_moins_y(TypeConvo)));
     connect(fenetreGradient,SIGNAL(norme_gradient(TypeConvo)),c,SLOT(norme_gradient(TypeConvo)));
     connect(fenetreGradient,SIGNAL(norme_4gradients(TypeConvo)),c,SLOT(norme_4gradients(TypeConvo)));
+    connect(fenetreGradient,SIGNAL(appliquer_laplacien(int,int)),c,SLOT(appliquer_laplacien(int,int)));
     connect(fenetreRehausseur,SIGNAL(appliquer_rehausseur_laplacien(int,int)),c,SLOT(appliquer_rehausseur_laplacien(int,int)));
+    connect(fenetreLuminosite,SIGNAL(appliquer_luminosite_contraste(float,float)),c,SLOT(luminosite_contraste(float,float)));
+    connect(fenetreSeuil,SIGNAL(appliquer_seuil(int)),c,SLOT(seuillage(int)));
 
     c->changer_mode(SELECTION);
 }
@@ -130,16 +138,19 @@ void MainWindow::changer_message_barre(QString message,int t){
 
 void MainWindow::createActions()
 {
-    QShortcut *keyDecoup= new QShortcut(QKeySequence::Delete,this);
-    QShortcut *keyOpen = new QShortcut(QKeySequence::Open,this);
-    QShortcut *keySave = new QShortcut(QKeySequence::Save,this);
-    QShortcut *keyQuit = new QShortcut(QKeySequence::Quit,this);
-    QShortcut *keySelec = new QShortcut((tr("Ctrl+S")),this);
-    QShortcut *keyPipette = new QShortcut((tr("Ctrl+P")),this);
-    QShortcut *keyHisto = new QShortcut((tr("Ctrl+H")),this);
-    QShortcut *keyRedim = new QShortcut((tr("Ctrl+R")),this);
+    keyDecoup= new QShortcut(QKeySequence::Delete,this);
+    keyOpen = new QShortcut(QKeySequence::Open,this);
+    keySave = new QShortcut(QKeySequence::Save,this);
+    keyQuit = new QShortcut(QKeySequence::Quit,this);
+    keyUndo = new QShortcut(QKeySequence::Undo,this);
+    keyRedo = new QShortcut(QKeySequence::Redo,this);
+    keySelec = new QShortcut((tr("Ctrl+S")),this);
+    keyPipette = new QShortcut((tr("Ctrl+P")),this);
+    keyHisto = new QShortcut((tr("Ctrl+H")),this);
+    keyRedim = new QShortcut((tr("Ctrl+R")),this);
 
-    exitAct = new QAction(tr("Quitter"), this);
+
+    exitAct = new QAction(QIcon(":/icones/exit.png"),tr("Quitter"), this);
     connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
     connect(keyQuit, SIGNAL(activated()),this, SLOT(close()));
 
@@ -154,8 +165,17 @@ void MainWindow::createActions()
     connect(keySave, SIGNAL(activated()),this, SLOT(save()));
 
 
-    saveInAct = new QAction(tr("Enregistrer sous..."), this);
+    saveInAct = new QAction(QIcon(":/icones/saveas.png"),tr("Enregistrer sous..."), this);
     connect(saveInAct, SIGNAL(triggered()), this, SLOT(saveIn()));
+
+    undoAct = new QAction(QIcon(":/icones/undo.png"),tr("Annuler"), this);
+    connect(undoAct, SIGNAL(triggered()), this, SLOT(undo()));
+    connect(keyUndo, SIGNAL(activated()), this, SLOT(undo()));
+
+    redoAct = new QAction(QIcon(":/icones/redo.png"),tr("Refaire"), this);
+    connect(redoAct, SIGNAL(triggered()), this, SLOT(redo()));
+    connect(keyRedo, SIGNAL(activated()), this, SLOT(redo()));
+
 
     pipetteAct = new QAction(tr("Pipette"), this);
     connect(pipetteAct, SIGNAL(triggered()), this, SLOT(pipette()));
@@ -204,12 +224,11 @@ void MainWindow::createActions()
     rehaussAct = new QAction(tr("Rehausseur Laplacien"), this);
     connect(rehaussAct, SIGNAL(triggered()), this, SLOT(rehausseur()));
 
-
-    undoAct = new QAction(tr("Annuler"), this);
-    connect(undoAct, SIGNAL(triggered()), this, SLOT(undo()));
-
-    redoAct = new QAction(tr("Refaire"), this);
-    connect(redoAct, SIGNAL(triggered()), this, SLOT(redo()));
+    lumAct = new QAction(tr("Luminosité / Contraste"), this);
+    connect(lumAct, SIGNAL(triggered()), this, SLOT(luminosite()))
+            ;
+    seuilAct = new QAction(tr("Seuil"), this);
+    connect(seuilAct, SIGNAL(triggered()), this, SLOT(seuil()));
 
 
 }
@@ -239,6 +258,8 @@ void MainWindow::createMenus()
     toolsMenu->addAction(fusionAct);
     toolsMenu->addAction(decoupageAct);
     toolsMenu->addAction(redimAct);
+    toolsMenu->addAction(lumAct);
+    toolsMenu->addAction(seuilAct);
 
     /*Creation de la barre de menu Filtres*/
     filtreMenu = menuBar()->addMenu("&Filtres");
@@ -250,6 +271,16 @@ void MainWindow::createMenus()
 
     activer_menus(false);
 }
+
+void MainWindow::createToolBars()
+{
+    fileToolBar = addToolBar(tr("Fichier"));
+    fileToolBar->addAction(ouvrirAct);
+    fileToolBar->addAction(saveAct);
+    fileToolBar->addAction(undoAct);
+    fileToolBar->addAction(redoAct);
+}
+
 
 void MainWindow::activer_menus(bool b)
 {
@@ -269,6 +300,22 @@ void MainWindow::activer_menus(bool b)
         medianAct->setDisabled(true);
         filtreAct->setDisabled(true);
         gradientAct->setDisabled(true);
+        rehaussAct->setDisabled(true);
+        lumAct->setDisabled(true);
+        seuilAct->setDisabled(true);
+
+        keyDecoup->setEnabled(false);
+        keyOpen->setEnabled(false);
+        keySave->setEnabled(false);
+        keyQuit->setEnabled(false);
+        keyUndo->setEnabled(false);
+        keyRedo->setEnabled(false);
+        keySelec->setEnabled(false);
+        keyPipette->setEnabled(false);
+        keyHisto->setEnabled(false);
+        keyRedim->setEnabled(false);
+
+
     }
     else
     {
@@ -286,6 +333,20 @@ void MainWindow::activer_menus(bool b)
         medianAct->setDisabled(false);
         filtreAct->setDisabled(false);
         gradientAct->setDisabled(false);
+        rehaussAct->setDisabled(false);
+        lumAct->setDisabled(false);
+        seuilAct->setDisabled(false);
+
+        keyDecoup->setEnabled(true);
+        keyOpen->setEnabled(true);
+        keySave->setEnabled(true);
+        keyQuit->setEnabled(true);
+        keyUndo->setEnabled(true);
+        keyRedo->setEnabled(true);
+        keySelec->setEnabled(true);
+        keyPipette->setEnabled(true);
+        keyHisto->setEnabled(true);
+        keyRedim->setEnabled(true);
     }
 
     undoAct->setDisabled(true);
@@ -314,10 +375,22 @@ void MainWindow::MAJ_affichage()
         fenetreGradient->show();
     else
         fenetreGradient->hide();
+
     if(c->mode == REHAUSSEUR)
         fenetreRehausseur->show();
     else
         fenetreRehausseur->hide();
+
+    if(c->mode == LUMINOSITE)
+        fenetreLuminosite->show();
+    else
+        fenetreLuminosite->hide();
+
+    if(c->mode == SEUIL)
+        fenetreSeuil->show();
+    else
+        fenetreSeuil->hide();
+
 
 
     z->init_affichage();
@@ -537,9 +610,20 @@ void  MainWindow::enable_undo_redo(){
         redoAct->setEnabled(true);
     else
         redoAct->setEnabled(false);
-
-
-
-
 }
+
+void MainWindow::luminosite(){
+    verifier_fusion();
+    c->changer_mode(LUMINOSITE);
+    fenetreLuminosite->init_lum_cont();
+    MAJ_affichage();
+}
+
+void MainWindow::seuil(){
+    verifier_fusion();
+    c->changer_mode(SEUIL);
+    fenetreSeuil->init_seuil();
+    MAJ_affichage();
+}
+
 

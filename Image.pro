@@ -29,7 +29,9 @@ SOURCES += \
     tabfiltres.cpp \
     fenetregradient.cpp \
     historique.cpp \
-    fenetrerehausseur.cpp
+    fenetrerehausseur.cpp \
+    fenetreseuil.cpp \
+    fenetreluminosite.cpp
 
 HEADERS  += \
     zonedessin.h \
@@ -49,7 +51,9 @@ HEADERS  += \
     tabfiltres.h \
     fenetregradient.h \
     historique.h \
-    fenetrerehausseur.h
+    fenetrerehausseur.h \
+    fenetreseuil.h \
+    fenetreluminosite.h
 
 FORMS    += mainwindow.ui \
 

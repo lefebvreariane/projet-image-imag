@@ -6,8 +6,6 @@ FenetreFlous::FenetreFlous(QWidget *parent) :
     //Creation du layout principal
     QGridLayout *layoutFlous = new QGridLayout;
 
-
-
     // Creation des boutons
     QPushButton *boutonOk = new QPushButton("Ok");
     connect(boutonOk, SIGNAL(clicked()),this, SLOT(clic_ok()));
