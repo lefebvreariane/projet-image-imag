@@ -209,17 +209,17 @@ QImage Filtres::appliquer_laplacien(MatConvo *m, QImage imIn)
                     b = b + (m->getMat2(s,t)*qBlue(imIn.pixel(i+k,j+l)));
                 }
             }
-            r = r/m->getCoef();
+            r = r/m->getCoef()+125;
             if (r < 0)
                 r = 0;
             else if (r>255)
                 r = 255;
-            g = g/m->getCoef();
+            g = g/m->getCoef()+125;
             if (g < 0)
                 g = 0;
             else if (g>255)
                 g = 255;
-            b = b/m->getCoef();
+            b = b/m->getCoef()+125;
             if (b < 0)
                 b = 0;
             else if (b>255)
@@ -227,11 +227,36 @@ QImage Filtres::appliquer_laplacien(MatConvo *m, QImage imIn)
             imFiltree.setPixel(i,j,qRgb((int)r,(int)g,(int)b));
         }
     }
-    //imFiltree = this->RGB_to_grey(imFiltree);
+    imFiltree = this->RGB_to_grey(imFiltree);
     m->~MatConvo();
     return imFiltree;
 }
 
+QImage Filtres::passage_zero(int seuil, QImage laplacien)
+{
+    QImage imOut = laplacien.copy(0,0,laplacien.width(),laplacien.height());
+
+    for (int i=1 ; i<laplacien.width()-1 ; i++)
+    {
+        for (int j=1 ; j<laplacien.height()-1 ; j++)
+        {
+            if (abs(laplacien.pixel(i,j-1)-laplacien.pixel(i,j)) > seuil ||       /*en x*/
+                abs(laplacien.pixel(i-1,j)-laplacien.pixel(i,j)) > seuil ||       /*en y*/
+                abs(laplacien.pixel(i-1,j-1)-laplacien.pixel(i,j)) > seuil ||     /*en diag de H-G a B-D */
+                abs(laplacien.pixel(i+1,j+1)-laplacien.pixel(i,j)) > seuil ||     /*en diag de H-D a B-G */
+                abs(laplacien.pixel(i,j+1)-laplacien.pixel(i,j)) > seuil ||       /*en -x*/
+                abs(laplacien.pixel(i+1,j)-laplacien.pixel(i,j)) > seuil ||       /*en -y*/
+                abs(laplacien.pixel(i+1,j-1)-laplacien.pixel(i,j)) > seuil ||     /*en -diag de H-G a B-D */
+                abs(laplacien.pixel(i-1,j+1)-laplacien.pixel(i,j)) > seuil)       /*en -diag de H-D a B-G */
+            {
+                imOut.setPixel(i,j,qRgb(255,255,255));
+            }
+            else
+                imOut.setPixel(i,j,qRgb(0,0,0));
+        }
+    }
+    return imOut;
+}
 
 /*QImage Filtres::info_contours(QImage imIn)
 {
@@ -252,39 +277,86 @@ QImage Filtres::appliquer_laplacien(MatConvo *m, QImage imIn)
     return imOut;
 }*/
 
-QImage Filtres::seuillage(int seuil, QImage imContours)
+QImage *Filtres::hysteresis(int seuilBas, int seuilHaut, QImage imNorme)
 {
-    QImage imOut = imContours.copy(0,0,imContours.width(),imContours.height());
+    QImage *Out = new QImage[2];
 
-    for (int i=0 ; i<imContours.width() ; i++)
+    Out[0] = imNorme.copy(0,0,imNorme.width(),imNorme.height()); // estPotentiel
+    Out[1] = imNorme.copy(0,0,imNorme.width(),imNorme.height()); // estContour
+
+    for (int i=0 ; i<imNorme.width() ; i++)
     {
-        for (int j=0 ; j<imContours.height() ; j++)
+        for (int j=0 ; j<imNorme.height() ; j++)
         {
-            if (qRed(imContours.pixel(i,j)) < seuil)
-                imOut.setPixel(i,j,qRgb(0,0,0));
+            if (qRed(imNorme.pixel(i,j)) > seuilHaut)
+            {
+                Out[1].setPixel(i,j,qRgb(255,255,255));
+                Out[0].setPixel(i,j,qRgb(0,0,0));
+            }
+            else if (qRed(imNorme.pixel(i,j)) >= seuilBas && qRed(imNorme.pixel(i,j)) <= seuilHaut)
+            {
+                Out[1].setPixel(i,j,qRgb(0,0,0));
+                Out[0].setPixel(i,j,qRgb(255,255,255));
+            }
+            else
+            {
+                Out[1].setPixel(i,j,qRgb(0,0,0));
+                Out[0].setPixel(i,j,qRgb(0,0,0));
+            }
         }
     }
-    imOut = this->appliquer_median(3,imOut);
-    return imOut;
+    //imOut = this->appliquer_median(3,imOut);
+    return Out;
 }
 
-/*QImage Filtres::rehaussement_contraste(QImage imIn)
+QImage Filtres::chainage_contours(int seuilBas, int seuilHaut, TypeConvo tConv, QImage imIn)
 {
-    int r,g,b;
-    QImage imRehaussee = imIn.copy(0,0,imIn.width(),imIn.height());
-    QImage imContours = this->seuillage(160,imIn);
-    for (int i=0 ; i<imIn.width() ; i++)
+    QImage imNorme;
+    if (tConv == LAPLACIEN)
     {
-        for(int j=0 ; j<imIn.height() ; j++)
-        {
-            r = qRed(imIn.pixel(i,j)) + qRed(imContours.pixel(i,j));
-            g = qGreen(imIn.pixel(i,j)) + qGreen(imContours.pixel(i,j));
-            b = qBlue(imIn.pixel(i,j)) + qBlue(imContours.pixel(i,j));
-            imRehaussee.setPixel(i,j,qRgb(r,g,b));
-        }
+        imNorme = this->appliquer_filtre(this->creer_laplacien(2,1), imIn);
     }
-    return imRehaussee;
-}*/
+    else
+        imNorme = this->norme_4gradients(tConv,imIn);
+
+    QImage *contours = this->hysteresis(seuilBas, seuilHaut, imNorme);
+    //contours[0] -> estPotentiel // contours[1] -> estContour
+
+    //1er passage
+    for(int i=1 ; i<imIn.width()-1 ; i++)
+        for(int j=1 ; j<imIn.height() ; j++)
+            if(qRed(contours[0].pixel(i,j) == 1))
+                if((contours[1].pixel(i,j-1) == 1) || (contours[1].pixel(i-1,j-1) == 1) ||
+                   (contours[1].pixel(i-1,j) == 1) || (contours[1].pixel(i-1,j+1) == 1))
+                     contours[1].setPixel(i,j,qRgb(255,255,255));
+
+    //2eme passage
+    for(int j=imIn.height()-2 ; j>=0 ; j--)
+        for(int i=1 ; i<imIn.width()-1 ; i++)
+            if(qRed(contours[0].pixel(i,j) == 1))
+                if((contours[1].pixel(i-1,j) == 1) || (contours[1].pixel(i-1,j+1) == 1) ||
+                   (contours[1].pixel(i,j+1) == 1) || (contours[1].pixel(i+1,j+1) == 1))
+                     contours[1].setPixel(i,j,qRgb(255,255,255));
+
+    //3eme passage
+    for(int i=imIn.width()-2 ; i>=0 ; i--)
+        for(int j=imIn.height()-2 ; j>0 ; j--)
+            if(qRed(contours[0].pixel(i,j) == 1))
+                if((contours[1].pixel(i,j+1) == 1) || (contours[1].pixel(i+1,j+1) == 1) ||
+                   (contours[1].pixel(i+1,j) == 1) || (contours[1].pixel(i+1,j-1) == 1))
+                     contours[1].setPixel(i,j,qRgb(255,255,255));
+
+    //4eme passage
+    for(int j=1 ; j<imIn.height() ; j++)
+        for(int i=imIn.width()-2 ; i>0 ; i--)
+            if(qRed(contours[0].pixel(i,j) == 1))
+                if((contours[1].pixel(i+1,j) == 1) || (contours[1].pixel(i+1,j-1) == 1) ||
+                   (contours[1].pixel(i,j-1) == 1) || (contours[1].pixel(i-1,j-1) == 1))
+                     contours[1].setPixel(i,j,qRgb(255,255,255));
+
+    return contours[1];
+
+}
 
 QImage Filtres::appliquer_rehaussement(int alpha, QImage imIn)
 {
@@ -366,21 +438,23 @@ QImage Filtres::eclaircir(int alpha, QImage imIn)
     {
         for(int j=0 ; j<imIn.height() ; j++)
         {
-            r = qRed(imIn.pixel(i,j)) + alpha;//*qRed(imIn.pixel(i,j))/100;
-            if (r>255)
-                r = 255;
-            else if(r<0)
-                r = 0;
-            g = qGreen(imOut.pixel(i,j)) + alpha;//*qGreen(imIn.pixel(i,j))/100;
-            if (g>255)
-                g = 255;
-            else if(g<0)
-                g = 0;
-            b = qBlue(imOut.pixel(i,j)) + alpha;//*qBlue(imIn.pixel(i,j))/100;
-            if (b>255)
-                b = 255;
-            else if(b<0)
-                b = 0;
+            if (r>255) r = 255;
+             else if(r<0) r = 0;
+             else r = qRed(imIn.pixel(i,j)) + alpha;//*qRed(imIn.pixel(i,j))/100;
+            if (r>255) r = 255;
+            else if(r<0) r = 0;
+
+            if (g>255) g = 255;
+             else if(g<0) g = 0;
+             else g = qGreen(imOut.pixel(i,j)) + alpha;//*qGreen(imIn.pixel(i,j))/100;
+            if (g>255) g = 255;
+            else if(g<0) g = 0;
+
+            if (b>255) b = 255;
+             else if(b<0) b = 0;
+             else b = qBlue(imOut.pixel(i,j)) + alpha;//*qBlue(imIn.pixel(i,j))/100;
+            if (b>255) b = 255;
+            else if(b<0) b = 0;
             imOut.setPixel(i,j,qRgb(r,g,b));
         }
     }
@@ -519,6 +593,7 @@ QImage Filtres::norme_gradient(QImage imX, QImage imY)
 }
 QImage Filtres::norme_4gradients(TypeConvo tConv, QImage imIn)
 {
+    //imIn = this->appliquer_median(3,imIn);
     QImage imX = this->appliquer_filtre(this->creer_gradient_x(tConv),imIn);
     imX = this->RGB_to_grey(imX);
     QImage imY = this->appliquer_filtre(this->creer_gradient_y(tConv),imIn);
@@ -546,10 +621,12 @@ QImage Filtres::inverser_couleurs(QImage imIn)
     return imOut;
 }
 
-double Filtres::orientation(QImage grad_x, QImage grad_y, int x, int y)
+/*QImage Filtres::orientation(QImage gradH, QImage gradV)
 {
-    return atan(grad_x.pixel(x,y)/grad_y.pixel(x,y));
-}
+    QImage direction(gradH.width(),gradH.height(),)
+    for (int i=0, i<gradH.width() ; i++)
+        atan(grad_x.pixel(x,y)/grad_y.pixel(x,y));
+}*/
 
 QImage Filtres::supp_non_maxima(QImage imX, QImage imY, QImage imNorme)
 {
@@ -561,11 +638,15 @@ QImage Filtres::supp_non_maxima(QImage imX, QImage imY, QImage imNorme)
         for(int y = 1 ; y < imOut.height() - 1; y++) {
             int dx, dy;
 
-            if(imX.pixel(x,y) > qRgb(0,0,0)) dx = 1;
-            else dx = -1;
+            if(imX.pixel(x,y) > qRgb(0,0,0))
+                dx = 1;
+            else
+                dx = -1;
 
-            if(imY.pixel(x,y) > qRgb(0,0,0)) dy = 1;
-            else dy = -1;
+            if(imY.pixel(x,y) > qRgb(0,0,0))
+                dy = 1;
+            else
+                dy = -1;
 
             int a1, a2, b1, b2, A, B, point;
             QRgb val;
@@ -608,4 +689,31 @@ QImage Filtres::supp_non_maxima(QImage imX, QImage imY, QImage imNorme)
         }
     }
     return imOut;
+}
+
+QImage Filtres::seuillage(QImage imNorme, int seuil)
+{
+    QImage imOut = imNorme.copy(0,0,imNorme.width(),imNorme.height());//this->eclaircir(50,imNorme);
+    for (int i=0 ; i<imOut.width() ; i++)
+        for (int j=0; j<imOut.height() ; j++)
+            if (qRed(imOut.pixel(i,j)) < seuil)
+                imOut.setPixel(i,j,qRgb(0,0,0));
+    return imOut;
+}
+
+QImage Filtres::decoupage_intelligent_contours(QImage imIn)
+{
+    QImage imOut = this->norme_4gradients(GRADIENT_PREWITT,imIn);
+    imOut = this->seuillage(imOut,10);
+    //1er passage: en x
+    int i=0, j=0;
+    while (i<imOut.width())
+    {
+        while (j<imOut.height())
+        {
+            //if ()
+        }
+    }
+    return imOut;
+
 }

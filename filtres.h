@@ -25,6 +25,10 @@ public:
 
     QImage norme_gradient(QImage imX, QImage imY);
     QImage norme_4gradients(TypeConvo tConv, QImage imIn);
+    QImage passage_zero(int seuil, QImage laplacien);
+
+    QImage *hysteresis(int seuilBas, int seuilHaut, QImage imContours);
+    QImage chainage_contours(int seuilBas, int seuilHaut, TypeConvo tConv, QImage imIn);
 
     QImage appliquer_median(int taille, QImage imIn);
     QImage appliquer_flou(MatConvo *m, QImage imIn);
@@ -32,11 +36,12 @@ public:
     QImage appliquer_laplacien(MatConvo *, QImage imIn);
     QImage appliquer_filtre(MatConvo *m, QImage imIn);
 
-    QImage seuillage(int seuil, QImage imContours);
-    double orientation(QImage grad_x, QImage grad_y, int x, int y);
+    //QImage orientation(QImage grad_horiz, QImage grad_vertical);
     QImage supp_non_maxima(QImage imX, QImage imY, QImage imNorme);
     /*QImage info_contours(QImage imIn);*/
-    /*QImage rehaussement_contraste(QImage imIn);*/
+    QImage seuillage(QImage imNorme, int seuil);
+
+    QImage decoupage_intelligent_contours(QImage imIn);
 };
 
 #endif // FILTRES_H
