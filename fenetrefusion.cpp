@@ -39,7 +39,7 @@ FenetreFusion::FenetreFusion(QWidget *parent) :
 
 
 
-    QLabel *label_transp = new QLabel("Transparence: ");
+    label_transp = new QLabel("Transparence: ");
     label_transp_pourcentage = new QLabel;
     tansparence = new QSlider(Qt::Horizontal);
     tansparence->setMinimum(0);
@@ -49,11 +49,37 @@ FenetreFusion::FenetreFusion(QWidget *parent) :
     connect(tansparence,SIGNAL(valueChanged(int)),this, SLOT(changement_tansparence(int)));
     transp_fusion = tansparence->value()/100.0;
 
+
     QHBoxLayout *layoutTransp = new QHBoxLayout;
     layoutTransp->addWidget(label_transp);
     layoutTransp->addWidget(tansparence);
     layoutTransp->addWidget(label_transp_pourcentage);
 
+
+    label_x = new QLabel("Décalage en x: ");
+    label_y = new QLabel("Décalage en y: ");
+
+    slider_x = new QSlider(Qt::Horizontal);
+    slider_x->setMinimum(0);
+    connect(slider_x,SIGNAL(valueChanged(int)),this,SLOT(changement_x(int)));
+
+    slider_y = new QSlider(Qt::Horizontal);
+    slider_y->setMinimum(0);
+    connect(slider_y,SIGNAL(valueChanged(int)),this,SLOT(changement_y(int)));
+
+    label_x_val = new QLabel("0");
+    label_y_val = new QLabel("0");
+
+    QHBoxLayout *layoutx = new QHBoxLayout;
+    layoutx->addWidget(label_x);
+    layoutx->addWidget(slider_x);
+    layoutx->addWidget(label_x_val);
+
+
+    QHBoxLayout *layouty = new QHBoxLayout;
+    layouty->addWidget(label_y);
+    layouty->addWidget(slider_y);
+    layouty->addWidget(label_y_val);
 
     layoutFusion = new QGridLayout;
     layoutFusion->addWidget(label_source, 0, 0, 1, 2);
@@ -61,8 +87,10 @@ FenetreFusion::FenetreFusion(QWidget *parent) :
     layoutFusion->addWidget(label_mode, 3, 0);
     layoutFusion->addWidget(liste, 3, 1);
     layoutFusion->addLayout(layoutTransp, 4, 0, 1, 2);
-    layoutFusion->addWidget(boutonOk, 5, 0);
-    layoutFusion->addWidget(boutonAnnuler, 5, 1);
+    layoutFusion->addLayout(layoutx, 5, 0, 1, 2);
+    layoutFusion->addLayout(layouty, 6, 0, 1, 2);
+    layoutFusion->addWidget(boutonOk, 7, 0);
+    layoutFusion->addWidget(boutonAnnuler, 7, 1);
 
     setLayout(layoutFusion);
 }
@@ -120,7 +148,7 @@ void FenetreFusion::changement_liste(int i){
     }
 
 
-    image_result = effectuer_fusion(image_fusion,image_source, image_result,type_fusion,transp_fusion,0,0);
+    image_result = effectuer_fusion(image_source,image_fusion, image_result,type_fusion,transp_fusion,slider_x->value(),slider_y->value());
     emit changer_image_sans_save(image_result);
 
 }
@@ -130,11 +158,23 @@ void FenetreFusion:: changement_tansparence(int i){
 
     transp_fusion = i/100.0;
     label_transp_pourcentage->setText(QString::number(tansparence->value()) + "%");
-    image_result = effectuer_fusion(image_fusion,image_source, image_result,type_fusion,transp_fusion,0,0);
+    image_result = effectuer_fusion(image_source,image_fusion, image_result,type_fusion,transp_fusion,slider_x->value(),slider_y->value());
     emit changer_image_sans_save(image_result);
 }
 
+void FenetreFusion::changement_x(int i){
 
+    label_x_val->setText(QString::number(i));
+    image_result = effectuer_fusion(image_source,image_fusion, image_result,type_fusion,transp_fusion,slider_x->value(),slider_y->value());
+    emit changer_image_sans_save(image_result);
+}
+
+void FenetreFusion::changement_y(int i){
+
+    label_y_val->setText(QString::number(i));
+    image_result = effectuer_fusion(image_source,image_fusion, image_result,type_fusion,transp_fusion,slider_x->value(),slider_y->value());
+    emit changer_image_sans_save(image_result);
+}
 
 void FenetreFusion::initFusion(QImage i){
     image_source = i;
@@ -146,14 +186,18 @@ void FenetreFusion::initFusion(QImage i){
     connect(bouton_open,SIGNAL(clicked()), this, SLOT(open()) );
     layoutFusion->addWidget(bouton_open, 2, 0, 1, 2);
 
+    slider_x->setMaximum(i.width());
+    slider_y->setMaximum(i.height());
+    slider_x->setValue(0);
+    slider_y->setValue(0);
 
-    /*
-    label_fusion->setText("Cliquer pour ouvrir");
-    label_fusion->setAlignment(Qt::AlignCenter);
-    label_fusion->adjustSize();
-*/
+    type_fusion =SOURCE_ATOP ;
+
     image_result = image_source.copy();
     image_result.convertToFormat(QImage::Format_ARGB32,0);
+
+    label_fusion->clear();
+    activer_fusion(false);
 }
 
 
@@ -168,7 +212,7 @@ void FenetreFusion::open()
                                      tr("Imppossible d'ouvrir %1.").arg(fileName));
             return;
         }
-
+        activer_fusion(true);
         label_fusion->setPixmap(QPixmap::fromImage(image_fusion.scaled(TAILLEH,TAILLEV,Qt::KeepAspectRatio)));
         label_fusion->setMaximumSize(TAILLEH,TAILLEV);
         label_fusion->setMinimumSize(TAILLEH,TAILLEV);
@@ -178,7 +222,7 @@ void FenetreFusion::open()
         bouton_open->setText("Ouvrir une autre image");
         image_result = image_source.copy();
         image_result.convertToFormat(QImage::Format_ARGB32,0);
-        image_result = effectuer_fusion(image_fusion,image_source, image_result,type_fusion,transp_fusion,0,0);
+        image_result = effectuer_fusion(image_source,image_fusion, image_result,type_fusion,transp_fusion,slider_x->value(),slider_y->value());
         emit changer_image_sans_save(image_result);
     }
 }
@@ -193,6 +237,32 @@ void FenetreFusion::clic_annuler(){
 
 }
 
+void FenetreFusion::activer_fusion(bool b){
+    if (b){
+        label_transp->setEnabled(true);
+        tansparence->setEnabled(true);
+        label_transp_pourcentage->setEnabled(true);
+        label_x->setEnabled(true);
+        label_y->setEnabled(true);
+        label_x_val->setEnabled(true);
+        label_y_val->setEnabled(true);
+        slider_x->setEnabled(true);
+        slider_y->setEnabled(true);
+
+    }else{
+
+        label_transp->setEnabled(false);
+        tansparence->setEnabled(false);
+        label_transp_pourcentage->setEnabled(false);
+        label_x->setEnabled(false);
+        label_y->setEnabled(false);
+        label_x_val->setEnabled(false);
+        label_y_val->setEnabled(false);
+        slider_x->setEnabled(false);
+        slider_y->setEnabled(false);
+
+    }
+}
 void FenetreFusion::finir_fusion(bool b){
     this->hide();
 
@@ -239,10 +309,6 @@ QImage FenetreFusion::effectuer_fusion(QImage src, QImage dest, QImage res)
 */
 
 //px, py=coordonnees du coin superieur gauche de l'image source, si les coordonnees de celui de l'image destination sont (0,0)
-void FenetreFusion::fusion_basique(QImage dest, QImage src, QImage res){
-    effectuer_fusion(dest,src,res, DESTINATION,1,0,0);
-
-}
 
 QImage FenetreFusion::effectuer_fusion(QImage dest, QImage src, QImage res, typeMode t, float transparence, int px, int py){
 
@@ -394,8 +460,8 @@ QImage FenetreFusion::effectuer_fusion(QImage dest, QImage src, QImage res, type
                         ad=1;
 
                     //if (cont<200){
-                        //qDebug()<<"red:"<<cd.red()<<", green:"<<cd.green()<<", blue:"<<cd.blue()<<", alpha:"<<cd.alpha();
-                        //cont++;
+                    //qDebug()<<"red:"<<cd.red()<<", green:"<<cd.green()<<", blue:"<<cd.blue()<<", alpha:"<<cd.alpha();
+                    //cont++;
                     //}
 
                     QColor cs;
@@ -441,9 +507,9 @@ QImage FenetreFusion::effectuer_fusion(QImage dest, QImage src, QImage res, type
                     }
                     //on applique la formule et cree ainsi une image resultat
                     res1.setPixel(i,j,QColor(r*as*ad+y*cs.red()*(1-ad)+zz*cd.red()*(1-as),
-                                           g*as*ad+y*cs.green()*(1-ad)+zz*cd.green()*(1-as),
-                                           b*as*ad+y*cs.blue()*(1-ad)+zz*cd.blue()*(1-as),
-                                           (x*as*ad+y*as*(1-ad)+zz*ad*(1-as))*255).rgba());
+                                             g*as*ad+y*cs.green()*(1-ad)+zz*cd.green()*(1-as),
+                                             b*as*ad+y*cs.blue()*(1-ad)+zz*cd.blue()*(1-as),
+                                             (x*as*ad+y*as*(1-ad)+zz*ad*(1-as))*255).rgba());
                     /*qDebug()<<"r="<<r<<"as="<<as<<"ad="<<ad<<"y="<<y<<"cs red="<<cs.red()<<"zz="<<zz
                             <<"cd red="<<cd.red()<<"x="<<x<<"cs green="<<cs.green()<<"cd green="<<cd.green()
                             <<"cs blue="<<cs.blue()<<"cd blue="<<cd.blue();
@@ -503,7 +569,7 @@ QImage FenetreFusion::effectuer_fusion(QImage dest, QImage src, QImage res, type
                 }
             }
         }*/
-    }
+        }
         //qDebug()<<"=========================================================";
 
         /*for (i=0;i<res.width();i++){

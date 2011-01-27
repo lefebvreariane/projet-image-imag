@@ -27,16 +27,17 @@ public slots:
     void clic_annuler();
     void changement_tansparence(int);
     void changement_liste(int);
-    void fusion_basique(QImage,QImage,QImage);
+    void changement_x(int);
+    void changement_y(int);
 
 private :
         static const int TAILLEH = 200;
 static const int TAILLEV = 200;
-//QImage effectuer_fusion(QImage src, QImage dest, QImage res);
+void activer_fusion(bool);
 
 QLabel *label_source;
 QLabel *label_fusion;
-QLabel *label_transp_pourcentage;
+
 QImage effectuer_fusion(QImage dest, QImage src, QImage res, typeMode t, float transparence, int px, int py);
 
 QImage image_fusion;
@@ -45,7 +46,18 @@ QImage image_result;
 QPushButton *bouton_open;
 
 QGridLayout * layoutFusion;
+
+QLabel *label_transp;
 QSlider *tansparence;
+QLabel *label_transp_pourcentage;
+
+QLabel *label_x;
+QLabel *label_y;
+QLabel *label_x_val;
+QLabel *label_y_val;
+QSlider *slider_x;
+QSlider *slider_y;
+
 
 typeMode type_fusion;
 float transp_fusion;

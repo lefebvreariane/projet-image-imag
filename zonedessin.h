@@ -34,7 +34,6 @@ public:
     Historique *historique;
 
 signals:
-    void fusionner(QImage,QImage,QImage);
     void enable_undo_redo();
 
 public slots:
