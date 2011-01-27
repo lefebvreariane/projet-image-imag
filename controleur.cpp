@@ -365,20 +365,20 @@ void Controleur::luminosite_contraste(float lum, float cont){
 
 void Controleur::decoupage_intelligent_contours()
 {
-    //z->changer_image(this->decouper());
+    //decoupage intelligent
 
     QImage imIn = this->decouper();
     z->changer_image(this->f->decoupage_intelligent_contours(imIn));
 }
 void Controleur::decoupage_intelligent_clic(int x, int y)
 {
-    //z->changer_image(this->decouper());
-
+    //gomme magique
     z->changer_image(this->f->decoupage_intelligent_clic(z->image, x, y));
 }
 
 void Controleur::decoupage_intelligent(int x, int y)
 {
+    //bagette magique
     z->changer_image(this->f->decoupage_intelligent(z->image, x, y));
 }
 
