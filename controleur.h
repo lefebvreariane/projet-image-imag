@@ -6,6 +6,7 @@
 #include <matConvo.h>
 #include "noyaupascal.h"
 #include "filtres.h"
+#include "redim.h"
 
 
 
@@ -34,7 +35,6 @@ public:
 
     void appliquer_rehaussement(int alpha);
     void appliquer_laplacien(MatConvo *m);
-    void afficher_histogrammes();
     void eclaircir(int alpha);
     void supp_non_maxima(TypeConvo tConv);
     void reInitSelection();
@@ -82,6 +82,7 @@ private:
     int sX0, sX1, sY0, sY1;
     QPainter paint;
     Histogramme *histogramme;
+    Redim *red;
 
 };
 

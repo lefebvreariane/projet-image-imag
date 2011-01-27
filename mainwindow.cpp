@@ -183,11 +183,13 @@ void MainWindow::createActions()
     pipetteAct = new QAction(QIcon(":/icones/pipette.png"),tr("Pipette"), this);
     connect(pipetteAct, SIGNAL(triggered()), this, SLOT(pipette()));
     connect(keyPipette, SIGNAL(activated()),this, SLOT(pipette()));
+    pipetteAct->setCheckable(true);
 
 
     selectionAct = new QAction(QIcon(":/icones/selection.png"),tr("Selection"), this);
     connect(selectionAct, SIGNAL(triggered()), this, SLOT(selection()));
     connect(keySelec, SIGNAL(activated()),this, SLOT(selection()));
+    selectionAct->setCheckable(true);
 
 
     histoAct = new QAction(tr("Histogrammes"), this);
@@ -222,6 +224,7 @@ void MainWindow::createActions()
 
     baguetteAct = new QAction(QIcon(":/icones/cutmagique.png"),tr("Gomme magique"), this);
     connect(baguetteAct, SIGNAL(triggered()), this, SLOT(baguette_magique()));
+    baguetteAct->setCheckable(true);
 
     redimAct = new QAction(tr("Redimentionnement"), this);
     connect(redimAct, SIGNAL(triggered()), this, SLOT(redimentionner()));
@@ -299,7 +302,7 @@ void MainWindow::createToolBars()
     fileToolBar->addSeparator();
     fileToolBar->addAction(selectionAct);
     fileToolBar->addAction(pipetteAct);
-    fileToolBar->addAction(baguetteAct);
+    //fileToolBar->addAction(baguetteAct);
 
 
 }
@@ -328,6 +331,7 @@ void MainWindow::activer_menus(bool b)
         rehaussAct->setDisabled(true);
         lumAct->setDisabled(true);
         seuilAct->setDisabled(true);
+        contoursAct->setDisabled(true);
 
         keyDecoup->setEnabled(false);
         keyOpen->setEnabled(false);
@@ -361,6 +365,7 @@ void MainWindow::activer_menus(bool b)
         rehaussAct->setDisabled(false);
         lumAct->setDisabled(false);
         seuilAct->setDisabled(false);
+        contoursAct->setDisabled(false);
 
         keyDecoup->setEnabled(true);
         keyOpen->setEnabled(true);
@@ -381,6 +386,22 @@ void MainWindow::activer_menus(bool b)
 void MainWindow::MAJ_affichage()
 {
     afficher_panneauDroite(false);
+
+    if (c->mode == PIPETTE)
+        pipetteAct->setChecked(true);
+    else
+        pipetteAct->setChecked(false);
+
+    if (c->mode == SELECTION)
+        selectionAct->setChecked(true);
+    else
+        selectionAct->setChecked(false);
+
+    if (c->mode == BAGUETTE_MAGIQUE)
+        baguetteAct->setChecked(true);
+    else
+        baguetteAct->setChecked(false);
+
 
     if (c->mode == REDIM)
         fenetreRedim->show();
@@ -636,7 +657,6 @@ void  MainWindow::rehausseur(){
 }
 
 void  MainWindow::undo(){
-    qDebug()<<"UNDO";
     verifier_fusion();
     z->historique->undo();
     enable_undo_redo();
@@ -644,7 +664,6 @@ void  MainWindow::undo(){
 }
 
 void  MainWindow::redo(){
-    qDebug()<<"REDO";
 
     verifier_fusion();
     z->historique->redo();

@@ -115,7 +115,6 @@ void MatConvo::noyau_gauss_bruit()
 
     if (isNullMat1())
     {
-        qDebug()<< "t'as oublié de déclarer un noyau de pascal";
         return;
     }
     for (int i=0 ; i<getTFiltre() ; i++)
@@ -134,7 +133,6 @@ void MatConvo::noyau_coef()
     // si le noyau est unique...mais il ne le devrait pas
     if(getTFiltre() == 1)
     {
-        qDebug()<< "attention! noyau pascal unique";
         return;
     }
 
@@ -160,7 +158,6 @@ void MatConvo::ajouter_val_mat1(int val)
 {
     if (isPleineMat1())
     {
-        qDebug()<<"matrice pleine, il y a erreur!!!";
         return;
     }
     int i = 0,j;
@@ -186,7 +183,6 @@ void MatConvo::ajouter_val_mat2(int val)
 {
     if (isPleineMat2())
     {
-        qDebug()<<"matrice pleine, il y a erreur!!!";
         return;
     }
 
@@ -214,7 +210,6 @@ void MatConvo::noyau_laplacien(int numero)
         setMat2(2,0,1); setMat2(2,1,2); setMat2(2,2,1);
         break;
     default:
-        qDebug()<<"il n'y a que 3 sorte de contraste (faible:1 , moyen:2 , fort: 3)";
         break;
     }
 }

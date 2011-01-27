@@ -28,6 +28,7 @@ FenetreLuminosite::FenetreLuminosite(QWidget *parent) :
 
     //Creation du layout principal
     QGridLayout *layout = new QGridLayout;
+    layout->setColumnMinimumWidth(2,20);
     layout->addWidget(label_lum, 0, 0);
     layout->addWidget(slider_lum, 0, 1);
     layout->addWidget(label_val_lum, 0, 2);

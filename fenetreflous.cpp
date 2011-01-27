@@ -48,6 +48,7 @@ FenetreFlous::FenetreFlous(QWidget *parent) :
 
 
     layoutFlous = new QGridLayout;
+    layoutFlous->setColumnMinimumWidth(2,20);
     layoutFlous->addWidget(Radio_lineaire, 0, 0);
     layoutFlous->addWidget(slider_lineaire, 0, 1);
     layoutFlous->addWidget(label_lineaire, 0, 2);
