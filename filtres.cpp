@@ -87,45 +87,62 @@ MatConvo *Filtres::creer_impulsionnel()
 
 QImage Filtres::appliquer_median(int taille, QImage imIn)
 {
-    qDebug()<<"fonction appliquer_median;";
+    int nbConvo = 1;
+    int n=0;
+    if (taille == 15)
+    {
+        taille = 7;
+        nbConvo = 2;
+    }
+    else if (taille == 13)
+    {
+        taille = 5;
+        nbConvo = 3;
+    }
+    else if (taille == 11)
+    {
+        taille = 5;
+        nbConvo = 2;
+    }
     QImage imFiltree = imIn.copy(0,0,imIn.width(),imIn.height());
     int gris;
     int i,j, k, l;
-    // ATTENTION verifier que l'image est IsGreyScale() avant d'appeler
-    // cette fonction.
-
-
-    // rentrer taille du filtre median
-    //int taille = 3;
     int nv = taille*taille;
     int distPixel = (int) taille/2;
-    qDebug()<<"taille filtre: "<<taille<<" ; NbVoisins: "<<nv<<" ; distPixel : "<<distPixel;
 
     MatConvo *voisins = new MatConvo();
     voisins->allouerMem(nv,1);
-    for (i=0 ; i<=imFiltree.width()-1 ; i++)
+
+    while (n<nbConvo)
     {
-        for (j=0 ; j<=imFiltree.height()-1 ; j++)
+        imIn = imFiltree.copy(0,0,imIn.width(),imIn.height());
+
+
+        for (i=0 ; i<=imFiltree.width()-1 ; i++)
         {
-            voisins->setTCourante(0);
-            for (k=-distPixel ; k<=distPixel ; k++)
+            for (j=0 ; j<=imFiltree.height()-1 ; j++)
             {
-                for(l=-distPixel ; l<=distPixel ; l++)
+                voisins->setTCourante(0);
+                for (k=-distPixel ; k<=distPixel ; k++)
                 {
-                    if ((i+k>=0) && (i+k<imIn.width()) &&
-                        (j+l>=0) && (j+l<imIn.height()))
+                    for(l=-distPixel ; l<=distPixel ; l++)
                     {
-                        voisins->ajouter_val_mat1(qRed(imIn.pixel(i+k,j+l)));
+                        if ((i+k>=0) && (i+k<imIn.width()) &&
+                            (j+l>=0) && (j+l<imIn.height()))
+                        {
+                            voisins->ajouter_val_mat1(qRed(imIn.pixel(i+k,j+l)));
+                        }
                     }
                 }
-            }
-            if (voisins->getTCourante() != 0)
-            {
-                //voisins->ranger_gris();
-                gris = voisins->gris_median((int) voisins->getTCourante()/2);
-                imFiltree.setPixel(i,j,qRgb((int)gris,(int)gris,(int)gris));
+                if (voisins->getTCourante() != 0)
+                {
+                    //voisins->ranger_gris();
+                    gris = voisins->gris_median((int) voisins->getTCourante()/2);
+                    imFiltree.setPixel(i,j,qRgb((int)gris,(int)gris,(int)gris));
+                }
             }
         }
+        n++;
     }
     voisins->~MatConvo();
     return imFiltree;
@@ -188,7 +205,6 @@ QImage Filtres::appliquer_flou(MatConvo *m, QImage imIn)
 
 QImage Filtres::appliquer_laplacien(MatConvo *m, QImage imIn)
 {
-    qDebug()<<"fonction appliquer_median;";
     QImage imFiltree = imIn.copy(0,0,imIn.width(),imIn.height());
     int i,j,k,l,s,t;
     double r,g,b;
@@ -326,32 +342,32 @@ QImage Filtres::chainage_contours(int seuilBas, int seuilHaut, TypeConvo tConv, 
     for(int i=1 ; i<imIn.width()-1 ; i++)
         for(int j=1 ; j<imIn.height() ; j++)
             if(qRed(contours[0].pixel(i,j) == 1))
-                if((contours[1].pixel(i,j-1) == 1) || (contours[1].pixel(i-1,j-1) == 1) ||
-                   (contours[1].pixel(i-1,j) == 1) || (contours[1].pixel(i-1,j+1) == 1))
+                if((contours[0].pixel(i,j-1) == 1) || (contours[0].pixel(i-1,j-1) == 1) ||
+                   (contours[0].pixel(i-1,j) == 1) || (contours[0].pixel(i-1,j+1) == 1))
                      contours[1].setPixel(i,j,qRgb(255,255,255));
 
     //2eme passage
     for(int j=imIn.height()-2 ; j>=0 ; j--)
         for(int i=1 ; i<imIn.width()-1 ; i++)
             if(qRed(contours[0].pixel(i,j) == 1))
-                if((contours[1].pixel(i-1,j) == 1) || (contours[1].pixel(i-1,j+1) == 1) ||
-                   (contours[1].pixel(i,j+1) == 1) || (contours[1].pixel(i+1,j+1) == 1))
+                if((contours[0].pixel(i-1,j) == 1) || (contours[0].pixel(i-1,j+1) == 1) ||
+                   (contours[0].pixel(i,j+1) == 1) || (contours[0].pixel(i+1,j+1) == 1))
                      contours[1].setPixel(i,j,qRgb(255,255,255));
 
     //3eme passage
     for(int i=imIn.width()-2 ; i>=0 ; i--)
         for(int j=imIn.height()-2 ; j>0 ; j--)
             if(qRed(contours[0].pixel(i,j) == 1))
-                if((contours[1].pixel(i,j+1) == 1) || (contours[1].pixel(i+1,j+1) == 1) ||
-                   (contours[1].pixel(i+1,j) == 1) || (contours[1].pixel(i+1,j-1) == 1))
+                if((contours[0].pixel(i,j+1) == 1) || (contours[0].pixel(i+1,j+1) == 1) ||
+                   (contours[0].pixel(i+1,j) == 1) || (contours[0].pixel(i+1,j-1) == 1))
                      contours[1].setPixel(i,j,qRgb(255,255,255));
 
     //4eme passage
     for(int j=1 ; j<imIn.height() ; j++)
         for(int i=imIn.width()-2 ; i>0 ; i--)
             if(qRed(contours[0].pixel(i,j) == 1))
-                if((contours[1].pixel(i+1,j) == 1) || (contours[1].pixel(i+1,j-1) == 1) ||
-                   (contours[1].pixel(i,j-1) == 1) || (contours[1].pixel(i-1,j-1) == 1))
+                if((contours[0].pixel(i+1,j) == 1) || (contours[0].pixel(i+1,j-1) == 1) ||
+                   (contours[0].pixel(i,j-1) == 1) || (contours[0].pixel(i-1,j-1) == 1))
                      contours[1].setPixel(i,j,qRgb(255,255,255));
 
     return contours[1];
@@ -373,7 +389,6 @@ QImage Filtres::appliquer_rehaussement(int alpha, QImage imIn)
     double r,g,b; // composantes de la nouvelle couleur
 
     int distPixel = (int) m->getTFiltre()/2;
-    qDebug()<< "taille du filtre:"<< m->getTFiltre()<< " ; distance du pixel central:"<< distPixel;
 
     for(i=distPixel ; i<imOut.width()-distPixel ; i++)
     {
@@ -468,7 +483,6 @@ QImage Filtres::appliquer_filtre(MatConvo *m, QImage imIn)
     double r,g,b; // composantes de la nouvelle couleur
 
     int distPixel = (int) m->getTFiltre()/2;
-    qDebug()<< "taille du filtre:"<< m->getTFiltre()<< " ; distance du pixel central:"<< distPixel;
 
     for(i=distPixel ; i<imOut.width()-distPixel ; i++)
     {
@@ -703,17 +717,59 @@ QImage Filtres::seuillage(QImage imNorme, int seuil)
 
 QImage Filtres::decoupage_intelligent_contours(QImage imIn)
 {
+    qDebug()<<"fonction decoupage intelligent: image: "<<imIn.width()<<" ; "<<imIn.height();
     QImage imOut = this->norme_4gradients(GRADIENT_PREWITT,imIn);
-    imOut = this->seuillage(imOut,10);
-    //1er passage: en x
-    int i=0, j=0;
-    while (i<imOut.width())
-    {
-        while (j<imOut.height())
-        {
-            //if ()
-        }
-    }
-    return imOut;
+    imOut = this->seuillage(imOut,25);
 
+    int **pixels = new int *[imOut.width()];
+    for (int i=0 ; i<imOut.width() ; i++)
+        pixels[i] = new int[imOut.height()];
+
+    for (int i=0 ; i<imOut.width() ; i++)
+        for (int j=0; j<imOut.height() ; j++)
+                pixels[i][j] = qRed(imOut.pixel(i,j));
+
+    qDebug()<<"decoupage recursif coin haut gauche";
+    pixels = this->decoupage_recursif(pixels,0,0,imOut.width(),imOut.height());
+    qDebug()<<"decoupage recursif coin bas droite";
+    pixels = this->decoupage_recursif(pixels,imOut.width()-1,imOut.height()-1,imOut.width(),imOut.height());
+    qDebug()<<"decoupage recursif coin haut droite";
+    pixels = this->decoupage_recursif(pixels,imOut.width()-1,0,imOut.width(),imOut.height());
+    qDebug()<<"decoupage recursif coin bas gauche";
+    pixels = this->decoupage_recursif(pixels,0,imOut.height()-1,imOut.width(),imOut.height());
+
+    for (int i=0 ; i<imOut.width() ; i++)
+        for (int j=0; j<imOut.height() ; j++)
+        {
+            if (pixels[i][j] == -1)
+                imOut.setPixel(i,j,qRgba(255,0,0,0));
+            else
+                imOut.setPixel(i,j,imIn.pixel(i,j));
+        }
+
+    return imOut;
+}
+
+int **Filtres::decoupage_recursif(int **pixels,int x, int y, int width, int height)
+{
+
+    //cas de debordement
+    if (x < 0 || x >= width || y < 0 || y >= height)
+        return pixels;
+    //cas de base
+    if (pixels[x][y] >0 || pixels[x][y] == -1)
+        return pixels;
+
+    //recursion sur les pixels entourant le pixel courant
+    pixels[x][y] = -1;
+    pixels = decoupage_recursif(pixels,x-1,y-1,width,height);
+    pixels = decoupage_recursif(pixels,x-1,y,width,height);
+    pixels = decoupage_recursif(pixels,x-1,y+1,width,height);
+    pixels = decoupage_recursif(pixels,x,y+1,width,height);
+    pixels = decoupage_recursif(pixels,x+1,y+1,width,height);
+    pixels = decoupage_recursif(pixels,x+1,y,width,height);
+    pixels = decoupage_recursif(pixels,x+1,y-1,width,height);
+    pixels = decoupage_recursif(pixels,x,y-1,width,height);
+
+    return pixels;
 }

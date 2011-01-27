@@ -42,6 +42,7 @@ public:
     QImage seuillage(QImage imNorme, int seuil);
 
     QImage decoupage_intelligent_contours(QImage imIn);
+    int **decoupage_recursif(int **pixels,int x, int y, int width, int height);
 };
 
 #endif // FILTRES_H

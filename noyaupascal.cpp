@@ -28,17 +28,12 @@ void NoyauPascal::setTaille(int val)
 // FONCTION
 void NoyauPascal::calcul_taille()
 {
-    qDebug()<< "fonction calcul_taille;";
-
-    qDebug()<<"coefficient du noyau de Pascal: "<<getCoef();
     int coefP = getCoef();
     setTaille(1);
     while (coefP > 1)
     {
         coefP = (int) coefP/2;
         setTaille(getTaille()+1);
-      qDebug()<<"taille = "<<getTaille()<<" ; coefP = "<<coefP;
     }
     setTaille(getTaille()*2 - 1);
-    qDebug()<<"taille du noyau de pascal: "<<getTaille();
 }

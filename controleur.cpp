@@ -353,6 +353,13 @@ void Controleur::luminosite_contraste(float lum, float cont){
     z->changer_image(res);
 }
 
+void Controleur::decoupage_intelligent_contours()
+{
+    //z->changer_image(this->decouper());
+
+    QImage imIn = this->decouper();
+    z->changer_image(this->f->decoupage_intelligent_contours(imIn));
+}
 
 QImage Controleur::decouper()
 {
@@ -376,7 +383,6 @@ QImage Controleur::decouper()
             y = 0;
         }
     }
-
     return resImage;
 }
 

@@ -57,7 +57,6 @@ void MatConvo::setCoef(int c)
 void MatConvo::setMat1(int i, int val)
 {
     this->mat1[i] = val;
-    //qDebug()<<"mat1["<<i<<"] = "<<mat1[i];
 }
 
 void MatConvo::setTCourante(int i)
@@ -73,7 +72,6 @@ void MatConvo::inc_tCourante()
 void MatConvo::setMat2(int i, int j, int val)
 {
     this->mat2[i][j] = val;
-    qDebug()<<"mat2["<<i<<"]["<<j<<"] = "<<mat2[i][j];
 }
 
 // FONCTIONS BOOLEENNES
@@ -114,9 +112,6 @@ void MatConvo::allouerMem(int tailleFiltre, int coefficient)
 
 void MatConvo::noyau_gauss_bruit()
 {
-    qDebug()<< "fonction noyau_gauss_bruit;";
-    qDebug()<< "taille matrice: "<<getTFiltre();
-    qDebug()<< "matrice: ";
 
     if (isNullMat1())
     {
@@ -130,8 +125,6 @@ void MatConvo::noyau_gauss_bruit()
 
 void MatConvo::noyau_coef()
 {
-    qDebug()<< "fonction noyau_coef;";
-    qDebug()<< "matrice: ";
 
     // tMilieu-1 est l'indice du coef max
     int tMilieu = (int) getTFiltre()/2;
@@ -155,10 +148,6 @@ void MatConvo::noyau_coef()
 
 void MatConvo::noyau_moyenne()
 {
-  qDebug()<< "fonction noyau_moyenne;";
-  qDebug()<< "taille matrice: "<<getTFiltre();
-  qDebug()<< "matrice: ";
-
     // cree une matrice de convolution à 1, pour faire la moyenne sur les pixels
     for (int i=0 ; i<getTFiltre() ; i++)
     {
@@ -202,16 +191,11 @@ void MatConvo::ajouter_val_mat2(int val)
     }
 
     setMat2((int) getTCourante()/getTFiltre(),getTCourante()%getTFiltre(),val);
-    qDebug()<<"ajouter: "<<(int) getTCourante()/getTFiltre()<<" , "<<getTCourante()%getTFiltre()<<" ; valeur: "<<val;
     inc_tCourante();
 }
 
 void MatConvo::noyau_laplacien(int numero)
 {
-    qDebug()<< "fonction noyau_laplacien;";
-    qDebug()<< "taille matrice: "<<getTFiltre();
-    qDebug()<< "matrice: ";
-
     switch (numero)
     {
     case 1:
@@ -237,10 +221,6 @@ void MatConvo::noyau_laplacien(int numero)
 
 void MatConvo::noyau_impulsionnel()
 {
-    qDebug()<< "fonction noyau_impulsionnel;";
-    qDebug()<< "taille matrice: "<<getTFiltre();
-    qDebug()<< "matrice: ";
-
     setMat2(0,0,0); setMat2(0,1,0); setMat2(0,2,0);
     setMat2(1,0,0); setMat2(1,1,1); setMat2(1,2,0);
     setMat2(2,0,0); setMat2(2,1,0); setMat2(2,2,0);
@@ -248,10 +228,6 @@ void MatConvo::noyau_impulsionnel()
 
 void MatConvo::gradient_x_lisse(TypeConvo tConv)
 {
-    qDebug()<< "fonction gradient_x_lisse;";
-    qDebug()<< "taille matrice: "<<getTFiltre();
-    qDebug()<< "matrice: ";
-
     if (tConv == GRADIENT_SOBEL)
     {
         setMat2(0,0,1); setMat2(0,1,0); setMat2(0,2,-1);
@@ -268,10 +244,6 @@ void MatConvo::gradient_x_lisse(TypeConvo tConv)
 
 void MatConvo::gradient_y_lisse(TypeConvo tConv)
 {
-    qDebug()<< "fonction gradient_y_lisse;";
-    qDebug()<< "taille matrice: "<<getTFiltre();
-    qDebug()<< "matrice: ";
-
     if (tConv == GRADIENT_SOBEL)
     {
         setMat2(0,0,1); setMat2(0,1,2); setMat2(0,2,1);

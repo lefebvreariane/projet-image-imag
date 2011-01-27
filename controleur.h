@@ -67,6 +67,7 @@ public slots:
     void appliquer_laplacien(int, int);
 
     QImage decouper();
+    void decoupage_intelligent_contours();
 
 signals:
     void afficher_pixel(int r, int g, int b);
