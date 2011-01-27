@@ -750,26 +750,68 @@ QImage Filtres::decoupage_intelligent_contours(QImage imIn)
     return imOut;
 }
 
+QImage Filtres::decoupage_intelligent_clic(QImage imIn, int x, int y)
+{
+    qDebug()<<"fonction decoupage intelligent: image: "<<imIn.width()<<" ; "<<imIn.height();
+    QImage imOut = this->norme_4gradients(GRADIENT_PREWITT,imIn);
+    imOut = this->seuillage(imOut,25);
+
+    int **pixels = new int *[imOut.width()];
+    for (int i=0 ; i<imOut.width() ; i++)
+        pixels[i] = new int[imOut.height()];
+
+    for (int i=0 ; i<imOut.width() ; i++)
+        for (int j=0; j<imOut.height() ; j++)
+                pixels[i][j] = qRed(imOut.pixel(i,j));
+
+    pixels = this->decoupage_recursif(pixels,x,y,imOut.width(),imOut.height());
+
+    for (int i=0 ; i<imOut.width() ; i++)
+        for (int j=0; j<imOut.height() ; j++)
+        {
+            if (pixels[i][j] == -1)
+                imOut.setPixel(i,j,qRgba(255,0,0,0));
+            else
+                imOut.setPixel(i,j,imIn.pixel(i,j));
+        }
+
+    return imOut;
+}
+
 int **Filtres::decoupage_recursif(int **pixels,int x, int y, int width, int height)
 {
 
     //cas de debordement
     if (x < 0 || x >= width || y < 0 || y >= height)
+    {
+        //qDebug()<<"débordement: "<<x<<" , "<<y;
         return pixels;
+    }
     //cas de base
     if (pixels[x][y] >0 || pixels[x][y] == -1)
+    {
+        //qDebug()<<"cas de base: "<<x<<" , "<<y;
         return pixels;
-
+    }
     //recursion sur les pixels entourant le pixel courant
+    //qDebug()<<"recursion: "<<x<<" , "<<y;
     pixels[x][y] = -1;
-    pixels = decoupage_recursif(pixels,x-1,y-1,width,height);
-    pixels = decoupage_recursif(pixels,x-1,y,width,height);
-    pixels = decoupage_recursif(pixels,x-1,y+1,width,height);
-    pixels = decoupage_recursif(pixels,x,y+1,width,height);
-    pixels = decoupage_recursif(pixels,x+1,y+1,width,height);
-    pixels = decoupage_recursif(pixels,x+1,y,width,height);
-    pixels = decoupage_recursif(pixels,x+1,y-1,width,height);
-    pixels = decoupage_recursif(pixels,x,y-1,width,height);
+    //if (x-1 < 0 || x-1 >= width || y-1 < 0 || y-1 >= height)
+        pixels = decoupage_recursif(pixels,x-1,y-1,width,height);
+    //if (x-1 < 0 || x-1 >= width || y < 0 || y >= height)
+        pixels = decoupage_recursif(pixels,x-1,y,width,height);
+    //if (x-1 < 0 || x-1 >= width || y+1 < 0 || y+1 >= height)
+        pixels = decoupage_recursif(pixels,x-1,y+1,width,height);
+    //if (x < 0 || x >= width || y+1 < 0 || y+1 >= height)
+        pixels = decoupage_recursif(pixels,x,y+1,width,height);
+    //if (x+1 < 0 || x+1 >= width || y+1 < 0 || y+1 >= height)
+        pixels = decoupage_recursif(pixels,x+1,y+1,width,height);
+    //if (x+1 < 0 || x+1 >= width || y < 0 || y >= height)
+        pixels = decoupage_recursif(pixels,x+1,y,width,height);
+    //if (x+1 < 0 || x+1 >= width || y-1 < 0 || y-1 >= height)
+        pixels = decoupage_recursif(pixels,x+1,y-1,width,height);
+    //if (x < 0 || x >= width || y-1 < 0 || y-1 >= height)
+        pixels = decoupage_recursif(pixels,x,y-1,width,height);
 
     return pixels;
 }
