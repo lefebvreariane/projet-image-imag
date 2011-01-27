@@ -26,13 +26,14 @@ FenetreRehausseur::FenetreRehausseur(QWidget *parent) :
 
     //Creation du layout principal
     QGridLayout *layoutRehausseur = new QGridLayout;
+    layoutRehausseur->setColumnMinimumWidth(2,20);
     layoutRehausseur->addWidget(label_intensite, 0, 0);
     layoutRehausseur->addWidget(listeIntensite, 0, 1);
     layoutRehausseur->addWidget(label_alpha, 1, 0);
     layoutRehausseur->addWidget(slider_alpha, 1, 1);
     layoutRehausseur->addWidget(label_val_alpha, 1, 2);
     layoutRehausseur->addWidget(boutonOk, 2, 0);
-    layoutRehausseur->addWidget(boutonAnnuler, 2, 1,1,2);
+    layoutRehausseur->addWidget(boutonAnnuler, 2, 1);
 
     setLayout(layoutRehausseur);
     this->setMaximumWidth(TAILLEH);

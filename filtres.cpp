@@ -48,7 +48,6 @@ MatConvo *Filtres::creer_filtre(int coefOuTaille, TypeConvo tConv)
         return m;
     }
     else {
-        qDebug()<<"erreur, aucune matrice n'a pas ete initialisee";
         return NULL;
     }
 }
@@ -62,7 +61,6 @@ MatConvo *Filtres::creer_laplacien(int numero, int alpha)
         return m;
     }
     else {
-        qDebug()<<"erreur, aucune matrice n'a pas ete initialisee";
         return NULL;
     }
 }
@@ -156,7 +154,6 @@ QImage Filtres::appliquer_flou(MatConvo *m, QImage imIn)
     double r,g,b; // composantes de la nouvelle couleur
 
     int distPixel = (int) m->getTFiltre()/2;
-    qDebug()<< "taille du filtre:"<< m->getTFiltre()<< " ; distance du pixel central:"<< distPixel;
 
     // On applique le filtre choisi taille t (à 1) sur l'image
     for(i=0 ; i<=imFloue.width()-1 ; i++)
@@ -717,7 +714,6 @@ QImage Filtres::seuillage(QImage imNorme, int seuil)
 
 QImage Filtres::decoupage_intelligent_contours(QImage imIn)
 {
-    qDebug()<<"fonction decoupage intelligent: image: "<<imIn.width()<<" ; "<<imIn.height();
     QImage imOut = this->norme_4gradients(GRADIENT_PREWITT,imIn);
     imOut = this->seuillage(imOut,25);
 
@@ -729,13 +725,9 @@ QImage Filtres::decoupage_intelligent_contours(QImage imIn)
         for (int j=0; j<imOut.height() ; j++)
                 pixels[i][j] = qRed(imOut.pixel(i,j));
 
-    qDebug()<<"decoupage recursif coin haut gauche";
     pixels = this->decoupage_recursif(pixels,0,0,imOut.width(),imOut.height());
-    qDebug()<<"decoupage recursif coin bas droite";
     pixels = this->decoupage_recursif(pixels,imOut.width()-1,imOut.height()-1,imOut.width(),imOut.height());
-    qDebug()<<"decoupage recursif coin haut droite";
     pixels = this->decoupage_recursif(pixels,imOut.width()-1,0,imOut.width(),imOut.height());
-    qDebug()<<"decoupage recursif coin bas gauche";
     pixels = this->decoupage_recursif(pixels,0,imOut.height()-1,imOut.width(),imOut.height());
 
     for (int i=0 ; i<imOut.width() ; i++)
@@ -752,7 +744,6 @@ QImage Filtres::decoupage_intelligent_contours(QImage imIn)
 
 QImage Filtres::decoupage_intelligent(QImage imIn, int x, int y)
 {
-    qDebug()<<"fonction decoupage intelligent: image: "<<imIn.width()<<" ; "<<imIn.height();
     QImage imOut = this->norme_4gradients(GRADIENT_PREWITT,imIn);
     imOut= imOut.convertToFormat(QImage::Format_ARGB32);
     imOut = this->seuillage(imOut,25);
@@ -781,7 +772,6 @@ QImage Filtres::decoupage_intelligent(QImage imIn, int x, int y)
 
 QImage Filtres::decoupage_intelligent_clic(QImage imIn, int x, int y)
 {
-    qDebug()<<"fonction decoupage intelligent: image: "<<imIn.width()<<" ; "<<imIn.height();
     QImage imOut = this->norme_4gradients(GRADIENT_PREWITT,imIn);
     imOut= imOut.convertToFormat(QImage::Format_ARGB32);
     imOut = this->seuillage(imOut,25);

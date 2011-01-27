@@ -120,7 +120,7 @@ void FenetreFusion::changement_liste(int i){
     }
 
 
-    image_result = effectuer_fusion(image_source,image_fusion, image_result,type_fusion,transp_fusion,0,0);
+    image_result = effectuer_fusion(image_fusion,image_source, image_result,type_fusion,transp_fusion,0,0);
     emit changer_image_sans_save(image_result);
 
 }
@@ -130,7 +130,7 @@ void FenetreFusion:: changement_tansparence(int i){
 
     transp_fusion = i/100.0;
     label_transp_pourcentage->setText(QString::number(tansparence->value()) + "%");
-    image_result = effectuer_fusion(image_source,image_fusion, image_result,type_fusion,transp_fusion,0,0);
+    image_result = effectuer_fusion(image_fusion,image_source, image_result,type_fusion,transp_fusion,0,0);
     emit changer_image_sans_save(image_result);
 }
 
@@ -178,7 +178,7 @@ void FenetreFusion::open()
         bouton_open->setText("Ouvrir une autre image");
         image_result = image_source.copy();
         image_result.convertToFormat(QImage::Format_ARGB32,0);
-        image_result = effectuer_fusion(image_source,image_fusion, image_result,type_fusion,transp_fusion,0,0);
+        image_result = effectuer_fusion(image_fusion,image_source, image_result,type_fusion,transp_fusion,0,0);
         emit changer_image_sans_save(image_result);
     }
 }
@@ -305,7 +305,6 @@ QImage FenetreFusion::effectuer_fusion(QImage dest, QImage src, QImage res, type
                     x=1;
                     y=1;
                     zz=1;
-                    qDebug()<<"on est rentre DEST_OVER!"<<v;
                     break;
                 }
             case SOURCE_IN:

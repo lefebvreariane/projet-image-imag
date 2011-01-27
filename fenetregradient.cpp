@@ -4,7 +4,7 @@ FenetreGradient::FenetreGradient(QWidget *parent) :
         QWidget(parent)
 {
     //Creation du layout principal
-    QGridLayout *layoutFlous = new QGridLayout;
+
 
 
     // Creation des boutons
@@ -48,20 +48,21 @@ FenetreGradient::FenetreGradient(QWidget *parent) :
     changement_type(0);
 
 
-    layoutFlous = new QGridLayout;
-    layoutFlous->addWidget(label_type, 0, 0);
-    layoutFlous->addWidget(typeGradient, 0, 1);
-    layoutFlous->addWidget(label_liste, 1, 0);
-    layoutFlous->addWidget(listeGradient, 1, 1);
-    layoutFlous->addWidget(typeLaplacien, 2, 0);
-    layoutFlous->addWidget(listeTypeLaplacien, 2, 1);
-    layoutFlous->addWidget(labelLaplacien, 3, 0);
-    layoutFlous->addWidget(sliderLaplacien, 3, 1);
-    layoutFlous->addWidget(labelValLaplacien, 3, 2);
-    layoutFlous->addWidget(boutonOk, 4, 0);
-    layoutFlous->addWidget(boutonAnnuler,4, 1);
+    QGridLayout *layoutGrad = new QGridLayout;
+    layoutGrad->setColumnMinimumWidth(2,20);
+    layoutGrad->addWidget(label_type, 0, 0);
+    layoutGrad->addWidget(typeGradient, 0, 1);
+    layoutGrad->addWidget(label_liste, 1, 0);
+    layoutGrad->addWidget(listeGradient, 1, 1);
+    layoutGrad->addWidget(typeLaplacien, 2, 0);
+    layoutGrad->addWidget(listeTypeLaplacien, 2, 1);
+    layoutGrad->addWidget(labelLaplacien, 3, 0);
+    layoutGrad->addWidget(sliderLaplacien, 3, 1);
+    layoutGrad->addWidget(labelValLaplacien, 3, 2);
+    layoutGrad->addWidget(boutonOk, 4, 0);
+    layoutGrad->addWidget(boutonAnnuler,4, 1);
 
-    setLayout(layoutFlous);
+    setLayout(layoutGrad);
     this->setMaximumWidth(TAILLEH);
 
 }

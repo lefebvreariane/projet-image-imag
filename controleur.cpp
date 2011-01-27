@@ -7,6 +7,7 @@ Controleur::Controleur(ZoneDessin *zone)
 {
     z = zone;
     f = new Filtres();
+    red = new Redim(z->image);
     sX0 = -1;
     sX1 = -1;
     sY0 = -1;
@@ -152,7 +153,6 @@ MatConvo *Controleur::creer_gradient_y(TypeConvo tConv)
 void Controleur::appliquer_median(int taille)
 {
     if (z->image.isGrayscale()){
-        qDebug()<<"fonction appliquer_median;";
         z->changer_image(f->appliquer_median(taille, z->image));
     }
     else
@@ -161,19 +161,16 @@ void Controleur::appliquer_median(int taille)
 
 void Controleur::appliquer_flou(int taille,TypeConvo tConv)
 {
-    qDebug()<<"fonction appliquer_flou;";
     z->changer_image(f->appliquer_flou(creer_filtre(taille,tConv),z->image));
 }
 
 void Controleur::appliquer_flou(MatConvo *m)
 {
-    qDebug()<<"fonction appliquer_flou;";
     z->changer_image(f->appliquer_flou(m,z->image));
 }
 
 void Controleur::appliquer_filtre(MatConvo *m)
 {
-    qDebug()<<"fonction appliquer_filtre;";
     z->changer_image(f->appliquer_filtre(m,z->image));
 }
 
@@ -187,19 +184,16 @@ void Controleur::hysteresis(int seuilBas, int seuilHaut, int i)
 void Controleur::chainage_contours(int seuilBas, int seuilHaut, TypeConvo tConv)
 {
     //z->changer_image(this->f->appliquer_median(3,z->image));
-    qDebug()<<"fonction chainage_contours";
     z->changer_image(this->f->chainage_contours(seuilBas,seuilHaut,tConv,z->image));
 }
 
 void Controleur::appliquer_rehaussement(int alpha)
 {
-    qDebug()<<"fonction appliquer_laplacien;";
     z->changer_image(this->f->appliquer_rehaussement(alpha,z->image));
 }
 
 void Controleur::appliquer_laplacien(MatConvo *m)
 {
-    qDebug()<<"fonction appliquer_laplacien;";
     z->changer_image(this->f->appliquer_laplacien(m,z->image));
 }
 
@@ -266,7 +260,6 @@ void Controleur::mon_seuillage(TypeConvo tConv, int seuil)
     z->changer_image(this->f->seuillage(imNorme,seuil));
 }
 void Controleur::seuillage(int s){
-    qDebug()<<s;
     QImage res = z->image.copy();
     double greyD;
     int i,j;
@@ -365,181 +358,82 @@ void Controleur::luminosite_contraste(float lum, float cont){
 
 void Controleur::decoupage_intelligent_contours()
 {
-    //decoupage intelligent
+    //z->changer_image(this->decouper());
 
     QImage imIn = this->decouper();
     z->changer_image(this->f->decoupage_intelligent_contours(imIn));
 }
 void Controleur::decoupage_intelligent_clic(int x, int y)
 {
-    //gomme magique
+    //z->changer_image(this->decouper());
+
     z->changer_image(this->f->decoupage_intelligent_clic(z->image, x, y));
 }
 
 void Controleur::decoupage_intelligent(int x, int y)
 {
-    //bagette magique
     z->changer_image(this->f->decoupage_intelligent(z->image, x, y));
 }
 
 QImage Controleur::decouper()
 {
-    int x = 0, y = 0;
-    //int largeur = max(z->resultLabel->X0, z->resultLabel->X1) - min(z->resultLabel->X0, z->resultLabel->X1);
-    //int hauteur = max(z->resultLabel->Y0, z->resultLabel->Y1) - min(z->resultLabel->Y0, z->resultLabel->Y1);
-    //QImage resImage(largeur,hauteur,z->image.format());
-    QImage resImage(sX1,sY1,QImage::Format_ARGB32);
+    red->maj(z->image);
+    QImage resImage;
 
     if(z->resultLabel->X0 == z->resultLabel->X1 || z->resultLabel->Y0 == z->resultLabel->Y1)
         resImage = z->image;
     else {
-        for(int i=sX0; i<sX0 + sX1; i++) {
-            for(int j=sY0; j<sY0 + sY1; j++) {
-                if (i < 0 || i > z->image.width() || j < 0 || j > z->image.height())
-                    resImage.setPixel(QPoint(x,y++),qRgba(255,255,255,0));
-                else
-                    resImage.setPixel(QPoint(x,y++),z->image.pixel(i,j));
-            }
-            x++;
-            y = 0;
-        }
+        resImage = red->decouper(sX0,sY0,sX1,sY1);
     }
 
     return resImage;
 }
-
-void Controleur::afficher_histogrammes()
-{
-    histogramme->show();
-}
-
-QImage down(QImage base, int l, int h) {
-
-    QImage res(l,h,base.format());
-    double ratioL, ratioH;
-    double compteurH = 0, compteurL = 0;
-    int iR = 0, jR = 0;
-
-    //Reduction de la taille de l'image :
-    ratioL = (double) base.width() / (double) l;
-    ratioH = (double) base.height() / (double) h ;
-
-    int cptL = 0, cptH = 0;
-
-
-    for(int i = 0; i < l; i++) {
-        for(int j = 0; j < h; j++) {
-            int r = 0, g = 0, b = 0;
-            compteurL += ratioL;
-            compteurH += ratioH;
-            //qDebug() << compteurL << "," << ratioL;
-            //if (iR > 330)
-            //  return res;
-
-            //qDebug() << compteurL <<"," << compteurH;
-            for(cptL = 0; cptL < (int) compteurL/* && cptL+iR < base.width()*/; cptL++) {
-                for(cptH = 0; cptH < (int) compteurH/* && cptH+jR < base.height()*/; cptH++) {
-                    r += ((QColor) base.pixel(cptL+iR, cptH+jR)).red();
-                    g += ((QColor) base.pixel(cptL+iR, cptH+jR)).green();
-                    b += ((QColor) base.pixel(cptL+iR, cptH+jR)).blue();
-                    //        qDebug() << "lecture en " << cptL+iR << "," << cptH+jR << '!' << compteurL << "," << compteurH;
-                }
-            }
-
-            jR = (int) ((double)  j*(ratioH)) ;
-            //qDebug() << "ecriture en " << i << "," << j;
-            res.setPixel(QPoint(i,j), (QColor(r/(cptL*cptH),g/(cptL*cptH),b/(cptL*cptH),255).rgb()));
-            //qDebug() << compteurL << (int) compteurL;
-            compteurL -= (int) compteurL;
-
-            compteurH -= (int) compteurH;
-        }
-        //qDebug() << iR << "," << cptL;
-        iR = (int) ((double) i*(ratioL ));
-
-        jR = 0;
-
-
-    }
-
-    return res;
-}
-
-QImage up(QImage base, int l, int h) {
-
-    QImage res(l,h,base.format());
-    double ratioL, ratioH;
-    double compteurH = 0, compteurL = 0;
-    int iR = 0, jR = 0;
-
-    //Augmentation de la taille de l'image :
-    ratioH = (double) base.height() / ((double) h - base.height());
-    ratioL = (double) base.width() / ((double) l - base.width());
-    for(int iB=0; iB < base.width(); iB++) {
-        for(int jB=0; jB<base.height(); jB++) {
-            // On parcours l'image et copie chaque pixel
-            res.setPixel(QPoint(iR,jR++),base.pixel(iB,jB));
-            //S'il y a un redimensionnement sur la hauteur on rajoute les pixels necessaire
-            if (h > base.height()) {
-                compteurH ++;
-                while (compteurH >= ratioH) {
-                    res.setPixel(QPoint(iR,jR++),base.pixel(iB,jB));
-                    compteurH -= ratioH;
-                }
-            }
-        }
-        //Dans le cas d'un nombre de pixel impair la hauteur de l'image ne sera pas atteinte
-        if (jR != res.height()) {
-            res.setPixel(QPoint(iR,jR),res.pixel(iR,jR-1));
-            jR++;
-        }
-        //S'il y a un redimensionnement sur la largeur on rajoute les pixels necessaire
-        if (l > base.width()) {
-            compteurL ++;
-            while (compteurL >= ratioL) {
-                iR++;
-                for(int j=0 ; j < res.height(); j++)
-                    res.setPixel(QPoint(iR,j),res.pixel(iR-1,j));
-                compteurL -= ratioL;
-            }
-        }
-        iR++;
-        jR = 0;
-        compteurH = 0;
-    }
-    //Dans le cas d'un nombre de pixel impaire la largeur de l'image ne sera pas atteinte
-    if (iR != res.width()) {
-        for(int j=0 ; j < res.height(); j++)
-            res.setPixel(QPoint(iR,j),res.pixel(iR-1,j));
-    }
-
-    return res;
-}
-
 
 
 void Controleur::redimensionner(int l, int h, int mode)
 {
     QImage res(l,h,z->image.format());
 
+    red->maj(z->image);
+    if (mode == 0) {
 
 
-    if (l<z->image.width() && h<z->image.height()) // si la diminution est sur les deux taille
-        res = down(z->image,l ,h);
-    else if (l < z->image.width()) // si elle n'est que sur la largeur
-        res = down(z->image,l ,z->image.height());
-    else if (h < z->image.height()) // si elle n'est que sur la hauteur
-        res = down(z->image,z->image.width(),h);
-    else
-        res = z->image;
+        if (l<z->image.width() && h<z->image.height()) // si la diminution est sur les deux taille
+            res = red->down(l ,h);
+        else if (l < z->image.width()) // si elle n'est que sur la largeur
+            res = red->down(l ,z->image.height());
+        else if (h < z->image.height()) // si elle n'est que sur la hauteur
+            res = red->down(z->image.width(),h);
+        else
+            res = z->image;
+        if (l<z->image.width() && h<z->image.height()) // si la diminution est sur les deux taille
+            res = red->down(l ,h);
+        else if (l < z->image.width()) // si elle n'est que sur la largeur
+            res = red->down(l ,z->image.height());
+        else if (h < z->image.height())  // si elle n'est que sur la hauteur
+            res = red->down(z->image.width(),h);
+        //red->maj(z->image);
 
-    if (l>z->image.width() && h>z->image.height()) // meme shéma
-        res = up(res,l, h);
-    else if (l > z->image.width())
-        res = up(res, l, z->image.height());
-    else if (h > z->image.height())
-        res = up(res, z->image.height(), h);
-
+        if (l>z->image.width() && h>z->image.height()) {// meme shéma
+            red->up(l, h);
+        }
+        else if (l > z->image.width())
+            res = red->up(l, z->image.height());
+        else if (h > z->image.height())
+            res = red->up(z->image.height(), h);
+        if (l>z->image.width() && h>z->image.height()) // meme shéma
+            res = red->up(l,h);
+        else if (l > z->image.width())
+            res = red->up(l, z->image.height());
+        else if (h > z->image.height())
+            res = red->up(z->image.height(), h);
+    }
+    else if (mode == 1){
+        res = red->interpolationBilineaire(l,h);
+    }
+    else if (mode == 2){
+        res = red->redimSeamCarving(z->image.width()-l,z->image.height()-h);
+    }
     z->changer_image(res);
 }
 
