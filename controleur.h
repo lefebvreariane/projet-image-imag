@@ -70,7 +70,6 @@ public slots:
     void chainage_contours(int seuilBas, int seuilHaut, TypeConvo tConv);
 
     QImage decouper();
-    void decoupage_intelligent_clic(int x, int y);
 
 signals:
     void afficher_pixel(int r, int g, int b);
