@@ -37,9 +37,9 @@ void FenetreHistogramme::changer_histo(int couche){
 
 
 void FenetreHistogramme::clic_ok(){
-    emit masquer_fenetre();
+    this->hide();
 }
 
 void FenetreHistogramme::clic_annuler(){
-    emit masquer_fenetre();
+    this->hide();
 }

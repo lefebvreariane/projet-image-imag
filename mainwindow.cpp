@@ -106,7 +106,6 @@ void MainWindow::createControleur()
     connect(fenetreFusion,SIGNAL(changer_image(QImage)),c->z,SLOT(changer_image(QImage)));
     connect(fenetreFusion,SIGNAL(changer_image_sans_save(QImage)),c->z,SLOT(changer_image_sans_save(QImage)));
     connect(fenetreFusion, SIGNAL(changer_mode(Mode)), c, SLOT(changer_mode(Mode)) );
-    connect(fenetreHistogramme,SIGNAL(masquer_fenetre()),this,SLOT(masquer_histogramme()));
     connect(fenetreRedim,SIGNAL(redim(int,int,int)),c,SLOT(redimensionner(int,int,int)));
     connect(fenetreFlous,SIGNAL(appliquer_flou(int,TypeConvo)),c,SLOT(appliquer_flou(int,TypeConvo)));
     connect(fenetreFlous,SIGNAL(appliquer_mediane(int)),c,SLOT(appliquer_median(int)));
@@ -218,8 +217,11 @@ void MainWindow::createActions()
     connect(decoupageAct, SIGNAL(triggered()), this, SLOT(decouper()));
     connect(keyDecoup, SIGNAL(activated()),this, SLOT(decouper()));
 
-    decoupageIntelligentAct = new QAction(tr("Decoupage Intelligent"), this);
+    decoupageIntelligentAct = new QAction(tr("Decoupage intelligent"), this);
     connect(decoupageIntelligentAct, SIGNAL(triggered()), this, SLOT(decoupage_intel()));
+
+    baguetteAct = new QAction(QIcon(":/icones/cutmagique.png"),tr("Gomme magique"), this);
+    connect(baguetteAct, SIGNAL(triggered()), this, SLOT(baguette_magique()));
 
     redimAct = new QAction(tr("Redimentionnement"), this);
     connect(redimAct, SIGNAL(triggered()), this, SLOT(redimentionner()));
@@ -261,12 +263,13 @@ void MainWindow::createMenus()
     toolsMenu = menuBar()->addMenu("&Outils");
     toolsMenu->addAction(selectionAct);
     toolsMenu->addAction(pipetteAct);
+    toolsMenu->addAction(baguetteAct);
+    toolsMenu->addAction(decoupageAct);
+    toolsMenu->addAction(decoupageIntelligentAct);
     toolsMenu->addAction(histoAct);
     toolsMenu->addAction(RGB_to_greyAct);
     toolsMenu->addAction(inversAct);
     toolsMenu->addAction(fusionAct);
-    toolsMenu->addAction(decoupageAct);
-    toolsMenu->addAction(decoupageIntelligentAct);
     toolsMenu->addAction(redimAct);
     toolsMenu->addAction(lumAct);
     toolsMenu->addAction(seuilAct);
@@ -296,6 +299,8 @@ void MainWindow::createToolBars()
     fileToolBar->addSeparator();
     fileToolBar->addAction(selectionAct);
     fileToolBar->addAction(pipetteAct);
+    fileToolBar->addAction(baguetteAct);
+
 
 }
 
@@ -314,6 +319,7 @@ void MainWindow::activer_menus(bool b)
         fusionAct->setDisabled(true);
         decoupageAct->setDisabled(true);
         decoupageIntelligentAct->setDisabled(true);
+        baguetteAct->setDisabled(true);
         redimAct->setDisabled(true);
         flouAct->setDisabled(true);
         medianAct->setDisabled(true);
@@ -327,8 +333,6 @@ void MainWindow::activer_menus(bool b)
         keyOpen->setEnabled(false);
         keySave->setEnabled(false);
         keyQuit->setEnabled(false);
-        keyUndo->setEnabled(false);
-        keyRedo->setEnabled(false);
         keySelec->setEnabled(false);
         keyPipette->setEnabled(false);
         keyHisto->setEnabled(false);
@@ -348,6 +352,7 @@ void MainWindow::activer_menus(bool b)
         fusionAct->setDisabled(false);
         decoupageAct->setDisabled(false);
         decoupageIntelligentAct->setDisabled(false);
+        baguetteAct->setDisabled(false);
         redimAct->setDisabled(false);
         flouAct->setDisabled(false);
         medianAct->setDisabled(false);
@@ -361,8 +366,6 @@ void MainWindow::activer_menus(bool b)
         keyOpen->setEnabled(true);
         keySave->setEnabled(true);
         keyQuit->setEnabled(true);
-        keyUndo->setEnabled(true);
-        keyRedo->setEnabled(true);
         keySelec->setEnabled(true);
         keyPipette->setEnabled(true);
         keyHisto->setEnabled(true);
@@ -371,6 +374,8 @@ void MainWindow::activer_menus(bool b)
 
     undoAct->setDisabled(true);
     redoAct->setDisabled(true);
+    keyUndo->setEnabled(false);
+    keyRedo->setEnabled(false);
 }
 
 void MainWindow::MAJ_affichage()
@@ -381,6 +386,12 @@ void MainWindow::MAJ_affichage()
         fenetreRedim->show();
     else
         fenetreRedim->hide();
+
+    if (c->mode == HISTO)
+        fenetreHistogramme->show();
+    else
+        fenetreHistogramme->hide();
+
     if(c->mode == FLOU)
         fenetreFlous->show();
     else
@@ -511,13 +522,9 @@ void MainWindow::afficher_histogramme()
     c->changer_mode( HISTO);
     fenetreHistogramme->histogramme->image = z->image;
     fenetreHistogramme->histogramme->repaint();
-    fenetreHistogramme->show();
     MAJ_affichage();
 }
 
-void MainWindow::masquer_histogramme(){
-    fenetreHistogramme->hide();
-}
 
 void MainWindow::RGB_to_grey()
 {
@@ -563,7 +570,15 @@ void MainWindow::decoupage_intel()
     c->changer_mode(DECOUPAGE_INTEL);
     //c->decoupage_intelligent_contours();
     //c->reInitSelection();
-    //statusBar()->showMessage("L'image a été découpée ");
+    statusBar()->showMessage("Cliquer pour decouper intelligement ");
+    MAJ_affichage();
+}
+
+void MainWindow::baguette_magique()
+{
+    verifier_fusion();
+    c->changer_mode(BAGUETTE_MAGIQUE);
+    statusBar()->showMessage("Cliquer pour utiliser la baguette magique ");
     MAJ_affichage();
 }
 
@@ -621,6 +636,7 @@ void  MainWindow::rehausseur(){
 }
 
 void  MainWindow::undo(){
+    qDebug()<<"UNDO";
     verifier_fusion();
     z->historique->undo();
     enable_undo_redo();
@@ -628,6 +644,8 @@ void  MainWindow::undo(){
 }
 
 void  MainWindow::redo(){
+    qDebug()<<"REDO";
+
     verifier_fusion();
     z->historique->redo();
     enable_undo_redo();
@@ -635,16 +653,25 @@ void  MainWindow::redo(){
 }
 
 void  MainWindow::enable_undo_redo(){
-    if (z->historique->can_undo())
+    if (z->historique->can_undo()){
         undoAct->setEnabled(true);
-    else
+        keyUndo->setEnabled(true);
+    }
+    else{
         undoAct->setEnabled(false);
+        keyUndo->setEnabled(false);
+    }
 
-    if (z->historique->can_redo())
+    if (z->historique->can_redo()){
         redoAct->setEnabled(true);
-    else
+        keyRedo->setEnabled(true);
+    }
+    else{
         redoAct->setEnabled(false);
+        keyRedo->setEnabled(false);
+    }
 }
+
 
 void MainWindow::luminosite(){
     verifier_fusion();

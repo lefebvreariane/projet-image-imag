@@ -13,7 +13,6 @@ public:
     Histogramme *histogramme;
 
 signals:
-    void masquer_fenetre();
 
 public slots:
     void changer_histo(int couche);

@@ -35,7 +35,7 @@ FenetreFusion::FenetreFusion(QWidget *parent) :
     liste->addItem("XOR");
     connect(liste,SIGNAL(currentIndexChanged(int)),this, SLOT(changement_liste(int)));
 
-    type_fusion = DESTINATION_OVER;
+    type_fusion = SOURCE;
 
 
 
@@ -153,6 +153,7 @@ void FenetreFusion::initFusion(QImage i){
     label_fusion->adjustSize();
 */
     image_result = image_source.copy();
+    image_result.convertToFormat(QImage::Format_ARGB32,0);
 }
 
 
@@ -176,7 +177,7 @@ void FenetreFusion::open()
         //layoutFusion->addWidget(label_fusion, 1, 0, 1, 2);
         bouton_open->setText("Ouvrir une autre image");
         image_result = image_source.copy();
-
+        image_result.convertToFormat(QImage::Format_ARGB32,0);
         image_result = effectuer_fusion(image_source,image_fusion, image_result,type_fusion,transp_fusion,0,0);
         emit changer_image_sans_save(image_result);
     }
@@ -239,13 +240,13 @@ QImage FenetreFusion::effectuer_fusion(QImage src, QImage dest, QImage res)
 
 //px, py=coordonnees du coin superieur gauche de l'image source, si les coordonnees de celui de l'image destination sont (0,0)
 void FenetreFusion::fusion_basique(QImage dest, QImage src, QImage res){
-    qDebug()<<"LOL";
     effectuer_fusion(dest,src,res, DESTINATION,1,0,0);
 
 }
 
 QImage FenetreFusion::effectuer_fusion(QImage dest, QImage src, QImage res, typeMode t, float transparence, int px, int py){
 
+    QImage res1(res.width(),res.height(),QImage::Format_ARGB32);
     if ((!src.isNull())&&(!dest.isNull()))
     {
 
@@ -270,7 +271,7 @@ QImage FenetreFusion::effectuer_fusion(QImage dest, QImage src, QImage res, type
             int v, x, y, zz;
 
             //conversion de l'image res en format qui supporte alpha
-            res.convertToFormat(QImage::Format_ARGB32,0);
+            //res.convertToFormat(QImage::Format_ARGB32,0);
 
             //les valeurs de variables pour la formule (ci-dessous) selon la mode de composition:
             switch (t)
@@ -280,6 +281,7 @@ QImage FenetreFusion::effectuer_fusion(QImage dest, QImage src, QImage res, type
                     x=1;
                     y=1;
                     zz=0;
+                    qDebug()<<"on est rentre ici!"<<v;
                     break;
                 }
             case DESTINATION:
@@ -303,6 +305,7 @@ QImage FenetreFusion::effectuer_fusion(QImage dest, QImage src, QImage res, type
                     x=1;
                     y=1;
                     zz=1;
+                    qDebug()<<"on est rentre DEST_OVER!"<<v;
                     break;
                 }
             case SOURCE_IN:
@@ -379,8 +382,25 @@ QImage FenetreFusion::effectuer_fusion(QImage dest, QImage src, QImage res, type
             {
                 for(j=0 ; j<res.height() ; j++)
                 {
+                    //recuperer la couleur de pixel de l'image destination
                     QColor cd = dest.pixel(i,j);
+                    //recuperer et definir la valeur de alpha (par defaut ,alpha=255 dans le constructeur QColor)
+                    if (dest.hasAlphaChannel()){
+                        const QRgb pix=dest.pixel(i,j);
+                        cd.setAlpha(qAlpha( pix ));
+                        ad=cd.alphaF();
+                    }
+                    //si l'image n'a pas d'alpha, alors alpha=1(i.e. 255) de partout
+                    else
+                        ad=1;
+
+                    //if (cont<200){
+                        //qDebug()<<"red:"<<cd.red()<<", green:"<<cd.green()<<", blue:"<<cd.blue()<<", alpha:"<<cd.alpha();
+                        //cont++;
+                    //}
+
                     QColor cs;
+
                     //si nous sommes en dehors de l'image source
                     if ((i<px)||(j<py)||(i>=px+src.width())||(j>=py+src.height())){
                         cs = QColor(qRgba(0,0,0,0)); //couleur transparente, ici definie comme noir
@@ -388,14 +408,20 @@ QImage FenetreFusion::effectuer_fusion(QImage dest, QImage src, QImage res, type
                     }
                     //si nous sommes a l'interieur de l'image source
                     else{
+                        //recuperer la couleur de pixel de l'image source
                         cs = src.pixel(i-px,j-py);
                         //si l'image src a le canal alpha, as=ce_canal*transparence, sinon as=transparence
-                        if (src.hasAlphaChannel())
+                        if (src.hasAlphaChannel()){
+                            //recuperer et definir la valeur de alpha (par defaut ,alpha=255 dans le constructeur QColor)
+                            const QRgb pix_s=src.pixel(i-px,j-py);
+                            cs.setAlpha(qAlpha( pix_s ));
                             as=cs.alphaF()*transparence;
+                        }
+                        //si l'image ne supporte pas alpha, alors alpha=transparence
                         else
                             as=transparence;
                     }
-                    ad=1;
+
                     //recuperation des valeurs de variables r,g,b selon la mode
                     if (v==0){
                         r=0;
@@ -415,17 +441,25 @@ QImage FenetreFusion::effectuer_fusion(QImage dest, QImage src, QImage res, type
                         }
                     }
                     //on applique la formule et cree ainsi une image resultat
-                    res.setPixel(i,j,qRgba(r*as*ad+y*cs.red()*(1-ad)+zz*cd.red()*(1-as),
+                    res1.setPixel(i,j,QColor(r*as*ad+y*cs.red()*(1-ad)+zz*cd.red()*(1-as),
                                            g*as*ad+y*cs.green()*(1-ad)+zz*cd.green()*(1-as),
                                            b*as*ad+y*cs.blue()*(1-ad)+zz*cd.blue()*(1-as),
-                                           x*as*ad+y*as*(1-ad)+zz*ad*(1-as)));
+                                           (x*as*ad+y*as*(1-ad)+zz*ad*(1-as))*255).rgba());
+                    /*qDebug()<<"r="<<r<<"as="<<as<<"ad="<<ad<<"y="<<y<<"cs red="<<cs.red()<<"zz="<<zz
+                            <<"cd red="<<cd.red()<<"x="<<x<<"cs green="<<cs.green()<<"cd green="<<cd.green()
+                            <<"cs blue="<<cs.blue()<<"cd blue="<<cd.blue();
+                    qDebug()<<"****************************************";
+                    qDebug()<<"r:"<<r*as*ad+y*cs.red()*(1-ad)+zz*cd.red()*(1-as)<<"g:"
+                            <<g*as*ad+y*cs.green()*(1-ad)+zz*cd.green()*(1-as)<<"b:"
+                            <<b*as*ad+y*cs.blue()*(1-ad)+zz*cd.blue()*(1-as)<<"a:"
+                            <<x*as*ad+y*as*(1-ad)+zz*ad*(1-as);*/
                 }
             }
         }
 
         //si la mode de composition=NONE, on n'applique que la transparence
         else{
-            float tr_inv = 1-transparence; //optimisation de code
+            /*float tr_inv = 1-transparence; //optimisation de code
 
             for (i=px ; i<fin_x ; i++)
             {
@@ -469,9 +503,19 @@ QImage FenetreFusion::effectuer_fusion(QImage dest, QImage src, QImage res, type
                     res.setPixel(i,j,qRgb(c.red(),c.green(),c.blue()));
                 }
             }
-        }
+        }*/
     }
-    return res;
+        //qDebug()<<"=========================================================";
+
+        /*for (i=0;i<res.width();i++){
+            for (j=0; j<res.height();j++){
+                const QRgb p=res1.pixel(i,j);
+                qDebug()<<"red:"<<qRed(p)<<"green:"<<qGreen(p)<<"blue:"<<qBlue(p)<<"alpha:"<<qAlpha(p);
+            }
+        }*/
+
+    }
+    return res1;
 }
 
 
