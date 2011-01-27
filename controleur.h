@@ -12,8 +12,9 @@
 enum Mode
 {
     SELECTION, PIPETTE, HISTO, GREY, MEDIAN, FLOU, FUSION,
-    DECOUPAGE, REDIM, FILTRE, GRADIENT, REHAUSSEUR, LUMINOSITE, SEUIL
-        };
+    DECOUPAGE, DECOUPAGE_INTEL, REDIM, FILTRE, GRADIENT, REHAUSSEUR, LUMINOSITE,
+    SEUIL, CONTOURS
+};
 
 class Controleur : public QObject
 {
@@ -30,7 +31,6 @@ public:
     void passage_zero(int numero, int alpha, int seuil);
 
     void hysteresis(int seuilBas, int seuilHaut, int i);
-    void chainage_contours(int seuilBas, int seuilHaut, TypeConvo tConv);
 
     void appliquer_rehaussement(int alpha);
     void appliquer_laplacien(MatConvo *m);
@@ -38,6 +38,8 @@ public:
     void eclaircir(int alpha);
     void supp_non_maxima(TypeConvo tConv);
     void reInitSelection();
+    void decoupage_intelligent_contours();
+    void decoupage_intelligent_clic(int,int);
 
     void mon_seuillage(TypeConvo tConv, int seuil);
     ZoneDessin *z;
@@ -65,9 +67,9 @@ public slots:
     void seuillage(int s);
     void luminosite_contraste(float lum, float cont);
     void appliquer_laplacien(int, int);
+    void chainage_contours(int seuilBas, int seuilHaut, TypeConvo tConv);
 
     QImage decouper();
-    void decoupage_intelligent_contours();
 
 signals:
     void afficher_pixel(int r, int g, int b);

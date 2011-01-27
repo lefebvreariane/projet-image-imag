@@ -754,6 +754,7 @@ QImage Filtres::decoupage_intelligent_clic(QImage imIn, int x, int y)
 {
     qDebug()<<"fonction decoupage intelligent: image: "<<imIn.width()<<" ; "<<imIn.height();
     QImage imOut = this->norme_4gradients(GRADIENT_PREWITT,imIn);
+    imOut= imOut.convertToFormat(QImage::Format_ARGB32);
     imOut = this->seuillage(imOut,25);
 
     int **pixels = new int *[imOut.width()];

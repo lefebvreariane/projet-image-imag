@@ -31,7 +31,8 @@ SOURCES += \
     historique.cpp \
     fenetrerehausseur.cpp \
     fenetreseuil.cpp \
-    fenetreluminosite.cpp
+    fenetreluminosite.cpp \
+    fenetrecontours.cpp
 
 HEADERS  += \
     zonedessin.h \
@@ -53,7 +54,8 @@ HEADERS  += \
     historique.h \
     fenetrerehausseur.h \
     fenetreseuil.h \
-    fenetreluminosite.h
+    fenetreluminosite.h \
+    fenetrecontours.h
 
 FORMS    += mainwindow.ui \
 

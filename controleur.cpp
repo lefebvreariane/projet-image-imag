@@ -75,6 +75,11 @@ void Controleur::clic_recu()
             pipette(z->resultLabel->X1,z->resultLabel->Y1);
             break;
         }
+    case DECOUPAGE_INTEL: {
+            decoupage_intelligent_clic(z->resultLabel->X1,z->resultLabel->Y1);
+            this->changer_mode(SELECTION);
+            break;
+        }
 
     default: {
 
@@ -360,6 +365,12 @@ void Controleur::decoupage_intelligent_contours()
     QImage imIn = this->decouper();
     z->changer_image(this->f->decoupage_intelligent_contours(imIn));
 }
+void Controleur::decoupage_intelligent_clic(int x, int y)
+{
+    //z->changer_image(this->decouper());
+
+    z->changer_image(this->f->decoupage_intelligent_clic(z->image, x, y));
+}
 
 QImage Controleur::decouper()
 {
@@ -367,7 +378,7 @@ QImage Controleur::decouper()
     //int largeur = max(z->resultLabel->X0, z->resultLabel->X1) - min(z->resultLabel->X0, z->resultLabel->X1);
     //int hauteur = max(z->resultLabel->Y0, z->resultLabel->Y1) - min(z->resultLabel->Y0, z->resultLabel->Y1);
     //QImage resImage(largeur,hauteur,z->image.format());
-    QImage resImage(sX1,sY1,z->image.format());
+    QImage resImage(sX1,sY1,QImage::Format_ARGB32);
 
     if(z->resultLabel->X0 == z->resultLabel->X1 || z->resultLabel->Y0 == z->resultLabel->Y1)
         resImage = z->image;
@@ -383,6 +394,7 @@ QImage Controleur::decouper()
             y = 0;
         }
     }
+
     return resImage;
 }
 

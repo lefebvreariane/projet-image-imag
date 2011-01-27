@@ -70,6 +70,8 @@ void MainWindow::createAreas()
     fenetreSeuil = new FenetreSeuil;
     fenetreSeuil->hide();
 
+    fenetreContours = new FenetreContours;
+    fenetreContours->hide();
 
     layout->addWidget(scrollArea);
     layout->addWidget(panneauDroite);
@@ -81,6 +83,7 @@ void MainWindow::createAreas()
     layout->addWidget(fenetreRehausseur);
     layout->addWidget(fenetreLuminosite);
     layout->addWidget(fenetreSeuil);
+    layout->addWidget(fenetreContours);
 
 
 
@@ -118,6 +121,7 @@ void MainWindow::createControleur()
     connect(fenetreRehausseur,SIGNAL(appliquer_rehausseur_laplacien(int,int)),c,SLOT(appliquer_rehausseur_laplacien(int,int)));
     connect(fenetreLuminosite,SIGNAL(appliquer_luminosite_contraste(float,float)),c,SLOT(luminosite_contraste(float,float)));
     connect(fenetreSeuil,SIGNAL(appliquer_seuil(int)),c,SLOT(seuillage(int)));
+    connect(fenetreContours,SIGNAL(detection_contours(int,int,TypeConvo)),c,SLOT(chainage_contours(int,int,TypeConvo)));
 
     c->changer_mode(SELECTION);
 }
@@ -177,12 +181,12 @@ void MainWindow::createActions()
     connect(keyRedo, SIGNAL(activated()), this, SLOT(redo()));
 
 
-    pipetteAct = new QAction(tr("Pipette"), this);
+    pipetteAct = new QAction(QIcon(":/icones/pipette.png"),tr("Pipette"), this);
     connect(pipetteAct, SIGNAL(triggered()), this, SLOT(pipette()));
     connect(keyPipette, SIGNAL(activated()),this, SLOT(pipette()));
 
 
-    selectionAct = new QAction(tr("Selection"), this);
+    selectionAct = new QAction(QIcon(":/icones/selection.png"),tr("Selection"), this);
     connect(selectionAct, SIGNAL(triggered()), this, SLOT(selection()));
     connect(keySelec, SIGNAL(activated()),this, SLOT(selection()));
 
@@ -214,6 +218,9 @@ void MainWindow::createActions()
     connect(decoupageAct, SIGNAL(triggered()), this, SLOT(decouper()));
     connect(keyDecoup, SIGNAL(activated()),this, SLOT(decouper()));
 
+    decoupageIntelligentAct = new QAction(tr("Decoupage Intelligent"), this);
+    connect(decoupageIntelligentAct, SIGNAL(triggered()), this, SLOT(decoupage_intel()));
+
     redimAct = new QAction(tr("Redimentionnement"), this);
     connect(redimAct, SIGNAL(triggered()), this, SLOT(redimentionner()));
     connect(keyRedim, SIGNAL(activated()),this, SLOT(redimentionner()));
@@ -230,6 +237,8 @@ void MainWindow::createActions()
     seuilAct = new QAction(tr("Seuil"), this);
     connect(seuilAct, SIGNAL(triggered()), this, SLOT(seuil()));
 
+    contoursAct = new QAction(tr("Detection de contours"), this);
+    connect(contoursAct, SIGNAL(triggered()), this, SLOT(detection_coutours()));
 
 }
 
@@ -257,6 +266,7 @@ void MainWindow::createMenus()
     toolsMenu->addAction(inversAct);
     toolsMenu->addAction(fusionAct);
     toolsMenu->addAction(decoupageAct);
+    toolsMenu->addAction(decoupageIntelligentAct);
     toolsMenu->addAction(redimAct);
     toolsMenu->addAction(lumAct);
     toolsMenu->addAction(seuilAct);
@@ -267,7 +277,10 @@ void MainWindow::createMenus()
     filtreMenu->addAction(medianAct);
     filtreMenu->addAction(gradientAct);
     filtreMenu->addAction(rehaussAct);
+    filtreMenu->addAction(contoursAct);
+    fileMenu->addSeparator();
     filtreMenu->addAction(filtreAct);
+
 
     activer_menus(false);
 }
@@ -277,8 +290,13 @@ void MainWindow::createToolBars()
     fileToolBar = addToolBar(tr("Fichier"));
     fileToolBar->addAction(ouvrirAct);
     fileToolBar->addAction(saveAct);
+    fileToolBar->addSeparator();
     fileToolBar->addAction(undoAct);
     fileToolBar->addAction(redoAct);
+    fileToolBar->addSeparator();
+    fileToolBar->addAction(selectionAct);
+    fileToolBar->addAction(pipetteAct);
+
 }
 
 
@@ -295,6 +313,7 @@ void MainWindow::activer_menus(bool b)
         inversAct->setDisabled(true);
         fusionAct->setDisabled(true);
         decoupageAct->setDisabled(true);
+        decoupageIntelligentAct->setDisabled(true);
         redimAct->setDisabled(true);
         flouAct->setDisabled(true);
         medianAct->setDisabled(true);
@@ -328,6 +347,7 @@ void MainWindow::activer_menus(bool b)
         inversAct->setDisabled(false);
         fusionAct->setDisabled(false);
         decoupageAct->setDisabled(false);
+        decoupageIntelligentAct->setDisabled(false);
         redimAct->setDisabled(false);
         flouAct->setDisabled(false);
         medianAct->setDisabled(false);
@@ -391,6 +411,10 @@ void MainWindow::MAJ_affichage()
     else
         fenetreSeuil->hide();
 
+    if(c->mode == CONTOURS)
+        fenetreContours->show();
+    else
+        fenetreContours->hide();
 
 
     z->init_affichage();
@@ -533,6 +557,16 @@ void MainWindow::decouper()
     MAJ_affichage();
 }
 
+void MainWindow::decoupage_intel()
+{
+    verifier_fusion();
+    c->changer_mode(DECOUPAGE_INTEL);
+    //c->decoupage_intelligent_contours();
+    //c->reInitSelection();
+    //statusBar()->showMessage("L'image a été découpée ");
+    MAJ_affichage();
+}
+
 void MainWindow::afficher_panneauDroite(bool b)
 {
     if (b)
@@ -626,4 +660,9 @@ void MainWindow::seuil(){
     MAJ_affichage();
 }
 
+void MainWindow::detection_coutours(){
+    verifier_fusion();
+    c->changer_mode(CONTOURS);
+    MAJ_affichage();
+}
 

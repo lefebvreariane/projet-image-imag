@@ -14,6 +14,7 @@
 #include "fenetreluminosite.h"
 #include "fenetreseuil.h"
 #include "fenetrerehausseur.h"
+#include "fenetrecontours.h"
 #include "noyaupascal.h"
 #include "historique.h"
 
@@ -53,6 +54,7 @@ private slots:
     void appliquer_flou();
     void fusion();
     void decouper();
+    void decoupage_intel();
     void afficher_panneauDroite(bool);
     void masquer_histogramme();
     void redimentionner();
@@ -67,6 +69,7 @@ private slots:
     void rehausseur();
     void luminosite();
     void seuil();
+    void detection_coutours();
 
 
 
@@ -103,6 +106,7 @@ private:
     QAction *flouAct;
     QAction *fusionAct;
     QAction *decoupageAct;
+    QAction *decoupageIntelligentAct;
     QAction *redimAct;
     QAction *filtreAct;
     QAction *medianAct;
@@ -112,6 +116,10 @@ private:
     QAction *rehaussAct;
     QAction *lumAct;
     QAction *seuilAct;
+    QAction *contoursAct;
+
+
+
 
     QShortcut *keyDecoup;
     QShortcut *keyOpen;
@@ -139,6 +147,7 @@ private:
     FenetreRehausseur *fenetreRehausseur;
     FenetreLuminosite *fenetreLuminosite;
     FenetreSeuil *fenetreSeuil;
+    FenetreContours *fenetreContours;
 
 };
 
