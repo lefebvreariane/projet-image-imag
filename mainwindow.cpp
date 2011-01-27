@@ -100,7 +100,6 @@ void MainWindow::createControleur()
     connect(c,SIGNAL(changer_message_barre(QString,int)),this,SLOT(changer_message_barre(QString,int)));
     connect(z->resultLabel, SIGNAL(clic()), c, SLOT(clic_recu()));
     connect(z,SIGNAL(enable_undo_redo()),this,SLOT(enable_undo_redo()));
-    connect(z,SIGNAL(fusionner(QImage,QImage,QImage)),fenetreFusion,SLOT(fusion_basique(QImage,QImage,QImage)));
     connect(c, SIGNAL(afficher_pixel(int,int,int)), fenetrePipette, SLOT(afficher_pixel(int,int,int)));
     connect(fenetrePipette, SIGNAL(afficher_panneauDroite(bool)),this,SLOT(afficher_panneauDroite(bool)));
     connect(fenetreFusion,SIGNAL(changer_image(QImage)),c->z,SLOT(changer_image(QImage)));
