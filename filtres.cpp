@@ -750,6 +750,35 @@ QImage Filtres::decoupage_intelligent_contours(QImage imIn)
     return imOut;
 }
 
+QImage Filtres::decoupage_intelligent(QImage imIn, int x, int y)
+{
+    qDebug()<<"fonction decoupage intelligent: image: "<<imIn.width()<<" ; "<<imIn.height();
+    QImage imOut = this->norme_4gradients(GRADIENT_PREWITT,imIn);
+    imOut= imOut.convertToFormat(QImage::Format_ARGB32);
+    imOut = this->seuillage(imOut,25);
+
+    int **pixels = new int *[imOut.width()];
+    for (int i=0 ; i<imOut.width() ; i++)
+        pixels[i] = new int[imOut.height()];
+
+    for (int i=0 ; i<imOut.width() ; i++)
+        for (int j=0; j<imOut.height() ; j++)
+                pixels[i][j] = qRed(imOut.pixel(i,j));
+
+    pixels = this->decoupage_recursif(pixels,x,y,imOut.width(),imOut.height());
+
+    for (int i=0 ; i<imOut.width() ; i++)
+        for (int j=0; j<imOut.height() ; j++)
+        {
+            if (pixels[i][j] == -1)
+                imOut.setPixel(i,j,imIn.pixel(i,j));
+            else
+                imOut.setPixel(i,j,qRgba(255,0,0,0));
+        }
+
+    return imOut;
+}
+
 QImage Filtres::decoupage_intelligent_clic(QImage imIn, int x, int y)
 {
     qDebug()<<"fonction decoupage intelligent: image: "<<imIn.width()<<" ; "<<imIn.height();

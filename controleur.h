@@ -40,6 +40,7 @@ public:
     void reInitSelection();
     void decoupage_intelligent_contours();
     void decoupage_intelligent_clic(int,int);
+    void decoupage_intelligent(int x, int y);
 
     void mon_seuillage(TypeConvo tConv, int seuil);
     ZoneDessin *z;

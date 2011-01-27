@@ -43,6 +43,7 @@ public:
 
     QImage decoupage_intelligent_contours(QImage imIn);
     QImage decoupage_intelligent_clic(QImage imIn, int x, int y);
+    QImage decoupage_intelligent(QImage imIn, int x, int y);
     int **decoupage_recursif(int **pixels,int x, int y, int width, int height);
 };
 

@@ -372,6 +372,11 @@ void Controleur::decoupage_intelligent_clic(int x, int y)
     z->changer_image(this->f->decoupage_intelligent_clic(z->image, x, y));
 }
 
+void decoupage_intelligent(int x, int y)
+{
+    z->changer_image(this->f->decoupage_intelligent(z->image, x, y));
+}
+
 QImage Controleur::decouper()
 {
     int x = 0, y = 0;
