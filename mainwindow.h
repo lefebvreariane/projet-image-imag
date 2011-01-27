@@ -55,8 +55,8 @@ private slots:
     void fusion();
     void decouper();
     void decoupage_intel();
+    void baguette_magique();
     void afficher_panneauDroite(bool);
-    void masquer_histogramme();
     void redimentionner();
     void median();
     void filtre_perso();
@@ -117,6 +117,8 @@ private:
     QAction *lumAct;
     QAction *seuilAct;
     QAction *contoursAct;
+    QAction *baguetteAct;
+
 
 
 

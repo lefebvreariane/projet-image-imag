@@ -80,6 +80,11 @@ void Controleur::clic_recu()
             this->changer_mode(SELECTION);
             break;
         }
+    case BAGUETTE_MAGIQUE: {
+            decoupage_intelligent(z->resultLabel->X1,z->resultLabel->Y1);
+            this->changer_mode(SELECTION);
+            break;
+        }
 
     default: {
 
@@ -372,7 +377,7 @@ void Controleur::decoupage_intelligent_clic(int x, int y)
     z->changer_image(this->f->decoupage_intelligent_clic(z->image, x, y));
 }
 
-void decoupage_intelligent(int x, int y)
+void Controleur::decoupage_intelligent(int x, int y)
 {
     z->changer_image(this->f->decoupage_intelligent(z->image, x, y));
 }
