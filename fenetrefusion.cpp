@@ -21,7 +21,6 @@ FenetreFusion::FenetreFusion(QWidget *parent) :
 
     QLabel *label_mode = new QLabel("Mode de fusion: ");
     QComboBox *liste = new QComboBox(this);
-	liste->addItem("Alpha Blending");
     liste->addItem("Source");
     liste->addItem("Destination");
     liste->addItem("Source Over");
@@ -36,7 +35,7 @@ FenetreFusion::FenetreFusion(QWidget *parent) :
     liste->addItem("XOR");
     connect(liste,SIGNAL(currentIndexChanged(int)),this, SLOT(changement_liste(int)));
 
-    type_fusion = NONE;
+    type_fusion = SOURCE;
 
 
 
@@ -98,55 +97,51 @@ FenetreFusion::FenetreFusion(QWidget *parent) :
 
 void FenetreFusion::changement_liste(int i){
     switch (i){
-	case 0: {
-            type_fusion = NONE;
-            break;
-        }
-    case 1: {
+    case 0: {
             type_fusion = SOURCE;
             break;
         }
-    case 2:{
+    case 1:{
             type_fusion = DESTINATION;
             break;
         }
-    case 3:{
+    case 2:{
             type_fusion =SOURCE_OVER ;
             break;
         }
-    case 4:{
+    case 3:{
             type_fusion = DESTINATION_OVER;
             break;
         }
-    case 5: {
+    case 4: {
             type_fusion =SOURCE_IN ;
             break;
         }
-    case 6: {
+    case 5: {
             type_fusion = DESTINATION_IN;
             break;
         }
-    case 7: {
+    case 6: {
             type_fusion =SOURCE_OUT ;
             break;
         }
-    case 8: {
+    case 7: {
             type_fusion = DESTINATION_OUT;
             break;
         }
-    case 9: {
+    case 8: {
             type_fusion =SOURCE_ATOP ;
             break;
         }
-    case 10: {
+    case 9: {
             type_fusion =DESTINATION_ATOP ;
             break;
         }
-    case 11: {
+    case 10: {
             type_fusion =CLEAR ;
             break;
         }
-    case 12: {
+    case 11: {
             type_fusion =XOR ;
             break;
         }
